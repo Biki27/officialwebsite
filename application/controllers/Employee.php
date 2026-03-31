@@ -167,7 +167,7 @@ class Employee extends CI_Controller
                 $this->load->view('employee/adminEmployeesView', $data);
             }
         } else {
-               $this->session->sess_destroy();
+            $this->session->sess_destroy();
             $this->load->view('errors/invalidAccessView');
         }
     }
@@ -1436,7 +1436,7 @@ class Employee extends CI_Controller
     }
     //geo location tracking for employee attendance
     // --- AJAX ATTENDANCE & GEOFENCING ROUTE ---
-  public function SubmitAttendanceAjax()
+   public function SubmitAttendanceAjax()
     {
         // 1. Check Session
         if (!$this->session->has_userdata('empid')) {
@@ -1444,13 +1444,11 @@ class Employee extends CI_Controller
             return;
         }
 
-        // 2. Get POST data (No 'TRUE' filter here so we don't break the decimals)
-        $lat = $this->input->post('lat');
-        $lng = $this->input->post('lng');
-        $action = $this->input->post('action'); 
+        // 2. Get POST data
+        $action = $this->input->post('action');
         $empid = $this->session->userdata('empid');
 
-        // 3. Detect the Device (THIS IS WHAT WAS MISSING!)
+        // 3. Detect the Device
         $this->load->library('user_agent');
         if ($this->agent->is_mobile()) {
             $device = 'Mobile (' . $this->agent->mobile() . ')';
@@ -1460,77 +1458,45 @@ class Employee extends CI_Controller
             $device = 'Unknown Device';
         }
 
-        // 4. Trap if coordinates are empty
-        if (empty($lat) || empty($lng)) {
-            echo json_encode([
-                'status' => 'error', 
-                'message' => 'Could not read location coordinates. Please allow location permissions.',
-                'what_php_saw' => $_POST
-            ]);
-            return;
-        }
+        // 4. Get the IP Address (With aggressive fallback)
+        $ipAddress = $this->input->ip_address();
 
-        // 5. Multiple Office Boundaries (150 meters)
-        $radius_km = 0.05; 
-        
-        $offices = [
-            [
-                'name' => 'Howrah Branch',
-                'lat'  => getenv('HOWRAH_LAT'),  // Add actual Howrah coordinates
-                'lng'  => getenv('HOWRAH_LNG') 
-            ],
-            [
-                'name' => 'Kolkata Branch',
-                'lat'  => getenv('KOLKATA_LAT'),  // Add actual Kolkata coordinates
-                'lng'  => getenv('KOLKATA_LNG')   
-            ]
-        ];
-
-        $is_inside_fence = false;
-        $matched_office = '';
-
-        // 6. Check Distance
-        foreach ($offices as $office) {
-            if ($this->calculate_distance($lat, $lng, $office['lat'], $office['lng'], $radius_km)) {
-                $is_inside_fence = true;
-                $matched_office = $office['name'];
-                break; 
-            }
-        }
-
-        // 7. Save to Database
-        if ($is_inside_fence) {
-            $this->load->model('EmployeeModel');
-            
-            $log_result = $this->EmployeeModel->update_log_current_state($empid, $action, $device, $lat, $lng);
-
-            if ($log_result['code'] == 0) {
-                $msg = ($action == 'login') ? "Clocked IN successfully at the $matched_office!" : "Clocked OUT successfully from the $matched_office!";
-                echo json_encode([
-                    'status' => 'success', 
-                    'message' => $msg,
-                    'device' => $device
-                ]);
+        if (empty($ipAddress) || $ipAddress === '0.0.0.0') {
+            if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+                $ipAddress = $_SERVER['HTTP_CLIENT_IP'];
+            } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+                // If multiple IPs are passed, grab the first one
+                $ipList = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
+                $ipAddress = trim($ipList[0]);
+            } elseif (!empty($_SERVER['REMOTE_ADDR'])) {
+                $ipAddress = $_SERVER['REMOTE_ADDR'];
             } else {
-                $error_msg = ($action == 'login') ? 'You have already clocked in today.' : 'Could not clock out. Have you clocked in yet?';
-                echo json_encode(['status' => 'error', 'message' => $error_msg]);
+                $ipAddress = 'Unknown IP';
             }
+        }
+
+        // Ensure the IP isn't too long for the database (IPv6 safety)
+        $ipAddress = substr($ipAddress, 0, 45);
+
+        // 5. Save to Database (THIS IS WHAT WAS MISSING)
+        $this->load->model('EmployeeModel');
+        
+        $log_result = $this->EmployeeModel->update_log_current_state($empid, $action, $device, $ipAddress);
+
+        if ($log_result['code'] == 0) {
+            $msg = ($action == 'login') ? "Clocked IN successfully!" : "Clocked OUT successfully!";
+            echo json_encode([
+                'status' => 'success', 
+                'message' => $msg,
+                'device' => $device,
+                'ip' => $ipAddress
+            ]);
         } else {
-            echo json_encode(['status' => 'error', 'message' => 'Out of range! You must be within 50 meters of an office location.']);
+            $error_msg = ($action == 'login') ? 'You have already clocked in today.' : 'Could not clock out. Have you clocked in yet?';
+            echo json_encode(['status' => 'error', 'message' => $error_msg]);
         }
     }
-    // Helper Math function for Geofencing
-    private function calculate_distance($emp_lat, $emp_lng, $office_lat, $office_lng, $radius)
-    {
-        $theta = $emp_lng - $office_lng;
-        $dist = sin(deg2rad($emp_lat)) * sin(deg2rad($office_lat)) + cos(deg2rad($emp_lat)) * cos(deg2rad($office_lat)) * cos(deg2rad($theta));
-        $dist = acos($dist);
-        $dist = rad2deg($dist);
-        $miles = $dist * 60 * 1.1515;
-        $km = $miles * 1.609344; // Convert miles to Kilometers
 
-        return ($km <= $radius);
-    }
 }
 
 ?>

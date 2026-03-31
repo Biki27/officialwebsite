@@ -70,33 +70,7 @@ function find_empid_with_daterange($empid, $start, $end)
         $this->db->where('log.seemp_logdate <=', $end);
         return $this->db->get()->result();
     }
-
-    // function find_empid_with_daterange($empid, $start, $end)
-    // {
-    //     $this->_get_attendance_with_names();
-
-    //     if (!empty($empid)) {
-    //         $this->db->where('log.seemp_logempid', $empid);
-    //     }
-    //     if (!empty($start)) {
-    //         $this->db->where('log.seemp_logdate >=', $start);
-    //     }
-    //     if (!empty($end)) {
-    //         $this->db->where('log.seemp_logdate <=', $end);
-    //     }
-
-    //     return $this->db->get()->result();
-    // }
-
-    // function get_today_login_logout($empid)
-    // {
-    //     $today = date('Y-m-d');
-    //     return $this->db
-    //         ->where('seemp_logempid', $empid)
-    //         ->where('seemp_logdate', $today)
-    //         ->get('seemployeeloginlog')
-    //         ->row();
-    // }
+ 
     function get_today_login_logout($empid)
 {
     $today = date('Y-m-d');

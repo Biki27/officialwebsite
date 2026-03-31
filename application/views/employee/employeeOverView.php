@@ -108,7 +108,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     <h5 class="fw-bold mb-3 text-primary">
                         <i class="fas fa-clock me-2"></i>Daily Attendance
                     </h5>
-                    <p class="text-muted small">You must be within 100 meters of the office to mark attendance.</p>
+                    <p class="text-muted small">Your IP address and device information will be recorded for attendance.</p>
                     <div class="d-flex justify-content-center gap-3">
                         <button id="clockInBtn" class="btn btn-primary btn-lg" onclick="markAttendance('login')">
                             <i class="fas fa-sign-in-alt me-2"></i> Clock In
@@ -146,50 +146,35 @@ defined('BASEPATH') OR exit('No direct script access allowed');
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <script>
-    let currentAction = 'login'; // Store which button was clicked
+    let currentAction = 'login'; 
 
     function markAttendance(action) {
         currentAction = action;
         const $btn = action === 'login' ? $('#clockInBtn') : $('#clockOutBtn');
         const originalHtml = $btn.html();
         
-        $btn.html('<i class="fas fa-spinner fa-spin me-2"></i> Locating...').prop('disabled', true);
+        $btn.html('<i class="fas fa-spinner fa-spin me-2"></i> Processing...').prop('disabled', true);
 
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                function(position) { sendPosition(position, originalHtml); }, 
-                function(error) { showError(error, originalHtml); }, 
-                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-            );
-        } else {
-            showModalMessage('error', "Geolocation is not supported by your browser.");
-            resetButtons(originalHtml);
-        }
+        // Skip geolocation and directly send the request
+        sendAttendanceRequest(originalHtml);
     }
 
-   function sendPosition(position, originalHtml) {
-        let lat = position.coords.latitude;
-        let lng = position.coords.longitude;
-        
-        // 1. Grab the CodeIgniter CSRF Security Token
+    function sendAttendanceRequest(originalHtml) {
         let csrfName = '<?= $this->security->get_csrf_token_name(); ?>';
         let csrfHash = '<?= $this->security->get_csrf_hash(); ?>';
-
-        console.log("My exact coordinates are: ", lat, lng);
 
         $.ajax({
             url: '<?= base_url("Employee/SubmitAttendanceAjax") ?>',
             type: 'POST',
             dataType: 'json',
             data: { 
-                lat: lat.toString(), 
-                lng: lng.toString(),
                 action: currentAction,
-                [csrfName]: csrfHash // 2. Send the token with the request!
+                [csrfName]: csrfHash 
             },
             success: function(data) {
                 if(data.status === 'success') {
-                    showModalMessage('success', data.message + '<br><small class="text-muted">Detected: ' + data.device + '</small>');
+                    // showModalMessage('success', data.message + '<br><small class="text-muted">Device: ' + data.device + '<br>IP: ' + data.ip + '</small>');
+                    showModalMessage('success', data.message + '<br><small class="text-muted">Device: ' + data.device + '<br>IP: ' + data.ip + '</small>');
                 } else {
                     showModalMessage('error', data.message);
                 }
@@ -201,17 +186,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 resetButtons(originalHtml);
             }
         });
-    }
-    function showError(error, originalHtml) {
-        let msg = "";
-        switch(error.code) {
-            case error.PERMISSION_DENIED: msg = "You denied the request for Geolocation. Please allow location access."; break;
-            case error.POSITION_UNAVAILABLE: msg = "Location information is unavailable. Ensure your GPS is turned on."; break;
-            case error.TIMEOUT: msg = "The request to get user location timed out."; break;
-            case error.UNKNOWN_ERROR: msg = "An unknown error occurred."; break;
-        }
-        showModalMessage('error', msg);
-        resetButtons(originalHtml);
     }
 
     function showModalMessage(type, message) {
@@ -229,7 +203,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         }
     }
 </script>
-
 </body>
 
 </html>

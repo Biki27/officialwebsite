@@ -4,7 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class EmployeeModel extends CI_Model
 {
-  
+
     function getallemployee_with_joins()
     {
         $res = $this->db
@@ -36,35 +36,35 @@ class EmployeeModel extends CI_Model
     }
 
     function get_employee_with_search($query = '', $status = '')
-{
-    // 1. Explicitly select all from main table and joined tables
-    $this->db->select('seemployee.*, seempdetails.*, sejobapplicant.sejoba_phone');
-    $this->db->from('seemployee');
-    
-    // 2. Apply Joins
-    $this->db->join('seempdetails', 'seemployee.seemp_id = seempdetails.seempd_empid', 'left');
-    $this->db->join('sejobapplicant', 'seempdetails.seempd_jobaid = sejobapplicant.sejoba_id', 'left');
+    {
+        // 1. Explicitly select all from main table and joined tables
+        $this->db->select('seemployee.*, seempdetails.*, sejobapplicant.sejoba_phone');
+        $this->db->from('seemployee');
 
-    // 3. Handle Text Query (If not empty)
-    if (!empty(trim($query))) {
-        $this->db->group_start();
-        $this->db->like('seemployee.seemp_id', $query);
-        $this->db->or_like('seemployee.seemp_email', $query);
-        $this->db->or_like('seempdetails.seempd_name', $query);
-        $this->db->or_like('seempdetails.seempd_designation', $query);
-        $this->db->group_end();
+        // 2. Apply Joins
+        $this->db->join('seempdetails', 'seemployee.seemp_id = seempdetails.seempd_empid', 'left');
+        $this->db->join('sejobapplicant', 'seempdetails.seempd_jobaid = sejobapplicant.sejoba_id', 'left');
+
+        // 3. Handle Text Query (If not empty)
+        if (!empty(trim($query))) {
+            $this->db->group_start();
+            $this->db->like('seemployee.seemp_id', $query);
+            $this->db->or_like('seemployee.seemp_email', $query);
+            $this->db->or_like('seempdetails.seempd_name', $query);
+            $this->db->or_like('seempdetails.seempd_designation', $query);
+            $this->db->group_end();
+        }
+
+        // 4. Handle Status Filter (IMPORTANT: Use the table prefix)
+        if (!empty(trim($status))) {
+            $this->db->where('seemployee.seemp_status', strtolower($status));
+        }
+
+        // 5. Execute
+        $result = $this->db->get()->result();
+
+        return $result;
     }
-
-    // 4. Handle Status Filter (IMPORTANT: Use the table prefix)
-    if (!empty(trim($status))) {
-        $this->db->where('seemployee.seemp_status', strtolower($status));
-    }
-
-    // 5. Execute
-    $result = $this->db->get()->result();
-    
-    return $result;
-}
     function check_if_employee_exist($username = '', $pass = '')
     {
         if (trim($username) == '' || trim($pass) == '') {
@@ -89,7 +89,7 @@ class EmployeeModel extends CI_Model
         );
         return $res;
     }
-    
+
 
     function change_employee_password($oldpass = '', $newpass = '')
     {
@@ -151,55 +151,8 @@ class EmployeeModel extends CI_Model
 
         }
     }
-
-    // function update_log_current_state($empid = '', $action = 'login')
-    // {
-    //     if (empty(trim($empid)) || empty(trim($action))) {
-    //         return ['code' => 1];
-    //     }
-
-    //     $today = date('Y-m-d');
-    //     $now = date('Y-m-d H:i:s');
-
-    //     // Check if an entry already exists for this employee for TODAY
-    //     $this->db->where([
-    //         'seemp_logempid' => $empid,
-    //         'seemp_logdate' => $today
-    //     ]);
-    //     $existing_log = $this->db->get('seemployeeloginlog')->row();
-
-    //     if ($action == 'login') {
-    //         // ONLY insert if NO record exists for today.
-    //         // This prevents the login time from being changed on second login.
-    //         if (!$existing_log) {
-    //             $data = [
-    //                 'seemp_logempid' => $empid,
-    //                 'seemp_logdate' => $today,
-    //                 'seemp_logintime' => $now
-    //             ];
-    //             $this->db->insert('seemployeeloginlog', $data);
-    //             return ['code' => 0];
-    //         }
-    //         // If it exists, do nothing (keep original login time)
-    //         return ['code' => 0];
-    //     } else if ($action == 'logout') {
-    //         // Find today's record and update the logout time
-    //         if ($existing_log) {
-    //             $this->db->where([
-    //                 'seemp_logempid' => $empid,
-    //                 'seemp_logdate' => $today
-    //             ]);
-    //             $this->db->update('seemployeeloginlog', [
-    //                 'seemp_logouttime' => $now
-    //             ]);
-    //             return ['code' => 0];
-    //         }
-    //     }
-    //     return ['code' => 1];
-    // }
-
     // Update Login/Logout Log with Device and Geolocation
-    function update_log_current_state($empid = '', $action = 'login', $device = null, $lat = null, $lng = null)
+    function update_log_current_state($empid = '', $action = 'login', $device = null, $ipAddress = null)
     {
         if (empty(trim($empid)) || empty(trim($action))) {
             return ['code' => 1];
@@ -216,38 +169,40 @@ class EmployeeModel extends CI_Model
         $existing_log = $this->db->get('seemployeeloginlog')->row();
 
         if ($action == 'login') {
-            // ONLY insert if NO record exists for today.
+            // If NO record exists for today, insert it.
             if (!$existing_log) {
                 $data = [
                     'seemp_logempid' => $empid,
                     'seemp_logdate' => $today,
                     'seemp_logintime' => $now,
-                    'seemp_device_info' => $device, // Added Device Detection
-                    'seemp_lat' => $lat,            // Added Geolocation
-                    'seemp_lng' => $lng             // Added Geolocation
+                    'seemp_device_info' => $device,
+                    'seemp_ip_address' => $ipAddress // Saves Login IP
                 ];
                 $this->db->insert('seemployeeloginlog', $data);
                 return ['code' => 0];
+            } else {
+                // Error: Already clocked in
+                return ['code' => 1];
             }
-            // If it exists, do nothing (keep original login time)
-            return ['code' => 0];
         } else if ($action == 'logout') {
-            // Find today's record and update the logout time
+            // Find today's record and update the logout time AND logout IP
             if ($existing_log) {
                 $this->db->where([
                     'seemp_logempid' => $empid,
                     'seemp_logdate' => $today
                 ]);
                 $this->db->update('seemployeeloginlog', [
-                    'seemp_logouttime' => $now
+                    'seemp_logouttime' => $now,
+                    'seemp_logout_ip_address' => $ipAddress // <-- Saves Logout IP
                 ]);
                 return ['code' => 0];
+            } else {
+                // Error: Trying to clock out before clocking in
+                return ['code' => 1];
             }
         }
         return ['code' => 1];
     }
-    
-
     function get_all_loginlog_for_thisempid()
     {
         $empid = $this->session->userdata('empid');
@@ -304,7 +259,7 @@ class EmployeeModel extends CI_Model
 
         // 1. HANDLE ID MIGRATION (If HR changed the Intern ID to a Permanent ID)
         $new_empid = $data['new_empid'];
-        
+
         if ($empid !== $new_empid) {
             // Temporarily disable strict foreign key checks to safely move the data
             $this->db->query('SET FOREIGN_KEY_CHECKS = 0');
@@ -351,8 +306,8 @@ class EmployeeModel extends CI_Model
             'seempd_address_current' => $data['currentAddress'],
             'seempd_aadhar' => $data['aadhar'],
             'seempd_pan' => $data['pan'],
-            'seempd_img' => $data['photo'], 
-            'seempd_cv' => $data['cv']      
+            'seempd_img' => $data['photo'],
+            'seempd_cv' => $data['cv']
         ];
 
         $this->db->where('seempd_empid', $new_empid); // Use new ID
