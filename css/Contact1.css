@@ -1,0 +1,329 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+/* Base Reset & Global */
+.row {
+    margin-right: 0 !important;
+    margin-left: 0 !important;
+}
+
+/* =========================================
+   PREMIUM CONTACT & TEAM STYLES
+   ========================================= */
+
+body {
+    background-color: #F8FAFC;
+    color: #475569;
+    font-family: 'Inter', sans-serif;
+}
+
+.bg-light-soft {
+    background-color: #F1F5F9;
+}
+
+/* --- Section Titles --- */
+.section-title {
+    font-weight: 800;
+    text-align: center;
+    color: #0F172A; /* Deep Navy */
+    position: relative;
+    padding-bottom: 20px;
+    margin-bottom: 0;
+    font-size: clamp(2rem, 5vw, 2.5rem);
+    letter-spacing: -0.5px;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 4px;
+    background: #2563eb; /* Brand Blue */
+    border-radius: 2px;
+}
+
+/* Modifier for dark backgrounds */
+.section-title.title-light::after {
+    background: #FFFFFF;
+}
+
+/* --- Premium Unified Cards (Tech & Team) --- */
+.premium-card {
+    background: #FFFFFF;
+    border-radius: 24px;
+    box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.08);
+    border: 1px solid #E2E8F0;
+    border-top: 5px solid #2563eb; /* Signature Brand Line */
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.premium-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 25px 50px -12px rgba(37, 99, 235, 0.25);
+}
+
+.card-img-wrapper {
+    height: 240px;
+    overflow: hidden;
+}
+
+.card-img-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s ease;
+}
+
+.premium-card:hover .card-img-wrapper img {
+    transform: scale(1.05);
+}
+
+.premium-card .card-title {
+    font-weight: 800;
+    color: #0F172A;
+    font-size: 1.35rem;
+    margin-bottom: 1rem;
+}
+
+.premium-card .card-text {
+    color: #64748B;
+    line-height: 1.7;
+    font-size: 1.05rem;
+}
+
+/* --- Team Background Override --- */
+.team-wrapper {
+    /* Replaced harsh gradient with a premium dark slate */
+    background: #0F172A; 
+    border-top: 1px solid rgba(255,255,255,0.05);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+/* --- Buttons --- */
+.btn-premium {
+    background: #2563eb !important;
+    color: #FFFFFF !important;
+    border: none;
+    border-radius: 12px;
+    padding: 12px 30px;
+    font-weight: 700;
+    font-size: 1.05rem;
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.25);
+    transition: all 0.3s ease;
+}
+
+.btn-premium:hover {
+    background: #1d4ed8 !important;
+    transform: translateY(-2px);
+    box-shadow: 0 12px 25px rgba(37, 99, 235, 0.35);
+}
+
+.btn-premium-outline {
+    background: transparent !important;
+    color: #2563eb !important;
+    border: 2px solid #2563eb !important;
+    border-radius: 12px;
+    padding: 10px 30px;
+    font-weight: 700;
+    transition: all 0.3s ease;
+}
+
+.btn-premium-outline:hover {
+    background: #2563eb !important;
+    color: #FFFFFF !important;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2);
+}
+
+/* --- Contact Form & Address Box --- */
+.premium-contact-box, .premium-address-box {
+    background: #FFFFFF;
+    border-radius: 24px;
+    box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.08);
+    border: 1px solid #E2E8F0;
+}
+
+.form-title {
+    font-weight: 800;
+    color: #0F172A;
+    letter-spacing: -0.5px;
+}
+
+.premium-label {
+    font-weight: 600;
+    color: #475569;
+    font-size: 0.95rem;
+    margin-bottom: 8px;
+}
+
+.premium-input {
+    border-radius: 12px;
+    padding: 14px 20px;
+    border: 1px solid #CBD5E1;
+    background: #F8FAFC;
+    color: #0F172A;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    box-shadow: none !important;
+}
+
+.premium-input:focus {
+    border-color: #2563eb;
+    background: #FFFFFF;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1) !important;
+}
+
+/* --- Map --- */
+.premium-map-wrapper {
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.08);
+    border: 1px solid #E2E8F0;
+    min-height: 350px;
+}
+
+/* --- Address Box Typography --- */
+.address-title {
+    color: #0F172A;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+}
+
+.contact-detail-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.contact-detail-row:last-child {
+    margin-bottom: 0;
+}
+
+.contact-icon {
+    width: 45px;
+    height: 45px;
+    background: rgba(37, 99, 235, 0.1);
+    color: #2563eb;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    margin-right: 16px;
+    flex-shrink: 0;
+}
+
+.contact-text {
+    color: #475569;
+    font-weight: 500;
+    font-size: 1.05rem;
+}
+
+.contact-link {
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.contact-link:hover {
+    color: #2563eb;
+}
+
+/* --- Premium Testimonial Cards --- */
+.premium-testimonial-card {
+    background: #FFFFFF;
+    border-radius: 24px;
+    box-shadow: 0 15px 35px -10px rgba(15, 23, 42, 0.08);
+    border: 1px solid #E2E8F0;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.4s ease;
+    z-index: 1;
+}
+
+.premium-testimonial-card:hover {
+    transform: translateY(-8px);
+}
+
+.giant-bg-quote-tsm {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    font-size: 8rem;
+    color: rgba(37, 99, 235, 0.04);
+    z-index: -1;
+}
+
+.testimonial-avatar-wrapper img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #FFFFFF;
+    box-shadow: 0 8px 16px rgba(37, 99, 235, 0.15);
+}
+
+.testimonial-name {
+    font-weight: 800;
+    color: #0F172A;
+    margin-bottom: 4px;
+    font-size: 1.25rem;
+}
+
+.testimonial-role {
+    color: #2563eb;
+    font-weight: 700;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.testimonial-text {
+    color: #475569;
+    font-size: 1.05rem;
+    line-height: 1.8;
+    font-style: italic;
+    position: relative;
+}
+
+.testimonial-rating {
+    color: #F59E0B; /* Premium Amber/Gold */
+    font-size: 0.9rem;
+    letter-spacing: 2px;
+}
+@media (max-width: 768px) {
+    .container {
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+    
+    /* Reduce padding on mobile so content isn't too squeezed */
+    .premium-contact-box, 
+    .premium-address-box, 
+    .premium-testimonial-card {
+        padding: 30px 20px !important;
+        border-radius: 16px;
+    }
+
+    .premium-map-wrapper {
+        min-height: 250px !important;
+        border-radius: 16px;
+        margin-bottom: 10px;
+    }
+
+    .contact-detail-row {
+        flex-direction: row;
+        align-items: flex-start;
+    }
+
+    .contact-text {
+        font-size: 0.95rem;
+        word-break: break-all; /* Prevents long emails from breaking layout */
+    }
+
+    .section-title {
+        font-size: 1.75rem;
+    }
+}

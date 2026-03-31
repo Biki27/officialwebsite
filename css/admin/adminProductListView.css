@@ -1,0 +1,166 @@
+/* Global */
+body {
+	font-family: "Inter", sans-serif;
+	background: linear-gradient(135deg, #0f0f23, #1a1a40);
+	margin: 0;
+	padding: 0;
+	color: #f1f5f9;
+}
+
+.main-content {
+	margin-left: 260px;
+	padding: 30px;
+	min-height: 100vh;
+}
+
+.welcome {
+	text-align: center;
+	color: white;
+	margin-bottom: 40px;
+}
+
+.welcome h1 {
+	font-size: 2.5rem;
+	font-weight: 700;
+	background: linear-gradient(135deg, #fff, rgba(255, 255, 255, 0.8));
+	background-clip: text;
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	margin-bottom: 10px;
+}
+
+.welcome p {
+	font-size: 1.1rem;
+	opacity: 0.9;
+}
+
+.table-container {
+	background: #ffffff;
+	border-radius: 20px;
+	overflow: hidden;
+	margin-top: 1.5rem;
+	box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+}
+
+.table thead th {
+ background: radial-gradient(circle at 0% 50%, #461bb9 20%, #973ce0 50%, #6b37e4 100%);
+
+	color: #fafafb;
+	text-transform: uppercase;
+	font-size: 0.75rem;
+	font-weight: 700;
+	letter-spacing: 1px;
+	padding: 1.25rem 1rem;
+	border: none;
+	border-bottom: 2px solid #f1f2f3;
+}
+
+.table tbody tr {
+	border-bottom: 1px solid #f1f2f3;
+	transition: background-color 0.2s ease;
+}
+
+.table tbody tr:hover {
+	background-color: #f6f3ff;
+}
+
+.table td {
+	padding: 1.25rem 1rem;
+	border: none;
+	vertical-align: middle;
+}
+
+.table tbody td:nth-child(4) {
+	max-width: 260px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	line-height: 1.5;
+	height: 1.5em;
+}
+
+.product-img {
+	width: 60px;
+	height: 60px;
+	object-fit: cover;
+	border-radius: 10px;
+	border: 1px solid #eee;
+}
+
+/* Badge */
+.badge {
+	padding: 0.6em 1.2em;
+	font-weight: 600;
+	letter-spacing: 0.5px;
+}
+
+.action-btn {
+	width: 36px;
+	height: 36px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	transition: all 0.3s ease;
+	border: 1.5px solid currentColor;
+}
+
+.action-btn:hover {
+	transform: translateY(-3px);
+	box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+.btn-outline-primary {
+	font-size: 0.8rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+	.main-content {
+		margin-left: 0;
+		padding: 20px;
+	}
+
+	.welcome h1 {
+		font-size: 20px;
+	}
+
+	.table thead {
+		font-size: 12px;
+	}
+
+	.product-img {
+		width: 50px;
+		height: 50px;
+	}
+
+	.table td {
+		padding: 0.75rem 0.5rem;
+	}
+}
+
+/* Product Details Modal Styling (Inspired by HR) */
+.modal-content {
+	border: none;
+	border-radius: 24px;
+	overflow: hidden;
+}
+
+.modal-header {
+	background: #fcfaff;
+	border-bottom: 1px solid #f1f2f3;
+}
+
+.modal-title {
+	color: #667eea;
+	font-weight: 700;
+}
+
+.product-name-link {
+	transition: all 0.2s ease;
+	cursor: pointer;
+}
+
+.product-name-link:hover {
+	color: #667eea !important;
+	text-decoration: underline !important;
+}

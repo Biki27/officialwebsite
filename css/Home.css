@@ -1,0 +1,364 @@
+* {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+}
+.row{
+	margin-right: 0 !important;
+	margin-left: 0 !important;
+}
+body {
+	font-family: "Inter", sans-serif !important;
+	background-color: #f8fafc !important;
+	color: #475569 !important;
+	padding-top: 0px !important; /* Navbar gap fix */
+	overflow-x: hidden !important; /* Horizontal scroll lock */
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
+}
+
+/* --- Section Titles --- */
+.section-title {
+	font-weight: 800;
+	color: #0f172a;
+	position: relative;
+	padding-bottom: 20px;
+	margin-bottom: 20px;
+	font-size: clamp(2rem, 5vw, 2.8rem);
+	letter-spacing: -0.5px;
+	display: inline-block;
+}
+
+.section-title::after {
+	content: "";
+	position: absolute;
+	bottom: 0;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 60px;
+	height: 4px;
+	background: #2563eb;
+	border-radius: 2px;
+}
+
+.section-subtitle {
+	font-size: 1.15rem;
+	color: #64748b;
+	max-width: 700px;
+	margin: 0 auto 50px;
+	line-height: 1.7;
+}
+
+/* =========================================
+           HERO SECTION (Signature Gradient)
+           ========================================= */
+.hero-section {
+	/* YOUR SIGNATURE GRADIENT */
+	background: linear-gradient(
+		90deg,
+		rgba(2, 0, 36, 1) 0%,
+		rgba(6, 5, 82, 1) 7%,
+		rgba(9, 9, 121, 1) 21%,
+		rgba(4, 130, 201, 1) 56%,
+		rgba(0, 212, 255, 1) 89%
+	) !important;
+
+	position: relative;
+	padding: 200px 0 180px;
+	color: white;
+	text-align: center;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.hero-content {
+	position: relative;
+	z-index: 10; /* Stays above the 3D canvas */
+}
+
+.hero-title {
+	font-size: clamp(2.8rem, 6vw, 4.5rem);
+	font-weight: 800;
+	letter-spacing: -1.5px;
+	margin-bottom: 25px;
+	line-height: 1.2;
+	color: #ffffff;
+	text-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); /* Helps text pop against gradient */
+}
+
+.hero-description {
+	font-size: 1.25rem;
+	color: rgba(255, 255, 255, 0.9);
+	max-width: 700px;
+	margin: 0 auto 40px;
+	line-height: 1.8;
+	text-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+}
+
+/* --- Buttons --- */
+.btn-premium-primary {
+	background: #ffffff !important;
+	color: #2563eb !important;
+	padding: 16px 40px;
+	border-radius: 50px;
+	font-weight: 700;
+	font-size: 1.1rem;
+	text-decoration: none;
+	transition: all 0.3s ease;
+	box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+	display: inline-flex;
+	align-items: center;
+}
+
+.btn-premium-primary:hover {
+	transform: translateY(-3px);
+	box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+	color: #1d4ed8 !important;
+}
+
+.btn-premium-outline {
+	background: rgba(255, 255, 255, 0.1);
+	color: #ffffff !important;
+	border: 2px solid rgba(255, 255, 255, 0.4);
+	padding: 14px 40px;
+	border-radius: 50px;
+	font-weight: 700;
+	font-size: 1.1rem;
+	text-decoration: none;
+	transition: all 0.3s ease;
+	display: inline-flex;
+	align-items: center;
+	backdrop-filter: blur(5px);
+}
+
+.btn-premium-outline:hover {
+	background: rgba(255, 255, 255, 0.25);
+	border-color: #ffffff;
+	transform: translateY(-3px);
+}
+
+/* =========================================
+           FLOATING STATS SECTION
+           ========================================= */
+.stats-section {
+	background: #f8fafc;
+	position: relative;
+	z-index: 10;
+}
+
+.stats-wrapper {
+	margin-top: -80px; /* Pulls cards up over the hero background */
+	margin-bottom: 60px;
+}
+
+.premium-stat-card {
+	background: #ffffff;
+	padding: 35px 20px;
+	border-radius: 20px;
+	text-align: center;
+	box-shadow: 0 15px 35px -5px rgba(15, 23, 42, 0.08);
+	border: 1px solid #e2e8f0;
+	border-bottom: 4px solid #00d4ff; /* Cyan accent to match gradient */
+	transition: transform 0.3s ease;
+	height: 100%;
+}
+
+.premium-stat-card:hover {
+	transform: translateY(-5px);
+}
+
+.stat-number {
+	font-size: clamp(2rem, 4vw, 3rem);
+	font-weight: 800;
+	color: #0f172a;
+	margin-bottom: 5px;
+	letter-spacing: -1px;
+}
+
+.stat-label {
+	color: #64748b;
+	font-weight: 600;
+	font-size: 0.9rem;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+}
+
+/* =========================================
+           PREMIUM CARDS (Services & AI)
+           ========================================= */
+.content-section {
+	background: #f8fafc;
+	padding: 60px 0;
+	position: relative;
+	z-index: 10;
+}
+
+.bg-white-section {
+	background: #ffffff;
+}
+
+.premium-feature-card {
+	background: #ffffff;
+	border-radius: 24px;
+	padding: 40px 30px;
+	box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.05);
+	border: 1px solid #e2e8f0;
+	border-top: 5px solid #2563eb;
+	transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+	height: 100%;
+	text-align: center;
+}
+
+.premium-feature-card.alt {
+	background: #f8fafc;
+}
+
+.premium-feature-card:hover {
+	transform: translateY(-8px);
+	box-shadow: 0 20px 40px -12px rgba(37, 99, 235, 0.15);
+}
+
+.feature-icon-wrapper {
+	width: 70px;
+	height: 70px;
+	background: rgba(37, 99, 235, 0.08);
+	color: #2563eb;
+	border-radius: 20px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 1.8rem;
+	margin: 0 auto 25px;
+	border: 1px solid rgba(37, 99, 235, 0.1);
+}
+
+.premium-feature-card h3 {
+	font-size: 1.35rem;
+	font-weight: 800;
+	color: #0f172a;
+	margin-bottom: 15px;
+	letter-spacing: -0.5px;
+}
+
+.premium-feature-card p {
+	color: #64748b;
+	line-height: 1.7;
+	margin: 0;
+	font-size: 0.95rem;
+}
+
+/* =========================================
+           TRUST / CLIENTS SECTION
+           ========================================= */
+.trust-section {
+	background: #ffffff;
+	padding: 80px 0;
+	position: relative;
+	z-index: 10;
+	border-top: 1px solid #e2e8f0;
+}
+
+.client-logo {
+	max-width: 120px;
+	height: auto;
+	/* filter: grayscale(1) opacity(0.5); */
+	transition: all 0.3s ease;
+}
+
+.client-logo:hover {
+	/* filter: grayscale(0) opacity(1); */
+	transform: scale(1.05);
+}
+
+/* =========================================
+           FINAL CTA SECTION
+           ========================================= */
+.premium-cta-section {
+	/* MATCHES YOUR SIGNATURE GRADIENT */
+	background: linear-gradient(
+		90deg,
+		rgba(2, 0, 36, 1) 0%,
+		rgba(6, 5, 82, 1) 7%,
+		rgba(9, 9, 121, 1) 21%,
+		rgba(4, 130, 201, 1) 56%,
+		rgba(0, 212, 255, 1) 89%
+	) !important;
+
+	color: white;
+	text-align: center;
+	padding: 80px 40px;
+	border-radius: 32px;
+	margin: 40px 0 80px;
+	position: relative;
+	overflow: hidden;
+	box-shadow: 0 20px 40px -10px rgba(4, 130, 201, 0.4);
+	z-index: 10;
+}
+
+.premium-cta-section::after {
+	content: "";
+	position: absolute;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.08'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+	opacity: 0.3;
+	pointer-events: none;
+}
+
+.cta-content {
+	position: relative;
+	z-index: 2;
+}
+
+.cta-title {
+	font-size: clamp(2rem, 4vw, 2.8rem);
+	font-weight: 800;
+	margin-bottom: 20px;
+	color: #ffffff;
+	letter-spacing: -0.5px;
+}
+
+.cta-description {
+	font-size: 1.15rem;
+	color: rgba(255, 255, 255, 0.9);
+	margin-bottom: 35px;
+	max-width: 600px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+/* =========================================
+           MOBILE RESPONSIVENESS
+           ========================================= */
+@media (max-width: 991px) {
+	.hero-section {
+		padding: 140px 0 140px;
+	}
+	.stats-wrapper {
+		margin-top: -60px;
+	}
+	.btn-premium-primary,
+	.btn-premium-outline {
+		width: 100%;
+		justify-content: center;
+		margin-bottom: 15px;
+	}
+}
+@media (max-width: 768px) {
+	.premium-stat-card {
+		margin-bottom: 20px;
+	}
+	.content-section {
+		padding: 50px 0;
+	}
+	.premium-cta-section {
+		padding: 60px 20px;
+		border-radius: 20px;
+		margin: 20px 15px 60px;
+	}
+	.client-logo {
+		margin-bottom: 30px;
+	}
+}

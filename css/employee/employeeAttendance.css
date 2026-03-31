@@ -1,0 +1,42 @@
+/* Background */
+body {
+    background: linear-gradient(135deg, #eef2ff, #f8fafc);
+    font-family: "Inter", sans-serif;
+}
+
+/* Card Animation */
+.card {
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+}
+
+/* Table Styling */
+.table th {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    color: #6b7280;
+}
+
+.table td {
+    font-size: 0.95rem;
+}
+
+/* Row Hover */
+.table tbody tr {
+    transition: all 0.2s ease;
+}
+
+.table tbody tr:hover {
+    background: #f9fafb;
+    transform: scale(1.01);
+}
+
+/* Input Styling */
+.form-control:focus {
+    box-shadow: none;
+    border-color: #7c3aed;
+}

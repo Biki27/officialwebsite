@@ -1,0 +1,31 @@
+body {
+    background: linear-gradient(135deg, #eef2ff, #f8fafc);
+    font-family: "Inter", sans-serif;
+}
+
+/* Cards */
+.card {
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+}
+
+/* Progress bar */
+.progress {
+    border-radius: 10px;
+}
+
+/* Text styling */
+.text-muted {
+    font-size: 0.85rem;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    .card {
+        text-align: center;
+    }
+}

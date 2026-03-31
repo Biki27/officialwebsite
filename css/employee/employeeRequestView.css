@@ -1,0 +1,46 @@
+body {
+    background: linear-gradient(135deg, #eef2ff, #f8fafc);
+    font-family: "Inter", sans-serif;
+}
+
+/* Card */
+.card {
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+}
+
+/* Table */
+.table th {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    color: #6b7280;
+}
+
+.table td {
+    font-size: 0.95rem;
+}
+
+/* Row hover */
+.table tbody tr:hover {
+    background: #f9fafb;
+    transform: scale(1.01);
+}
+
+/* Button */
+.btn-primary {
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    border: none;
+}
+
+.btn-primary:hover {
+    opacity: 0.9;
+}
+
+/* Badge polish */
+.badge {
+    border-radius: 20px;
+}

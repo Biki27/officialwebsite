@@ -1,0 +1,169 @@
+
+        body {
+            background-color: #F8FAFC;
+            font-family: 'Inter', sans-serif;
+            color: #475569;
+        }
+
+        /* Base Reset & Global */
+        .row {
+            margin-right: 0 !important;
+            margin-left: 0 !important;
+        }
+
+        .bg-light-soft {
+            background-color: #F8FAFC;
+        }
+
+        /* --- Premium Hero Section --- */
+        .premium-tech-hero {
+            background: #0F172A; /* Signature Deep Slate/Navy */
+            padding: 160px 0 100px;
+            position: relative;
+            overflow: hidden;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .premium-hero-badge {
+            display: inline-block;
+            background: rgba(37, 99, 235, 0.2);
+            color: #60a5fa;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        .premium-hero-title {
+            color: #FFFFFF;
+            font-size: clamp(3rem, 6vw, 4.5rem);
+            font-weight: 800;
+            letter-spacing: -1.5px;
+            margin: 0;
+        }
+
+        .premium-hero-subtitle {
+            color: #94A3B8;
+            font-size: clamp(1.1rem, 2vw, 1.3rem);
+            line-height: 1.7;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Subtle glowing orb in the background */
+        .hero-glow {
+            position: absolute;
+            top: -50%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(37,99,235,0.15) 0%, rgba(15,23,42,0) 70%);
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* --- Tech Stack Cards --- */
+        .stack-section {
+            position: relative;
+            z-index: 10;
+            margin-top: -40px; /* Pulls cards up slightly over the hero */
+        }
+
+        .premium-tech-card {
+            background: #FFFFFF;
+            border-radius: 24px;
+            box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.08);
+            border: 1px solid #E2E8F0;
+            border-top: 5px solid #2563eb; /* Signature Brand Line */
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+
+        .premium-tech-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 30px 60px -12px rgba(37, 99, 235, 0.2);
+        }
+
+        .tech-icon-wrapper {
+            width: 70px;
+            height: 70px;
+            background: rgba(37, 99, 235, 0.08);
+            color: #2563eb;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            border: 1px solid rgba(37, 99, 235, 0.1);
+        }
+
+        .tech-card-title {
+            font-weight: 800;
+            color: #0F172A;
+            font-size: 1.4rem;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.5px;
+        }
+
+        /* Clean List Styling */
+        .premium-tech-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .premium-tech-list li {
+            color: #475569;
+            font-size: 1.05rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .premium-tech-list li i {
+            color: #10B981; /* Emerald green checkmark */
+            font-size: 0.9rem;
+            background: rgba(16, 185, 129, 0.1);
+            padding: 4px;
+            border-radius: 50%;
+        }
+
+        /* Accuracy/Performance Badge */
+        .premium-tech-badge {
+            display: inline-flex;
+            align-items: center;
+            background: #F1F5F9;
+            color: #334155;
+            padding: 10px 18px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border: 1px solid #E2E8F0;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .premium-tech-badge i {
+            color: #2563eb;
+        }
+
+        /* --- Mobile Responsiveness --- */
+        @media (max-width: 768px) {
+            .premium-tech-hero {
+                padding: 120px 20px 80px;
+            }
+            .stack-section {
+                margin-top: 0;
+            }
+            .premium-tech-card {
+                padding: 30px 25px !important;
+            }
+        }
+    
