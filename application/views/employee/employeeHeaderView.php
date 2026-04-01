@@ -1,5 +1,5 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 ?>
 
 <head>
@@ -73,6 +73,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             <a href="<?= base_url() ?>Employee/EmployeeRequest"
                 class="btn btn-outline-primary rounded-pill px-4 nav-section-btn">
                 <i class="fas fa-paper-plane me-2"></i>Requests
+            </a>
+            <a  class="btn btn-outline-primary rounded-pill px-4 nav-section-btn" 
+            href="<?= base_url('Employee/mySalarySlips') ?>">
+                <i class="fas fa-file-invoice-dollar me-2"></i> My Salary Slips
             </a>
 
         </div>

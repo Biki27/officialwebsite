@@ -1,6 +1,6 @@
 <?php
 
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
 class Employee extends CI_Controller
 {
@@ -60,7 +60,6 @@ class Employee extends CI_Controller
                 $this->session->sess_destroy();
                 $this->load->view('employee/employeeLoginView', array('error' => 'Login details not found.'));
             }
-
         }
     }
 
@@ -322,7 +321,6 @@ class Employee extends CI_Controller
             $header = ($access == 'HR') ? 'hr/hrHeaderView' : 'employee/adminHeaderView';
             $this->load->view($header);
             $this->load->view('employee/adminAttendanceView', $data);
-
         } else {
             $this->session->sess_destroy();
             $this->load->view('errors/invalidAccessView');
@@ -352,8 +350,6 @@ class Employee extends CI_Controller
         } else {
             echo json_encode(['success' => false, 'message' => 'Applicant not found or not in "Selected" state.']);
         }
-
-
     }
 
 
@@ -540,7 +536,6 @@ class Employee extends CI_Controller
             $header = ($this->session->userdata('accesslevel') == 'HR') ? 'hr/hrHeaderView' : 'employee/adminHeaderView';
             $this->load->view($header);
             $this->load->view('employee/adminEmployeeRegistrationView', $data);
-
         } else {
             $this->session->sess_destroy();
             $this->load->view('errors/invalidAccessView');
@@ -595,7 +590,6 @@ class Employee extends CI_Controller
             if ($this->upload->do_upload('photo')) {
 
                 $photo_name = $this->upload->data('file_name');
-
             } else {
 
                 $this->session->set_flashdata('msg', 'Photo Upload Error: ' . strip_tags($this->upload->display_errors('', '')));
@@ -665,7 +659,6 @@ class Employee extends CI_Controller
             $this->session->set_flashdata('msg', 'Database Error adding employee. ID or Email may already exist.');
             redirect('Employee/RegisterEmployee');
         }
-
     }
     // updateEmployee function with improved validation, file handling, and error management
     public function updateEmployee($empid)
@@ -818,14 +811,16 @@ class Employee extends CI_Controller
 
             $this->session->set_userdata('empname', $emp->seempd_name);
 
-            $data = array(
+            // Fetch Bank Details for the Dashboard Alert
+            $this->load->model('EmployeeModel');
+            $bank_details = $this->EmployeeModel->get_bank_details($this->session->userdata('empid'));
 
+            $data = array(
                 'holidays_taken' => $holidaycount,
                 'holidays_used' => 20 - $holidaycount,
                 'holidays_percent' => 100 * (20 - $holidaycount) / 20,
-
-                'empdetails' => $emp
-
+                'empdetails' => $emp,
+                'bank_details' => $bank_details // Add this line!
             );
 
             $this->load->view('employee/employeeHeaderView');
@@ -836,7 +831,102 @@ class Employee extends CI_Controller
 
             $this->session->sess_destroy();
             $this->load->view('errors/invalidAccessView');
+        }
+    }
+    //new
+    // Handle Employee Self-Service Bank Details
+    public function updateMyBankDetails()
+    {
+        // Ensure only logged-in employees can do this
+        if (!$this->session->userdata('empid') || $this->session->userdata('accesslevel') != 'EMPL') {
+            redirect('Employee/Login');
+        }
 
+        $post = $this->input->post();
+        if ($post) {
+            $data = $this->security->xss_clean($post);
+
+            $bank_data = array(
+                'sebank_empid' => $this->session->userdata('empid'),
+                'sebank_ac_no' => $data['bank_ac'],
+                'sebank_ifsc'  => strtoupper($data['bank_ifsc']), // Force uppercase for IFSC
+                'sebank_esi'   => $data['bank_esi']
+            );
+
+            $this->load->model('EmployeeModel');
+            $this->EmployeeModel->save_bank_details($bank_data);
+
+            // Send a success message back to the dashboard
+            $this->session->set_flashdata('msg', 'Bank details securely updated!');
+            redirect('Employee/EmployeeOverview');
+        }
+    }
+    // --- Employee Portal: View Salary Slips Page ---
+    public function mySalarySlips()
+    {
+        if (
+            !$this->session->userdata('empid') ||
+            $this->session->userdata('status') != 'active' ||
+            $this->session->userdata('accesslevel') != 'EMPL'
+        ) {
+            $this->session->sess_destroy();
+            redirect('Employee/Login');
+        }
+        // ... rest of function
+
+
+        $empid = $this->session->userdata('empid');
+        $this->load->model('EmployeeModel');
+
+        $data['slips'] = $this->EmployeeModel->get_employee_salary_slips($empid);
+
+        // Load the views
+        $this->load->view('employee/employeeHeaderView');
+        $this->load->view('employee/employeeSalarySlipsView', $data);
+    }
+
+
+    // --- Download/View Specific Slip (Handles both Employee and HR/Admin) ---
+    public function viewMySlip($slip_id)
+    {
+        // 1. Basic Security Check (Must be logged in and active)
+        if (!$this->session->userdata('empid') || $this->session->userdata('status') != 'active') {
+            redirect('Employee/Login');
+        }
+
+        $logged_in_empid = $this->session->userdata('empid');
+        $accesslevel = $this->session->userdata('accesslevel');
+        $this->load->model('EmployeeModel');
+
+        // 2. Fetch Slip Data Based on Access Level
+        if ($accesslevel == 'HR' || $accesslevel == 'ADMIN') {
+            // HR/Admin can view ANY slip. (Bypass the ownership check)
+            $slip_data = $this->db->where('slip_id', $slip_id)->get('sesalaryslips')->row_array();
+        } else {
+            // Normal Employees can ONLY view their own slips. (Enforce ownership check)
+            $slip_data = $this->EmployeeModel->get_slip_by_id($slip_id, $logged_in_empid);
+        }
+
+        // 3. If the slip exists and they have permission to view it
+        if ($slip_data) {
+
+            // IMPORTANT: Fetch the details of the person who OWNS the slip, not the person viewing it!
+            $target_empid = $slip_data['seemp_id'];
+            $emp_details = $this->EmployeeModel->get_employee_with_id($target_empid)[0];
+
+            // Re-attach the employee's personal details to the array for the Print View
+            $slip_data['emp_name'] = $emp_details->seempd_name;
+            $slip_data['designation'] = $emp_details->seempd_designation;
+            $slip_data['branch'] = $emp_details->seemp_branch;
+
+            // Security Headers to prevent browser caching of sensitive financial data
+            $this->output->set_header('Cache-Control: no-store, no-cache, must-revalidate');
+            $this->output->set_header('Pragma: no-cache');
+
+            // Load the exact same Print View
+            $this->load->view('hr/salarySlipPrintView', $slip_data);
+        } else {
+            show_404(); // Slip doesn't exist or employee is trying to view someone else's slip
         }
     }
     function EmployeeAttendence()
@@ -1059,7 +1149,6 @@ class Employee extends CI_Controller
             // Load Views
             $this->load->view('hr/hrHeaderView');
             $this->load->view('hr/hrDashboardView', $data);
-
         } else {
             $this->session->sess_destroy();
             $this->load->view('errors/invalidAccessView');
@@ -1131,7 +1220,6 @@ class Employee extends CI_Controller
                 $this->load->view('employee/adminHeaderView');
                 $this->load->view('employee/adminEmployeeRequestView', $data);
             }
-
         } else {
             $this->session->sess_destroy();
             $this->load->view('errors/invalidAccessView');
@@ -1523,7 +1611,80 @@ class Employee extends CI_Controller
             echo json_encode(['status' => 'error', 'message' => $error_msg]);
         }
     }
+    // Load Salary Management View
+    // Load Salary Management View (HR/ADMIN Portal)
+    public function salaryManagement()
+    {
+        if ($this->session->userdata('accesslevel') == 'HR' || $this->session->userdata('accesslevel') == 'ADMIN') {
+            $this->load->model('EmployeeModel');
 
+            // 1. Determine which month HR is looking at (Defaults to current month)
+            $selected_month = $this->input->get('month') ? $this->input->get('month') : date('Y-m');
+
+            // 2. Fetch all active employees
+            // $data['employees'] = $this->EmployeeModel->getallemployee_with_joins();
+            // 2. Fetch all active regular employees (No Admin/HR)
+            $data['employees'] = $this->EmployeeModel->get_payroll_employees();
+
+            // 3. Fetch all slips already generated for this specific month
+            $data['monthly_slips'] = $this->EmployeeModel->get_slips_by_month($selected_month);
+            $data['selected_month'] = $selected_month;
+
+            // 4. Calculate Stats for the Dashboard
+            $data['total_emps'] = count($data['employees']);
+            $data['processed_count'] = count($data['monthly_slips']);
+            $data['pending_count'] = $data['total_emps'] - $data['processed_count'];
+
+            // 5. Load appropriate header based on role
+            $header = ($this->session->userdata('accesslevel') == 'HR') ? 'hr/hrHeaderView' : 'admin/adminHeaderView';
+            $this->load->view($header);
+            $this->load->view('hr/hrSalaryManagementView', $data);
+        } else {
+            redirect('Employee/Login');
+        }
+    }
+
+    // Process and Print the Slip
+    // Process and Print the Slip
+    public function generatePayslip()
+    {
+        if ($this->session->userdata('accesslevel') == 'HR' || $this->session->userdata('accesslevel') == 'ADMIN') {
+            $post = $this->input->post();
+
+            if ($post) {
+                // 1. LOAD THE MODEL FIRST!
+                $this->load->model('EmployeeModel');
+
+                $data = $this->security->xss_clean($post);
+
+                // Calculate Totals Securely on Server
+                $data['gross_earnings'] = $data['basic'] + $data['transport'] + $data['incentive'] + $data['overtime'] + $data['round_off'];
+                $data['total_deductions'] = $data['pf'] + $data['esi_deduction'] + $data['prof_tax'] + $data['late_fees'] + $data['loss_of_pay'] + $data['loan'];
+                $data['net_salary'] = $data['gross_earnings'] - $data['total_deductions'];
+
+                // Copy the data array specifically for the database
+                $db_data = $data;
+
+                // Remove the fields that belong on the PDF but NOT in the database
+                unset($db_data['emp_name']);
+                unset($db_data['designation']);
+                unset($db_data['branch']);
+
+                // Now this will work because the model is loaded!
+                if ($this->EmployeeModel->slip_already_exists($db_data['seemp_id'], $db_data['slip_month'])) {
+                    // Show error, don't insert
+                    $this->session->set_flashdata('error', 'Slip for this month already exists.');
+                    redirect('Employee/salaryManagement');
+                }
+
+                // Save the clean data to the Database
+                $this->db->insert('sesalaryslips', $db_data);
+
+                // Load the Print Template View using the original $data (which still has the name/designation for printing)
+                $this->load->view('hr/salarySlipPrintView', $data);
+            }
+        } else {
+            redirect('Employee/Login');
+        }
+    }
 }
-
-?>

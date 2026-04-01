@@ -13,11 +13,23 @@ defined('BASEPATH') OR exit('No direct script access allowed');
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-
     <link href="<?= base_url('css/employee/employeeOverView.css') ?>" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body>
+
+    <?php if ($this->session->flashdata('msg')): ?>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const Toast = Swal.mixin({
+                toast: true, position: 'top-end', showConfirmButton: false, timer: 4000, timerProgressBar: true
+            });
+            Toast.fire({ icon: 'success', title: <?= json_encode($this->session->flashdata('msg')) ?> });
+        });
+    </script>
+    <?php endif; ?>
 
     <div class="container py-4" id="overview-section" style="display: block;">
 
@@ -28,6 +40,19 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             </h4>
             <small class="opacity-75">Your performance & personal details</small>
         </div>
+
+        <?php if(!isset($bank_details) || empty($bank_details->sebank_ac_no)): ?>
+        <div class="alert border-warning bg-warning bg-opacity-10 d-flex align-items-center p-4 shadow-sm rounded-4 mb-4" role="alert">
+            <i class="fas fa-exclamation-circle fa-2x text-warning me-3"></i>
+            <div class="flex-grow-1">
+                <h5 class="alert-heading text-dark fw-bold mb-1">Action Required: Update Bank Details</h5>
+                <p class="mb-0 text-muted small">Your salary processing is currently on hold. Please provide your bank account information securely.</p>
+            </div>
+            <button class="btn btn-warning text-dark fw-bold rounded-pill px-4 shadow-sm" data-bs-toggle="modal" data-bs-target="#bankDetailsModal">
+                Update Now
+            </button>
+        </div>
+        <?php endif; ?>
 
         <div class="row g-4">
 
@@ -141,11 +166,85 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <div class="modal fade" id="bankDetailsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow-lg" style="border-radius: 15px;">
+                
+                <?= form_open('Employee/updateMyBankDetails', ['id' => 'bankDetailsForm']) ?>
+                
+                <div class="modal-header border-0 pb-0 pt-4 px-4">
+                    <h5 class="modal-title fw-bold text-primary"><i class="fas fa-shield-alt me-2 text-success"></i> Secure Financial Info</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                
+                <div class="modal-body p-4">
+                    <div class="alert alert-info border-0 rounded-3 small mb-4">
+                        <i class="fas fa-info-circle me-2"></i> This information is encrypted and only used by HR for salary disbursement.
+                    </div>
 
+                    <div class="mb-3">
+                        <label class="fw-bold small text-muted mb-1">Bank Account Number <span class="text-danger">*</span></label>
+                        <input type="text" name="bank_ac" class="form-control fw-medium" required 
+                               value="<?= isset($bank_details) ? $bank_details->sebank_ac_no : '' ?>">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="fw-bold small text-muted mb-1">IFSC Code <span class="text-danger">*</span></label>
+                        <input type="text" name="bank_ifsc" class="form-control fw-medium text-uppercase" required 
+                               value="<?= isset($bank_details) ? $bank_details->sebank_ifsc : '' ?>"
+                               placeholder="e.g. SBIN0001234">
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="fw-bold small text-muted mb-1">ESI Number (If applicable)</label>
+                        <input type="text" name="bank_esi" class="form-control fw-medium" 
+                               value="<?= isset($bank_details) ? $bank_details->sebank_esi : '' ?>">
+                    </div>
+                </div>
+                
+                <div class="modal-footer border-0 pt-0 pb-4 px-4">
+                    <button type="button" class="btn btn-light rounded-pill px-4 fw-medium" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm">Securely Save</button>
+                </div>
+                
+                <?= form_close() ?>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <script>
+    // --- Bank Details Submission Alert ---
+    document.addEventListener("DOMContentLoaded", function() {
+        const bankForm = document.getElementById('bankDetailsForm');
+        if(bankForm) {
+            bankForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                Swal.fire({
+                    title: 'Save Bank Details?',
+                    text: 'Please ensure your Account Number and IFSC code are completely accurate before submitting.',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#461bb9',
+                    cancelButtonColor: '#64748b',
+                    confirmButtonText: 'Yes, Submit Securely'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        Swal.fire({
+                            title: 'Saving Securely...',
+                            allowOutsideClick: false,
+                            didOpen: () => { Swal.showLoading(); }
+                        });
+                        HTMLFormElement.prototype.submit.call(bankForm);
+                    }
+                });
+            });
+        }
+    });
+
+    // --- Attendance Logic ---
     let currentAction = 'login'; 
 
     function markAttendance(action) {
@@ -173,7 +272,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             },
             success: function(data) {
                 if(data.status === 'success') {
-                    // showModalMessage('success', data.message + '<br><small class="text-muted">Device: ' + data.device + '<br>IP: ' + data.ip + '</small>');
                     showModalMessage('success', data.message + '<br><small class="text-muted">Device: ' + data.device + '<br>IP: ' + data.ip + '</small>');
                 } else {
                     showModalMessage('error', data.message);
@@ -204,5 +302,4 @@ defined('BASEPATH') OR exit('No direct script access allowed');
     }
 </script>
 </body>
-
 </html>
