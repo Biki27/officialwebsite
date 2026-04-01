@@ -1,16 +1,28 @@
 <?php
 
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
 class EmployeeModel extends CI_Model
 {
 
+    // function getallemployee_with_joins()
+    // {
+    //     $res = $this->db
+    //         ->from('seemployee')
+    //         ->join('seempdetails', 'seemployee.seemp_id = seempdetails.seempd_empid', 'left')
+    //         ->join('sejobapplicant', 'seempdetails.seempd_jobaid = sejobapplicant.sejoba_id', 'left')
+    //         ->get()
+    //         ->result();
+
+    //     return $res;
+    // }
     function getallemployee_with_joins()
     {
         $res = $this->db
             ->from('seemployee')
             ->join('seempdetails', 'seemployee.seemp_id = seempdetails.seempd_empid', 'left')
             ->join('sejobapplicant', 'seempdetails.seempd_jobaid = sejobapplicant.sejoba_id', 'left')
+            ->join('seempbankdetails', 'seemployee.seemp_id = seempbankdetails.sebank_empid', 'left') // Fetch Bank Details
             ->get()
             ->result();
 
@@ -115,11 +127,9 @@ class EmployeeModel extends CI_Model
                 $this->db->trans_rollback();
                 return ['code' => 1];
             }
-
         } else {
             return ['code' => 1];
         }
-
     }
 
     function update_employee_table_with_today($empid = '', $email = '', $seqid = '', $status = '')
@@ -148,7 +158,6 @@ class EmployeeModel extends CI_Model
                 $this->db->trans_rollback();
                 return ['code' => 1, 'message' => 'Something is wrong Check Credentials or Multiple rows getting affected.'];
             }
-
         }
     }
     // Update Login/Logout Log with Device and Geolocation
@@ -231,7 +240,6 @@ class EmployeeModel extends CI_Model
                 'sejobapplicant',
                 ['sejoba_state' => 'selected']
             );
-
         }
 
         $this->db->trans_complete();
@@ -239,13 +247,10 @@ class EmployeeModel extends CI_Model
         if ($this->db->trans_status() === FALSE) {
 
             return ['code' => 1];
-
         } else {
 
             return ['code' => 0];
-
         }
-
     }
 
     //  for update employee from admin panel
@@ -368,6 +373,81 @@ class EmployeeModel extends CI_Model
     {
         return $this->db->count_all('seemployee');
     }
-}
 
-?>
+    // bank details functions
+    // Fetch an employee's bank details
+    public function get_bank_details($empid)
+    {
+        return $this->db->where('sebank_empid', $empid)->get('seempbankdetails')->row();
+    }
+
+    // Insert or Update the bank details
+    public function save_bank_details($data)
+    {
+        // Check if the record already exists
+        $this->db->where('sebank_empid', $data['sebank_empid']);
+        $query = $this->db->get('seempbankdetails');
+
+        if ($query->num_rows() > 0) {
+            // Update existing
+            $this->db->where('sebank_empid', $data['sebank_empid']);
+            return $this->db->update('seempbankdetails', $data);
+        } else {
+            // Insert new
+            return $this->db->insert('seempbankdetails', $data);
+        }
+    }
+    // --- Employee Salary Slip Functions ---
+
+    // Get all salary slips for a specific employee
+    public function get_employee_salary_slips($empid)
+    {
+        return $this->db->where('seemp_id', $empid)
+            ->order_by('slip_id', 'DESC') // Newest first
+            ->get('sesalaryslips')
+            ->result();
+    }
+
+    // Get a specific slip (Ensure it belongs to the logged-in employee for security)
+    public function get_slip_by_id($slip_id, $empid)
+    {
+        return $this->db->where('slip_id', $slip_id)
+            ->where('seemp_id', $empid)
+            ->get('sesalaryslips')
+            ->row_array(); // Return as array to easily pass to the print view
+    }
+     
+  // Check if a salary slip already exists for an employee for a specific month
+    public function slip_already_exists($empid, $month)
+    {
+        $this->db->where('seemp_id', $empid);
+        $this->db->where('slip_month', $month);
+        $query = $this->db->get('sesalaryslips');
+        
+        // Returns true if a slip is found, false if it is safe to generate
+        return $query->num_rows() > 0;
+    }
+    // Fetch all slips generated in a specific month, indexed by Employee ID
+    public function get_slips_by_month($month_year)
+    {
+        $query = $this->db->where('slip_month', $month_year)->get('sesalaryslips')->result();
+        $slips = [];
+        foreach ($query as $row) {
+            $slips[$row->seemp_id] = $row; // Key the array by Employee ID for instant lookup
+        }
+        return $slips;
+    }
+    // Fetch only active, regular employees for Payroll (Excludes HR & ADMIN)
+    public function get_payroll_employees()
+    {
+        return $this->db
+            ->from('seemployee')
+            ->join('seempdetails', 'seemployee.seemp_id = seempdetails.seempd_empid', 'left')
+            ->join('sejobapplicant', 'seempdetails.seempd_jobaid = sejobapplicant.sejoba_id', 'left')
+            ->join('seempbankdetails', 'seemployee.seemp_id = seempbankdetails.sebank_empid', 'left')
+            ->where('seemployee.seemp_acesslevel', 'EMPL') // Only regular employees
+            ->where('seemployee.seemp_status', 'active')   // Only active employees
+            ->get()
+            ->result();
+    }
+}

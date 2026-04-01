@@ -1,4 +1,4 @@
-<?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
+<?php defined('BASEPATH') or exit('No direct script access allowed'); ?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -11,7 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="<?= base_url() ?>css/hr/hrHeaderView.css">
 
-     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
@@ -47,6 +47,9 @@
             <a class="nav-link" href="<?= base_url('Employee/viewJobs') ?>">
                 <i class="fas fa-list-alt me-2"></i> Manage Jobs
             </a>
+            <a class="nav-link" href="<?= base_url('Employee/salaryManagement') ?>">
+                <i class="fas fa-file-invoice-dollar me-2"></i> Salary Setup
+            </a>
             <a class="nav-link " onclick="logout()">
                 <i class="fas fa-sign-out-alt me-2"></i> Logout
             </a>
@@ -55,38 +58,38 @@
     </nav>
     </div>
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             const btn = document.getElementById('mobileToggle');
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('sidebarOverlay');
 
             if (btn && sidebar && overlay) {
-                btn.onclick = function () {
+                btn.onclick = function() {
                     sidebar.classList.add('active');
                     overlay.classList.add('active');
                     btn.style.display = 'none'; // Hide button when sidebar opens
                 };
 
-                overlay.onclick = function () {
+                overlay.onclick = function() {
                     sidebar.classList.remove('active');
                     overlay.classList.remove('active');
                     btn.style.display = 'flex'; // Show button when sidebar closes
                 };
             }
         });
-         window.logout = function() {
-                Swal.fire({
-                    title: 'Ready to leave?',
-                    text: "You will be logged out of the Admin Dashboard.",
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonColor: '#461bb9',
-                    cancelButtonColor: '#64748b',
-                    confirmButtonText: 'Yes, Logout'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.location.href = '<?= base_url() ?>Employee/logout';
-                    }
-                });
-            };
+        window.logout = function() {
+            Swal.fire({
+                title: 'Ready to leave?',
+                text: "You will be logged out of the Admin Dashboard.",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#461bb9',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Yes, Logout'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '<?= base_url() ?>Employee/logout';
+                }
+            });
+        };
     </script>
