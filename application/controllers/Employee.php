@@ -1130,26 +1130,26 @@ class Employee extends CI_Controller
     /**
      * HR Attendance Monitoring
      */
-    public function hrAttendance()
-    {
-        if ($this->session->userdata('accesslevel') == 'HR') {
-            $this->load->model('AttendanceModel');
+    // public function hrAttendance()
+    // {
+    //     if ($this->session->userdata('accesslevel') == 'HR') {
+    //         $this->load->model('AttendanceModel');
 
-            // FIX 1: Fetch the HR's specific login/logout times for the left card
-            $empid = $this->session->userdata('empid');
-            $data['todayAttendance'] = $this->AttendanceModel->get_today_login_logout($empid);
+    //         // FIX 1: Fetch the HR's specific login/logout times for the left card
+    //         $empid = $this->session->userdata('empid');
+    //         $data['todayAttendance'] = $this->AttendanceModel->get_today_login_logout($empid);
 
-            // Get all logs to show HR the history in the right table
-            $data['atten'] = $this->AttendanceModel->get_attendance_of_all_employee();
+    //         // Get all logs to show HR the history in the right table
+    //         $data['atten'] = $this->AttendanceModel->get_attendance_of_all_employee();
 
-            $this->load->view('hr/hrHeaderView');
-            // Reusing the Admin Attendance View for data consistency
-            $this->load->view('employee/adminAttendanceView', $data);
-        } else {
-            $this->session->sess_destroy();
-            $this->load->view('errors/invalidAccessView');
-        }
-    }
+    //         $this->load->view('hr/hrHeaderView');
+    //         // Reusing the Admin Attendance View for data consistency
+    //         $this->load->view('employee/adminAttendanceView', $data);
+    //     } else {
+    //         $this->session->sess_destroy();
+    //         $this->load->view('errors/invalidAccessView');
+    //     }
+    // }
 
     // Logout Function
     function Logout()

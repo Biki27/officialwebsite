@@ -35,7 +35,7 @@
             <a class="nav-link" href="<?= base_url('Employee/viewEmployee') ?>">
                 <i class="fas fa-users-cog me-2"></i> Employees
             </a>
-            <a class="nav-link" href="<?= base_url('Employee/hrAttendance') ?>">
+            <a class="nav-link" href="<?= base_url('Employee/viewAttendance') ?>">
                 <i class="fas fa-calendar-check me-2"></i> Attendance
             </a>
             <a class="nav-link" href="<?= base_url('Employee/viewJobApplicants') ?>">
