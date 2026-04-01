@@ -171,6 +171,7 @@ class Employee extends CI_Controller
             $this->load->view('errors/invalidAccessView');
         }
     }
+
     function viewJobApplicants()
     {
         if (
@@ -261,6 +262,31 @@ class Employee extends CI_Controller
             $this->session->sess_destroy();
             $this->load->view('errors/invalidAccessView');
         }
+    }
+
+    // add coded for view details of employee total leave and history details
+    public function getEmployeeLeaveSummary($empid)
+    {
+        if ($this->session->userdata('status') != 'active') {
+            echo json_encode(['error' => 'Unauthorized']);
+            return;
+        }
+
+        $this->load->model('RequestsModel');
+        // We modify the existing RequestsModel logic to fetch by empid
+        $history = $this->RequestsModel->get_requestes_for_any_empid($empid);
+
+        $approved_days = 0;
+        foreach ($history as $h) {
+            if ($h->seemrq_status == 'approved') {
+                $approved_days += (int) $h->seemrq_days;
+            }
+        }
+
+        echo json_encode([
+            'history' => $history,
+            'approved_days' => $approved_days
+        ]);
     }
 
     function viewAttendance()
@@ -995,6 +1021,7 @@ class Employee extends CI_Controller
             $this->load->view('errors/invalidAccessView');
         }
     }
+    
     // HR Dashboard
     function HRDashboard()
     {
@@ -1436,7 +1463,7 @@ class Employee extends CI_Controller
     }
     //geo location tracking for employee attendance
     // --- AJAX ATTENDANCE & GEOFENCING ROUTE ---
-   public function SubmitAttendanceAjax()
+    public function SubmitAttendanceAjax()
     {
         // 1. Check Session
         if (!$this->session->has_userdata('empid')) {
@@ -1480,13 +1507,13 @@ class Employee extends CI_Controller
 
         // 5. Save to Database (THIS IS WHAT WAS MISSING)
         $this->load->model('EmployeeModel');
-        
+
         $log_result = $this->EmployeeModel->update_log_current_state($empid, $action, $device, $ipAddress);
 
         if ($log_result['code'] == 0) {
             $msg = ($action == 'login') ? "Clocked IN successfully!" : "Clocked OUT successfully!";
             echo json_encode([
-                'status' => 'success', 
+                'status' => 'success',
                 'message' => $msg,
                 'device' => $device,
                 'ip' => $ipAddress

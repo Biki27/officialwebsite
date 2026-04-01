@@ -77,7 +77,7 @@
 
                                 <tr data-status="<?= strtolower($req->seemrq_status) ?>">
                                     <td>
-                                        REQ<?= str_pad($req->seemrq_id, 2, '0', STR_PAD_LEFT) ?>
+                                        REQ<?= str_pad($req->seemrq_id, 1, '0', STR_PAD_LEFT) ?>
                                     </td>
 
                                     <td><?= $req->seemrq_empid ?></td>

@@ -10,16 +10,16 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 </head>
 
 <body>
-  <?php if ($this->session->flashdata('msg')): 
-        $msg = $this->session->flashdata('msg');
-        $icon = (stripos($msg, 'Success') !== false) ? 'success' : 'info';
-  ?>
+  <?php if ($this->session->flashdata('msg')):
+    $msg = $this->session->flashdata('msg');
+    $icon = (stripos($msg, 'Success') !== false) ? 'success' : 'info';
+    ?>
     <script>
-      document.addEventListener("DOMContentLoaded", function() {
-          const Toast = Swal.mixin({
-              toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, timerProgressBar: true
-          });
-          Toast.fire({ icon: '<?= $icon ?>', title: '<?= $msg ?>' });
+      document.addEventListener("DOMContentLoaded", function () {
+        const Toast = Swal.mixin({
+          toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, timerProgressBar: true
+        });
+        Toast.fire({ icon: '<?= $icon ?>', title: '<?= $msg ?>' });
       });
     </script>
   <?php endif; ?>
@@ -83,7 +83,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             <?php foreach ($employees as $emp) { ?>
 
               <tr>
-                <td><span class="emp-id"><?= $emp->seemp_id ?></span></td>
+                <td>
+                  <span class="emp-id"><?= $emp->seemp_id ?></span><br>
+                  <a href="javascript:void(0)" class="text-primary small text-decoration-none"
+                    onclick="viewEmployeeQuickDetails('<?= $emp->seemp_id ?>', '<?= addslashes($emp->seempd_name) ?>')">
+                    <i class="fas fa-info-circle"></i> view details
+                  </a>
+                </td>
                 <td>
                   <div>
                     <strong><?= $emp->seempd_name ?></strong><br>
@@ -119,8 +125,97 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         </table>
       </div>
     </div>
+    <!-- Employee Details Modal -->
+    <div class="modal fade" id="empDetailsModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 15px;">
+          <div class="modal-header bg-light">
+            <h5 class="modal-title fw-bold text-primary"><i class="fas fa-user-clock me-2"></i>Employee Leave Summary
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body p-4">
+            <div class="row g-3 mb-4">
+              <div class="col-md-6">
+                <div class="p-3 bg-primary bg-opacity-10 rounded-3 border-start border-primary border-4">
+                  <small class="text-muted fw-bold text-uppercase">Employee</small>
+                  <h5 id="dt_name" class="mb-0 fw-bold"></h5>
+                  <span id="dt_id" class="badge bg-primary mt-1"></span>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="p-3 bg-info bg-opacity-10 rounded-3 border-start border-info border-4 text-center">
+                  <small class="text-muted fw-bold text-uppercase">Leaves Consumed</small>
+                  <h4 class="mb-0 fw-bold text-info"><span id="dt_leave_count">0</span> / 20</h4>
+                </div>
+              </div>
+            </div>
 
-    
+            <div class="table-responsive">
+              <h6 class="fw-bold mb-3"><i class="fas fa-history me-2"></i>Request History</h6>
+              <table class="table table-sm table-hover align-middle border">
+                <thead class="table-light">
+                  <tr>
+                    <th>Req ID</th>
+                    <th>Reason</th>
+                    <th>Summary</th>
+                    <th>Applied On</th>
+                    <th>Date Range</th>
+                    <th>Days</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="dt_leave_history">
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+      function viewEmployeeQuickDetails(empid, name) {
+        document.getElementById('dt_name').innerText = name;
+        document.getElementById('dt_id').innerText = empid;
+        document.getElementById('dt_leave_history').innerHTML = '<tr><td colspan="7" class="text-center">Loading...</td></tr>';
+
+        var myModal = new bootstrap.Modal(document.getElementById('empDetailsModal'));
+        myModal.show();
+
+        $.ajax({
+          url: '<?= base_url("Employee/getEmployeeLeaveSummary/") ?>' + empid,
+          type: 'GET',
+          dataType: 'json',
+          success: function (res) {
+            document.getElementById('dt_leave_count').innerText = res.approved_days;
+
+            let html = '';
+            if (res.history && res.history.length > 0) {
+              res.history.forEach(row => {
+                let statusClass = row.seemrq_status === 'approved' ? 'bg-success' :
+                  (row.seemrq_status === 'rejected' ? 'bg-danger' : 'bg-warning text-dark');
+                html += `
+                        <tr>
+                            <td>REQ${row.seemrq_id}</td>
+                            <td><span class="badge bg-light text-dark border">${row.seemrq_reason}</span></td>
+                            <td><small>${row.seemrq_summary}</small></td>
+                            <td>${row.seemrq_reqdate}</td>
+                            <td>${row.seemrq_fromdate} to ${row.seemrq_todate}</td>
+                            <td>${row.seemrq_days}</td>
+                            <td><span class="badge ${statusClass}">${row.seemrq_status.toUpperCase()}</span></td>
+                        </tr>`;
+              });
+            } else {
+              html = '<tr><td colspan="7" class="text-center">No history found.</td></tr>';
+            }
+            document.getElementById('dt_leave_history').innerHTML = html;
+          }
+        });
+      }
+    </script>
 </body>
 
 </html>
