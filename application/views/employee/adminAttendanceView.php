@@ -87,6 +87,8 @@
                         <th><i class="fas fa-user me-2"></i>Employee Name</th>
                         <th><i class="fas fa-clock me-2"></i>Login Time</th>
                         <th><i class="fas fa-clock me-3"></i>Logout Time</th>
+                        <th><i class="fas fa-laptop me-2"></i>Device</th>
+                        <th><i class="fas fa-network-wired me-2"></i>IP Address</th>
                     </tr>
                 </thead>
                 <tbody id="attendanceTable">
@@ -106,6 +108,8 @@
                                         ? date("h:i A", strtotime($att->seemp_logouttime))
                                         : '<span class="text-muted">Not Logged Out</span>' ?>
                                 </td>
+                                <td><small class="text-muted"><?= $att->seemp_device_info ?? 'N/A' ?></small></td>
+                                <td><code><?= $att->seemp_ip_address ?? '0.0.0.0' ?></code></td>
                             </tr>
                         <?php endforeach; ?>
                     <?php else: ?>
