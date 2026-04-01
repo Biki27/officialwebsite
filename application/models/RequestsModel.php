@@ -125,6 +125,21 @@ class RequestsModel extends CI_Model
             'seemrq_status' => $status
         ]);
     }
+    public function get_requestes_for_thisempid_custom($empid)
+    {
+        return $this->db->from('seemprequests')
+            ->where('seemrq_empid', $empid)
+            ->order_by('seemrq_reqdate', 'DESC')
+            ->get()
+            ->result();
+    }
+    public function get_requestes_for_any_empid($empid)
+    {
+        $this->db->from('seemprequests');
+        $this->db->where('seemrq_empid', $empid);
+        $this->db->order_by('seemrq_reqdate', 'DESC'); // FOR latest requests first
+        return $this->db->get()->result();
+    }
 
 }
 
