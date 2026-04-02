@@ -1,9 +1,4 @@
 <?php
-// This code is Written by :
-// PAPPU BISWAS
-// Suropriyo Enterprise
-// Howrah
-
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 class ProjectsModel extends CI_Model
@@ -68,6 +63,7 @@ class ProjectsModel extends CI_Model
             ->get('seprojects')
             ->row();
     }
+    
     function getProjectsByStatus($status)
     {
         return $this->db->where('seproj_status', $status)
@@ -84,6 +80,24 @@ class ProjectsModel extends CI_Model
     {
         $this->db->where('seproj_id', $id);
         return $this->db->update('seprojects', $data);
+    }
+
+    // --- THESE ARE THE NEW FUNCTIONS THAT WERE MISSING ---
+    
+    public function getRecentProjects($limit = 5) 
+    {
+        $this->db->order_by('seproj_id', 'DESC'); 
+        $this->db->limit($limit);
+        return $this->db->get('seprojects')->result();
+    }
+
+    public function getUpcomingDeadlines($limit = 3) 
+    {
+        $this->db->where('seproj_status !=', 'completed'); 
+        $this->db->where('seproj_deadline >=', date('Y-m-d')); 
+        $this->db->order_by('seproj_deadline', 'ASC'); 
+        $this->db->limit($limit);
+        return $this->db->get('seprojects')->result();
     }
 }
 ?>
