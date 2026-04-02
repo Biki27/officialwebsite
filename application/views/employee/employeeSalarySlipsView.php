@@ -100,6 +100,7 @@
             </div>
             <i class="fas fa-wallet fa-3x opacity-50"></i>
         </div>
+        
 
         <div class="table-responsive">
             <table class="table mb-0 align-middle">

@@ -121,6 +121,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                             <span class="text-muted">Experience</span>
                             <span class="fw-semibold"><?= $empdetails->seempd_experience ?> Years</span>
                         </div>
+                        
+
                     </div>
                 </div>
             </div>

@@ -1,5 +1,5 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 ?>
 
 <!DOCTYPE html>
@@ -22,11 +22,19 @@ defined('BASEPATH') OR exit('No direct script access allowed');
     <!-- ATTENDANCE SECTION -->
     <div class="container mt-4" id="attendance-section" class="section-content" style="display: block;">
         <!-- ATTENDANCE HEADING WITH RIGHT ALIGN -->
-        <div class="section-header">
+        <!-- <div class="section-header">
             <h3 class="mb-0 fw-semibold text-primary">
                 <i class="fas fa-clock me-2"></i>Attendance Summary
             </h3>
             <span class="badge bg-primary fs-6 px-3 py-2">Attendance</span>
+        </div> -->
+        <div class="mb-4 p-3 rounded-4 shadow-sm text-white"
+            style="background: linear-gradient(135deg, #4f46e5, #7c3aed);">
+            <h4 class="fw-bold mb-1">
+                <i class="fas fa-clock me-2"></i>Attendance Summary
+
+            </h4>
+            <small class="opacity-75">Manage your leave and requests</small>
         </div>
 
         <!-- ATTENDANCE TABLE -->
@@ -48,10 +56,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                 <td><?= $atdc->seemp_logdate ?></td>
                                 <td>
                                     <span class="badge rounded-pill px-3 py-2"
-                                            style="background: rgba(127, 255, 112, 0.24); color:#10b981;">
-                                            <i class="fas fa-sign-in-alt me-1"></i>
-                                            <?= date('h:i A', strtotime($atdc->seemp_logintime)) ?>
-                                        </span>
+                                        style="background: rgba(127, 255, 112, 0.24); color:#10b981;">
+                                        <i class="fas fa-sign-in-alt me-1"></i>
+                                        <?= date('h:i A', strtotime($atdc->seemp_logintime)) ?>
+                                    </span>
                                 </td>
                                 <td>
                                     <?php if ($atdc->seemp_logouttime && $atdc->seemp_logouttime != '0000-00-00 00:00:00'): ?>
@@ -63,7 +71,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                     <?php else: ?>
                                         <span class="badge rounded-pill px-3 py-2"
                                             style="background: rgba(239,68,68,0.1); color:rgba(6, 6, 6, 0.51);">
-                                             <i class="fas fa-sign-out-alt me-1"></i>Not Logged Out
+                                            <i class="fas fa-sign-out-alt me-1"></i>Not Logged Out
                                         </span>
                                     <?php endif; ?>
                                 </td>
