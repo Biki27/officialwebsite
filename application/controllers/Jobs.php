@@ -60,40 +60,6 @@ class Jobs extends CI_Controller
         $this->load->view('footerView');
     }
 
-    // public function Apply($job_id = null)
-    // {
-    //     if ($job_id == null) {
-    //         redirect('Careers/Jobs');
-    //     }
-    //     //  Check if the job is actually active before allowing application
-    //     $job = $this->JobsModel->get_job_by_id($job_id);
-    //     if (!$job || strtolower($job->sejob_state) !== 'active') {
-    //         $this->session->set_flashdata('error', 'This job position is no longer accepting applications.');
-    //         redirect('Jobs');
-    //         return;
-    //     }
-
-    //     // 1. If NOT logged in, save the Job ID in session and go to Login
-    //     if (!$this->session->userdata('candidate_logged_in')) {
-    //         $this->session->set_userdata('redirect_to_job', $job_id);
-    //         $this->session->set_flashdata('error', 'Please log in to apply for this position.');
-    //         redirect('Candidate/login');
-    //     }
-
-    //     $candidate_id = $this->session->userdata('candidate_id');
-
-    //     // This now uses the updated logic: 
-    //     // It returns TRUE only if previous apps are 'rejected' or don't exist
-    //     if (!$this->jobApplicationModel->is_eligible_to_apply($candidate_id)) {
-    //         $this->session->set_flashdata('error', 'You currently have an active application. You can only apply for a new role if your current application is rejected.');
-    //         redirect('Candidate/dashboard');
-    //     }
-
-    //     // 2. If ALREADY logged in, save the Job ID in flashdata and go to Dashboard
-    //     // This flashdata tells the dashboard: "Open the modal for this specific job"
-    //     $this->session->set_flashdata('auto_open_job_id', $job_id);
-    //     redirect('Candidate/dashboard');
-    // }
     public function Apply($job_id = null)
     {
         if ($job_id == null) {

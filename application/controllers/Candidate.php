@@ -172,21 +172,7 @@ class Candidate extends CI_Controller
         $this->session->set_userdata($session_data);
     }
 
-    // Redirects user to dashboard and triggers the job application modal if they clicked "Apply" before logging in
-    // private function handle_redirect()
-    // {
-    //     if ($this->session->userdata('redirect_to_job')) {
-    //         $job_id = $this->session->userdata('redirect_to_job');
-    //         $this->session->unset_userdata('redirect_to_job'); // Clear it so it doesn't get stuck
-
-    //         // Set a temporary flashdata flag to tell the dashboard to open the modal
-    //         $this->session->set_flashdata('auto_open_job_id', $job_id);
-
-    //         redirect('Candidate/dashboard');
-    //     } else {
-    //         redirect('Candidate/dashboard');
-    //     }
-    // }
+  
     private function handle_redirect()
     {
         $job_id = $this->session->userdata('redirect_to_job');
@@ -207,10 +193,7 @@ class Candidate extends CI_Controller
         redirect('Candidate/dashboard');
     }
 
-    // ==========================================
-    // 6. GOOGLE OAUTH 2.0 INTEGRATION
-    // ==========================================
-
+     // 6. GOOGLE OAUTH 2.0 INTEGRATION
     public function google_login()
     {
         require_once FCPATH . 'vendor/autoload.php';

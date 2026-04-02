@@ -40,21 +40,6 @@ class Employee extends CI_Controller
                     'lastlogin' => $info[0]->seemp_lastlogin,
                 );
                 $this->session->set_userdata($sdata);
-
-                // // 1. Update the Main Employee Table (Last Login Date) if it's a new day
-                // if (trim($info[0]->seemp_lastlogin) != date('Y-m-d')) {
-                //     $this->EmployeeModel->update_employee_table_with_today(
-                //         $info[0]->seemp_id,
-                //         $info[0]->seemp_email,
-                //         $info[0]->seseq_id,
-                //         $info[0]->seemp_status
-                //     );
-                // }
-
-                // 2. ALWAYS call the Log update. 
-                // The Model will be responsible for not overwriting the first login time.
-                // $this->EmployeeModel->update_log_current_state($info[0]->seemp_id, 'login');
-
                 redirect('Employee/Dashboard');
             } else {
                 $this->session->sess_destroy();
@@ -89,30 +74,28 @@ class Employee extends CI_Controller
             $this->load->view('errors/invalidAccessView');
         }
     }
-
     function AdminDashboard()
     {
         if (
             $this->session->has_userdata('empid') &&
-            $this->session->has_userdata('email') &&
-            $this->session->has_userdata('branch') &&
             $this->session->userdata('status') == 'active' &&
             $this->session->userdata('accesslevel') == 'ADMIN'
         ) {
-            $this->load->model('EmployeeDetailsModel');
+            $this->load->model('EmployeeModel');
             $this->load->model('jobApplicationModel');
             $this->load->model('ProjectsModel');
+            $this->load->model('AttendanceModel');
+            $this->load->model('EmployeeDetailsModel');
+            $this->load->model('RequestsModel');
 
             // Fetch employee details from seempdetails table
             $empdetails = $this->EmployeeDetailsModel->get_this_employee_details();
 
-
             if (!empty($empdetails) && !empty($empdetails[0]->seempd_name)) {
                 $this->session->set_userdata('empname', $empdetails[0]->seempd_name);
             } else {
-                $this->session->set_userdata('empname', 'Administrator'); // Fallback only if name is missing
+                $this->session->set_userdata('empname', 'Administrator');
             }
-
 
             if (!empty($empdetails) && !empty($empdetails[0]->seempd_jobaid)) {
                 $emp_appliction_details = $this->jobApplicationModel->get_applicant_info($empdetails[0]->seempd_jobaid);
@@ -121,10 +104,32 @@ class Employee extends CI_Controller
                 }
             }
 
+            // ── Payroll counts for current month ──
+            // Uses the same model methods as salaryManagement() so counts always match.
+            $payroll_employees   = $this->EmployeeModel->get_payroll_employees();
+            $monthly_slips_now   = $this->EmployeeModel->get_slips_by_month(date('Y-m'));
+            $total_staff_count   = $this->EmployeeModel->get_total_staff_count();
+            $processed_count_now = count($monthly_slips_now);   // Slips Generated  (PAID)
+            $pending_count_now   = count($payroll_employees) - $processed_count_now; // Pending (UNPAID)
+
+            // Fetch dashboard statistics
             $data = array(
-                'projpending' => count($this->ProjectsModel->getPendingProjects()),
-                'projrunning' => count($this->ProjectsModel->getRunningProjects()),
-                'projcompleted' => count($this->ProjectsModel->getCompletedProjects()),
+                'projpending'      => count($this->ProjectsModel->getPendingProjects()),
+                'projrunning'      => count($this->ProjectsModel->getRunningProjects()),
+                'projcompleted'    => count($this->ProjectsModel->getCompletedProjects()),
+                'total_staff'      => $total_staff_count,
+                'present_today'    => $this->AttendanceModel->get_present_today_count(),
+                'new_apps'         => $this->jobApplicationModel->get_new_applicants_count(),
+
+                'recent_projs'     => $this->ProjectsModel->getRecentProjects(5),
+                'deadlines'        => $this->ProjectsModel->getUpcomingDeadlines(3),
+
+                // Payroll summary
+                'processed_count'  => $processed_count_now,
+                'pending_count'    => $pending_count_now,
+
+                // Leave requests
+                'leave_pending'    => $this->RequestsModel->get_pending_requests_count(),
             );
 
             $this->load->view('employee/adminHeaderView');
@@ -135,10 +140,8 @@ class Employee extends CI_Controller
         }
     }
 
+
     // AdminEmployee
-    /**
-     * HR & ADMIN: View Employee Directory
-     */
     public function viewEmployee()
     {
         $access = $this->session->userdata('accesslevel');
@@ -1645,7 +1648,7 @@ class Employee extends CI_Controller
             $data['pending_count'] = $data['total_emps'] - $data['processed_count'];
 
             // 5. Load appropriate header based on role
-            $header = ($this->session->userdata('accesslevel') == 'HR') ? 'hr/hrHeaderView' : 'admin/adminHeaderView';
+            $header = ($this->session->userdata('accesslevel') == 'HR') ? 'hr/hrHeaderView' : 'employee/adminHeaderView';
             $this->load->view($header);
             $this->load->view('hr/hrSalaryManagementView', $data);
         } else {
@@ -1653,39 +1656,39 @@ class Employee extends CI_Controller
         }
     }
 
-   public function generatePayslip()
-{
-    if ($this->session->userdata('accesslevel') == 'HR' || $this->session->userdata('accesslevel') == 'ADMIN') {
-        $post = $this->input->post();
+    public function generatePayslip()
+    {
+        if ($this->session->userdata('accesslevel') == 'HR' || $this->session->userdata('accesslevel') == 'ADMIN') {
+            $post = $this->input->post();
 
-        if ($post) {
-            $this->load->model('EmployeeModel');
-            $data = $this->security->xss_clean($post);
+            if ($post) {
+                $this->load->model('EmployeeModel');
+                $data = $this->security->xss_clean($post);
 
-            // Calculate Totals Securely on Server
-            $data['gross_earnings'] = $data['basic'] + $data['transport'] + $data['incentive'] + $data['overtime'] + $data['round_off'];
-            $data['total_deductions'] = $data['pf'] + $data['esi_deduction'] + $data['prof_tax'] + $data['late_fees'] + $data['loss_of_pay'] + $data['loan'];
-            $data['net_salary'] = $data['gross_earnings'] - $data['total_deductions'];
+                // Calculate Totals Securely on Server
+                $data['gross_earnings'] = $data['basic'] + $data['transport'] + $data['incentive'] + $data['overtime'] + $data['round_off'];
+                $data['total_deductions'] = $data['pf'] + $data['esi_deduction'] + $data['prof_tax'] + $data['late_fees'] + $data['loss_of_pay'] + $data['loan'];
+                $data['net_salary'] = $data['gross_earnings'] - $data['total_deductions'];
 
-            $db_data = $data;
-            unset($db_data['emp_name'], $db_data['designation'], $db_data['branch']);
+                $db_data = $data;
+                unset($db_data['emp_name'], $db_data['designation'], $db_data['branch']);
 
-            if ($this->EmployeeModel->slip_already_exists($db_data['seemp_id'], $db_data['slip_month'])) {
-                $this->session->set_flashdata('error', 'Slip for this month already exists.');
-                redirect('Employee/salaryManagement');
+                if ($this->EmployeeModel->slip_already_exists($db_data['seemp_id'], $db_data['slip_month'])) {
+                    $this->session->set_flashdata('error', 'Slip for this month already exists.');
+                    redirect('Employee/salaryManagement');
+                }
+
+                // --- THE FIX STARTS HERE ---
+                $this->db->insert('sesalaryslips', $db_data);
+
+                // Capture the ID of the row just inserted
+                $data['slip_id'] = $this->db->insert_id();
+                // --- THE FIX ENDS HERE ---
+
+                $this->load->view('hr/salarySlipPrintView', $data);
             }
-
-            // --- THE FIX STARTS HERE ---
-            $this->db->insert('sesalaryslips', $db_data);
-            
-            // Capture the ID of the row just inserted
-            $data['slip_id'] = $this->db->insert_id(); 
-            // --- THE FIX ENDS HERE ---
-
-            $this->load->view('hr/salarySlipPrintView', $data);
+        } else {
+            redirect('Employee/Login');
         }
-    } else {
-        redirect('Employee/Login');
     }
-}
 }

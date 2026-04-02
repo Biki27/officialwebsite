@@ -1,3 +1,52 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+/* ── DESIGN TOKENS (available to ALL pages) ── */
+:root {
+  --brand-900: #1e0f5e;
+  --brand-700: #3d22b5;
+  --brand-600: #461bb9;
+  --brand-500: #6b37e4;
+  --brand-400: #8b5cf6;
+  --brand-300: #a78bfa;
+  --brand-200: #c4b5fd;
+  --brand-100: #ede9fe;
+  --brand-50:  #f5f3ff;
+
+  --blue-600:  #2563eb;
+  --blue-500:  #3b82f6;
+  --blue-100:  #dbeafe;
+
+  --success:    #059669;
+  --success-bg: #d1fae5;
+  --warning:    #d97706;
+  --warning-bg: #fef3c7;
+  --danger:     #dc2626;
+  --danger-bg:  #fee2e2;
+  --info:       #0284c7;
+  --info-bg:    #e0f2fe;
+
+  --page-bg:   #f1f4fd;
+  --surface:   #ffffff;
+  --surface-2: #f8f9fe;
+  --border:    #e5e7f4;
+  --border-md: #d1d5f0;
+
+  --text-primary:   #1a1340;
+  --text-secondary: #4b5280;
+  --text-muted:     #7c82aa;
+
+  --shadow-xs: 0 1px 3px rgba(70,27,185,.06), 0 1px 2px rgba(0,0,0,.04);
+  --shadow-sm: 0 4px 12px rgba(70,27,185,.08), 0 1px 3px rgba(0,0,0,.06);
+  --shadow-md: 0 8px 24px rgba(70,27,185,.12), 0 2px 6px rgba(0,0,0,.06);
+  --shadow-lg: 0 16px 40px rgba(70,27,185,.15), 0 4px 12px rgba(0,0,0,.08);
+
+  --r-sm:  8px;
+  --r-md:  12px;
+  --r-lg:  16px;
+  --r-xl:  20px;
+
+  --sidebar-w: 260px;
+}
 * {
 	margin: 0;
 	padding: 0;

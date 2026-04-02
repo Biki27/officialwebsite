@@ -1,178 +1,184 @@
-:root {
-    --primary-gradient: radial-gradient(circle at 0% 50%, #461bb9 20%, #973ce0 50%, #6b37e4 100%);
-    --primary: #461bb9;
-    --secondary: #973ce0;
-    --accent: #6b37e4;
-    --glass-bg: rgba(255, 255, 255, 0.95);
-    --glass-border: rgba(255, 255, 255, 0.25);
-    --shadow-light: 0 10px 40px rgba(0, 0, 0, 0.15);
-    --shadow-hover: 0 20px 50px rgba(0, 0, 0, 0.2);
+/* adminEmployeeRegistrationView.css — Enterprise Light Theme */
+
+.main-content {
+  margin-left: var(--sidebar-w, 260px);
+  padding: 32px 36px;
+  min-height: 100vh;
 }
 
+/* ── Form Container ── */
 .employee-container {
-    max-width: 900px;
-    margin: 0 auto 30px 500px; /* Note: The 500px left margin implies this sits next to a sidebar */
-    background: var(--glass-bg);
-    backdrop-filter: blur(20px);
-    border-radius: 24px;
-    border: 1px solid var(--glass-border);
-    box-shadow: var(--shadow-light);
-    overflow: hidden;
+  max-width: 860px;
+  margin: 0 auto 30px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
 }
 
+/* ── Header ── */
 .form-header {
-    background: linear-gradient(135deg, var(--primary), var(--secondary));
-    color: white;
-    padding: 2.5rem 3rem;
-    text-align: center;
+  background: linear-gradient(135deg, var(--brand-600), var(--brand-500));
+  color: #fff;
+  padding: 1.75rem 2.5rem;
+  text-align: center;
 }
 
 .form-title {
-    font-size: 2rem;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin-bottom: 4px;
+  letter-spacing: -.3px;
 }
 
+.form-subtitle { opacity: .8; font-size: .875rem; margin: 0; }
+
+/* ── Form Body ── */
 .form-body {
-    padding: 3rem;
-    /* --- CHANGE 1: Remove extra right padding previously used for the floating photo --- */
-    padding-right: 3rem; 
-    position: relative;
+  padding: 2.5rem;
 }
 
-.form-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 2rem;
-}
-
-.form-label {
-    font-weight: 600;
-    color: #374151;
-    margin-bottom: 0.75rem;
-    font-size: 0.85rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-}
-
-.required { color: #ef4444; }
-
-.form-control, .form-select {
-    height: 48px;
-    border: 2px solid #e5e7eb;
-    border-radius: 12px;
-    font-size: 0.95rem;
-    transition: all 0.3s ease;
-}
-
-.form-control:focus, .form-select:focus {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(70, 27, 185, 0.1);
-    outline: none;
-}
-
-/* Photo Section - Top Middle */
+/* Photo block — centered above grid */
 .photo-section {
-    /* --- CHANGE 2: Switch from Absolute to Relative/Static positioning --- */
-    position: relative; 
-    top: 0;
-    right: 0;
-    
-    /* --- CHANGE 3: Use margin auto to center horizontally, add bottom margin for spacing --- */
-    margin: 0 auto 2.5rem auto; 
-    
-    width: 110px;
-    height: 125px;
-    border-radius: 16px;
-    overflow: hidden;
-    border: 4px solid white;
-    box-shadow: var(--shadow-hover);
-    z-index: 10;
-    display: flex;
-    flex-direction: column;
+  position: relative;
+  margin: 0 auto 2rem;
+  width: 110px; height: 125px;
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  border: 3px solid var(--surface);
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
 }
 
 .photo-preview {
-    width: 100%;
-    height: 80%;
-    object-fit: cover;
-    cursor: pointer;
+  width: 100%; height: 80%;
+  object-fit: cover;
+  cursor: pointer;
 }
 
 .photo-btn {
-    height: 20%;
-    background: var(--primary);
-    color: white;
-    border: none;
-    font-size: 0.7rem;
-    font-weight: 600;
-    cursor: pointer;
-    text-transform: uppercase;
+  height: 20%;
+  background: linear-gradient(135deg, var(--brand-600), var(--brand-500));
+  color: #fff; border: none;
+  font-size: .68rem; font-weight: 700;
+  cursor: pointer; text-transform: uppercase;
+  font-family: inherit;
 }
 
-/* CV Upload Box */
+/* ── Form Grid ── */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%,260px), 1fr));
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+/* ── Labels ── */
+.form-label {
+  font-size: .72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .7px;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.required { color: var(--danger); }
+
+.optional::after {
+  content: " (Optional)";
+  font-size: .7rem;
+  color: var(--text-muted);
+  text-transform: none;
+  font-weight: 400;
+}
+
+/* ── Inputs ── */
+.form-control,
+.form-select {
+  height: 44px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-md);
+  font-family: inherit;
+  font-size: .875rem;
+  color: var(--text-primary);
+  background: var(--surface-2);
+  transition: border-color .2s, box-shadow .2s;
+}
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--brand-400);
+  box-shadow: 0 0 0 3px rgba(70,27,185,.1);
+  background: var(--surface);
+  outline: none;
+}
+
+/* CV Upload */
 .cv-upload {
-    padding: 1.5rem;
-    border: 2px dashed #d1d5db;
-    border-radius: 12px;
-    text-align: center;
-    background: #f8fafc;
-    cursor: pointer;
-    transition: all 0.3s ease;
+  padding: 1.25rem;
+  border: 2px dashed var(--border-md);
+  border-radius: var(--r-md);
+  text-align: center;
+  background: var(--surface-2);
+  cursor: pointer;
+  transition: all .25s ease;
+  color: var(--text-muted);
+  font-size: .875rem;
 }
-
 .cv-upload:hover {
-    border-color: var(--primary);
-    background: rgba(70, 27, 185, 0.05);
+  border-color: var(--brand-400);
+  background: var(--brand-50);
+  color: var(--brand-600);
 }
 
-/* Action Buttons Container */
+/* ── Action Buttons ── */
 .action-buttons {
-    display: flex;
-    gap: 1.5rem;
-    justify-content: center;
-    margin-top: 2.5rem;
-    padding-top: 2rem;
-    border-top: 1px solid #e5e7eb;
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  padding-top: 1.75rem;
+  border-top: 1px solid var(--border);
 }
 
 .btn {
-    padding: 0.8rem 2rem;
-    border-radius: 12px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    transition: all 0.3s ease;
+  padding: .8rem 1.75rem;
+  border-radius: var(--r-md);
+  font-family: inherit;
+  font-size: .875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  cursor: pointer;
+  transition: all .25s ease;
+  border: none;
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, var(--primary), var(--secondary));
-    color: white;
-    box-shadow: 0 8px 20px rgba(70, 27, 185, 0.2);
+  background: linear-gradient(135deg, var(--brand-600), var(--brand-500));
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(70,27,185,.3);
 }
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(70,27,185,.4); color:#fff; }
 
 .btn-secondary {
-    background: #f3f4f6;
-    color: #4b5563;
+  background: var(--surface-2);
+  color: var(--text-secondary);
+  border: 1.5px solid var(--border);
 }
+.btn-secondary:hover { background: var(--border); color: var(--text-primary); }
 
-.btn-secondary:hover { background: #e5e7eb; }
-
-.optional::after {
-    content: " (Optional)";
-    font-size: 0.75rem;
-    color: #9ca3af;
-    text-transform: none;
-}
-
-/* Mobile Responsive Adjustments */
+/* Responsive */
 @media (max-width: 992px) {
-    /* --- CHANGE 4: Clean up mobile query since photo is already centered --- */
-    .employee-container { margin: 20px auto; width: 95%; }
-    .form-body { padding: 2rem; }
-    .photo-section { margin: 0 auto 2rem; }
+  .main-content { margin-left: 0; padding: 76px 16px 26px; }
+  .employee-container { margin: 0 auto; width: 97%; }
+}
+@media (max-width: 768px) {
+  .form-body { padding: 1.5rem; }
+  .action-buttons { flex-direction: column; }
+  .action-buttons .btn { width: 100%; }
 }

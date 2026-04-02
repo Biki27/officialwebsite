@@ -50,9 +50,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             <a class="nav-link" href="<?= base_url() ?>Employee/viewProjects">
                 <i class="fas fa-project-diagram"></i> Projects
             </a>
-            <a class="nav-link" href="<?= base_url() ?>Employee/RegisterEmployee">
+            <!-- <a class="nav-link" href="<?= base_url() ?>Employee/RegisterEmployee">
                 <i class="fas fa-user-plus"></i> Add Employee
-            </a>
+            </a> -->
             <a class="nav-link" href="<?= base_url() ?>Employee/addProjectPage">
                 <i class="fas fa-plus"></i> Add Project
             </a>
