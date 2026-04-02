@@ -1,0 +1,159 @@
+/* --- Global Variables & Optimizations --- */
+:root {
+    --primary-gradient: linear-gradient(135deg, #461bb9, #973ce0);
+    --row-hover: #fbfaff;
+    --sidebar-width: 260px;
+}
+
+/* --- Layout Structure & Overlap Fix --- */
+.main-content {
+    margin-left: var(--sidebar-width);
+    padding: 2.5rem;
+    min-height: 100vh;
+    transition: all 0.4s ease;
+    background: transparent; 
+}
+
+/* Responsive fix for Mobile & Tablet */
+@media (max-width: 992px) {
+    .main-content {
+        margin-left: 0;
+        padding: 1.5rem;
+        padding-top: 90px !important; /* Prevents overlap with the mobile toggle */
+    }
+}
+
+/* --- Table Container (Card Depth) --- */
+.table-container {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 0;
+    margin-top: 1.5rem;
+    overflow: hidden;
+    border: none;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* --- Table Headers --- */
+.table thead th {
+    background-color: #fcfaff;
+    color: #888ea8;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 1.25rem 1rem;
+    border: none;
+    border-bottom: 2px solid #f1f2f3;
+}
+
+/* --- Table Rows & Cells --- */
+.table tbody tr {
+    border-bottom: 1px solid #f1f2f3;
+    transition: background-color 0.2s ease; /* Changed from 'all' to prevent jitter */
+}
+
+.table tbody tr:hover {
+    background-color: #f6f3ff !important;  
+    
+}
+.table td {
+    padding: 1.25rem 1rem;
+    border: none;
+    vertical-align: middle;
+}
+
+/* --- Badges & Urgency Colors --- */
+.badge {
+    padding: 0.6em 1.2em;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.text-urgent { color: #dc3545 !important; font-weight: 700; }
+.text-hot    { color: #fd7e14 !important; font-weight: 700; }
+.text-new    { color: #0d6efd !important; font-weight: 700; }
+
+/* --- Action Buttons (Edit/Delete) --- */
+.action-btn {
+    width: 36px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1.5px solid currentColor;
+}
+
+.action-btn:hover {
+    background-color:  rgb(110, 116, 119);
+    /* color: white !important; */
+
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+}
+
+/* Post New Job Button Hover */
+.action-btn-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.15) !important;
+}
+
+/* --- Modal Polish --- */
+.modal-content {
+    border: none;
+    border-radius: 24px;
+    overflow: hidden;
+}
+
+.modal-header {
+    background: #fcfaff;
+    border-bottom: 1px solid #f1f2f3;
+}
+
+.form-control, .form-select {
+    border: 1.5px solid #eee;
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    border-radius: 12px !important;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #973ce0;
+    box-shadow: 0 0 0 0.25rem rgba(151, 60, 224, 0.15);
+}
+/* Quick View Link Styling */
+.job-title-link {
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.job-title-link:hover {
+    color: #973ce0 !important; /* Matches your brand purple */
+    text-decoration: underline !important;
+}
+
+.footer {
+	position: fixed;
+	bottom: 0;
+	left: 260px;
+	right: 0;
+	text-align: center;
+	color: rgba(255, 255, 255, 0.85);
+	font-size: 0.9rem;
+	padding: 15px;
+	background: rgba(70, 27, 185, 0.1);
+	backdrop-filter: blur(10px);
+}
+
+@media (max-width: 768px) {
+	 
+	.main-content {
+		margin-left: 0;
+	}
+	.footer {
+		left: 0;
+	}
+	 
+}
