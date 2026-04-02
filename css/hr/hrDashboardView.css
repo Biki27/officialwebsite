@@ -126,12 +126,83 @@
 .s-badge { margin-left: auto; background: var(--brand-600); color: #fff; border-radius: 20px; padding: 2px 8px; font-size: .67rem; font-weight: 700; }
 .modal-field-label { display: block; font-size: .7rem; text-transform: uppercase; letter-spacing: .6px; font-weight: 700; color: var(--text-muted); margin-bottom: 4px; }
 
-@media (max-width: 1400px) { .kpi-grid { grid-template-columns: repeat(3, 1fr); } }
+/* @media (max-width: 1400px) { .kpi-grid { grid-template-columns: repeat(3, 1fr); } }
 @media (max-width: 1200px) { .dash-grid { grid-template-columns: 1fr; } }
 @media (max-width: 992px) {
   .main-content { margin-left: 0; padding: 80px 16px 26px; }
   .kpi-grid { grid-template-columns: repeat(2, 1fr); }
   .dash-grid { grid-template-columns: 1fr; }
   .page-header h1 { font-size: 1.3rem; }
-}
+} */
 @media (max-width: 480px) { .kpi-grid { grid-template-columns: 1fr; } }
+/* ══ MOBILE OPTIMIZATIONS (< 768px) ══ */
+@media (max-width: 768px) {
+  /* 1. Stack the Page Header Buttons */
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+  .page-header .btn-brand {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* 2. Fix the Attendance Donut alignment */
+  .att-donut-wrap {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .att-stat {
+    width: 100%;
+  }
+
+  /* 3. Transform Table into Mobile Cards */
+  .se-table thead {
+    display: none; /* Hide standard headers */
+  }
+  .se-table tbody tr {
+    display: block;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    margin-bottom: 16px;
+  }
+  /* Style individual "rows" within the card */
+  .se-table tbody td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    text-align: right;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .se-table tbody td:last-child {
+    border-bottom: none;
+    background: rgba(0, 0, 0, 0.02); /* Slight highlight for actions */
+    border-radius: 0 0 var(--r-md) var(--r-md);
+  }
+  
+  /* Inject the column name using the data-label we added */
+  .se-table tbody td::before {
+    content: attr(data-label);
+    font-weight: 800;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    text-align: left;
+    flex-basis: 35%;
+    margin-right: 15px;
+  }
+}
+
+/* Very small screens */
+@media (max-width: 400px) {
+  .reminder-banner {
+    flex-direction: column;
+    text-align: center;
+  }
+  .reminder-link {
+    margin: 10px auto 0;
+  }
+}

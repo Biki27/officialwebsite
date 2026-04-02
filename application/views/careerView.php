@@ -214,7 +214,7 @@
                                     <h5 class="author-name">Mr. Surajit Das</h5>
                                     <span class="author-title">FOUNDER</span>
                                 </div>
-                                <div class="author-accent-line"></div>
+                                <!-- <div class="author-accent-line"></div> -->
                             </div>
                         </div>
                     </div>

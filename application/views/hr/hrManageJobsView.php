@@ -34,8 +34,8 @@
 
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
-                    <h2 class="text-white fw-bold mb-0">Job Management</h2>
-                    <p class="text-white-50 small mb-0 mt-1">Manage and monitor active career opportunities</p>
+                    <h2 class="text-black fw-bold mb-0">Job Management</h2>
+                    <p class="text-black-50 small mb-0 mt-1">Manage and monitor active career opportunities</p>
                 </div>
                 <button class="btn btn-light rounded-pill px-4 py-2 fw-bold shadow-sm action-btn-hover text-primary"
                     data-bs-toggle="modal" data-bs-target="#jobModal">

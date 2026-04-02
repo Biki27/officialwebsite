@@ -34,8 +34,8 @@
 
             <div class="page-header d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
                 <div>
-                    <h2 class="text-white fw-bold mb-1">Applicant Management</h2>
-                    <p class="text-white-50 small mb-0">Review candidates and schedule interviews</p>
+                    <h2 class="text-black fw-bold mb-1">Applicant Management</h2>
+                    <p class="text-black-50 small mb-0">Review candidates and schedule interviews</p>
                 </div>
 
                 <div class="d-flex flex-wrap gap-2 align-items-center">

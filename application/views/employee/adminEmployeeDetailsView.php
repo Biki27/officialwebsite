@@ -98,13 +98,18 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         </div>
 
                         <!--  COVER LETTER AS TEXT -->
-                        <div class="info-item" style="grid-column: 1 / -1;">
+                        <!-- <div class="info-item" style="grid-column: 1 / -1;">
                             <div class="info-label">Cover Letter</div>
                             <div class="info-value">
                                 <div class="cover-letter-text">
                                     <?= $info->sejoba_coverletter	 ?>
                                 </div>
                             </div>
+                        </div> -->
+                        <!-- Projects details -->
+                         <div class="info-item" style="grid-column: 1 / -1;">
+                            <div class="info-label">Projects</div>
+                            <div class="info-value"><?= $info->seempd_project?></div>
                         </div>
 
                        

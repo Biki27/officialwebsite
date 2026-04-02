@@ -223,43 +223,49 @@ if (!empty($recent_leaves)) {
                 $bal_color = ($taken >= 18) ? 'var(--danger)' : (($taken >= 14) ? 'var(--warning)' : 'var(--success)');
               ?>
               <tr class="<?= (isset($leave['seemrq_reminder']) && $leave['seemrq_reminder'] == 1) ? 'row-reminder' : '' ?>">
-                <td>
-                  <div class="fw-bold" style="color:var(--text-primary)">
-                    <?= htmlspecialchars($leave['seempd_name'] ?? 'N/A') ?>
-                    <?php if (isset($leave['seemrq_reminder']) && $leave['seemrq_reminder'] == 1): ?>
-                      <span class="badge-pending ms-1" style="font-size:.62rem">REMINDER</span>
-                    <?php endif; ?>
+                <td data-label="Employee">
+                  <div class="text-md-start text-end">
+                      <div class="fw-bold" style="color:var(--text-primary)">
+                        <?= htmlspecialchars($leave['seempd_name'] ?? 'N/A') ?>
+                        <?php if (isset($leave['seemrq_reminder']) && $leave['seemrq_reminder'] == 1): ?>
+                          <span class="badge-pending ms-1" style="font-size:.62rem">REMINDER</span>
+                        <?php endif; ?>
+                      </div>
+                      <small style="color:var(--text-muted)"><?= $leave['seemrq_empid'] ?? '' ?></small>
                   </div>
-                  <small style="color:var(--text-muted)"><?= $leave['seemrq_empid'] ?? '' ?></small>
                 </td>
-                <td>
-                  <span class="badge-info"><?= htmlspecialchars($leave['seemrq_reason'] ?? '') ?></span>
-                  <?php if (!empty($leave['seemrq_summary'])): ?>
-                  <br><a href="javascript:void(0)" class="detail-link mt-1"
-                    onclick="showLeaveDetails(
-                      '<?= htmlspecialchars($leave['seempd_name'] ?? '', ENT_QUOTES) ?>',
-                      '<?= htmlspecialchars($leave['seemrq_reason'] ?? '', ENT_QUOTES) ?>',
-                      '<?= htmlspecialchars(json_encode($leave['seemrq_summary']), ENT_QUOTES) ?>',
-                      '<?= $leave['seemrq_fromdate'] ?? '' ?>',
-                      '<?= $leave['seemrq_todate'] ?? '' ?>')">
-                    <i class="fas fa-info-circle me-1"></i>Details
-                  </a>
-                  <?php endif; ?>
+                <td data-label="Reason">
+                  <div class="text-md-start text-end">
+                      <span class="badge-info"><?= htmlspecialchars($leave['seemrq_reason'] ?? '') ?></span>
+                      <?php if (!empty($leave['seemrq_summary'])): ?>
+                      <br><a href="javascript:void(0)" class="detail-link mt-1"
+                        onclick="showLeaveDetails(
+                          '<?= htmlspecialchars($leave['seempd_name'] ?? '', ENT_QUOTES) ?>',
+                          '<?= htmlspecialchars($leave['seemrq_reason'] ?? '', ENT_QUOTES) ?>',
+                          '<?= htmlspecialchars(json_encode($leave['seemrq_summary']), ENT_QUOTES) ?>',
+                          '<?= $leave['seemrq_fromdate'] ?? '' ?>',
+                          '<?= $leave['seemrq_todate'] ?? '' ?>')">
+                        <i class="fas fa-info-circle me-1"></i>Details
+                      </a>
+                      <?php endif; ?>
+                  </div>
                 </td>
-                <td style="color:var(--text-secondary);font-size:.82rem">
+                <td data-label="Applied On" style="color:var(--text-secondary);font-size:.82rem">
                   <?= isset($leave['seemrq_reqdate']) ? date('d M Y', strtotime($leave['seemrq_reqdate'])) : '—' ?>
                 </td>
-                <td style="font-weight:700;color:var(--brand-600)">
+                <td data-label="Duration" style="font-weight:700;color:var(--brand-600)">
                   <?= $leave['seemrq_days'] ?? 0 ?> Days
                 </td>
-                <td>
-                  <div style="font-size:.78rem;color:var(--text-muted);margin-bottom:4px"><?= $taken ?> / 20 used</div>
-                  <div class="kpi-track" style="width:90px">
-                    <div class="kpi-track-fill" style="width:<?= min(100, ($taken/20)*100) ?>%;background:<?= $bal_color ?>"></div>
+                <td data-label="Leave Balance">
+                  <div class="d-flex flex-column align-items-md-start align-items-end">
+                      <div style="font-size:.78rem;color:var(--text-muted);margin-bottom:4px"><?= $taken ?> / 20 used</div>
+                      <div class="kpi-track m-0" style="width:90px">
+                        <div class="kpi-track-fill" style="width:<?= min(100, ($taken/20)*100) ?>%;background:<?= $bal_color ?>"></div>
+                      </div>
                   </div>
                 </td>
-                <td class="text-center">
-                  <div class="d-flex justify-content-center gap-2">
+                <td data-label="Actions" class="text-center">
+                  <div class="d-flex justify-content-md-center justify-content-end gap-2 w-100">
                     <a href="<?= base_url('Employee/updateLeaveStatus/' . ($leave['seemrq_id'] ?? '') . '/approved') ?>"
                        class="action-approve" title="Approve">
                       <i class="fas fa-check"></i>
