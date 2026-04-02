@@ -138,6 +138,10 @@
                                 <div class="pe-2">
                                     <h4 class="job-title mb-1"><?= $job->sejob_jobtitle ?></h4>
                                     <div class="job-company text-primary fw-bold">Suropriyo Enterprise</div>
+                                    <div class="job-location text-muted">
+                                        <i class="fas fa-map-marker-alt me-1"></i>
+                                        <?= $job->sejob_address?>
+                                    </div>
                                 </div>
                                 <span class="badge rounded-pill <?php
                                         if ($job->sejob_urgency == 'new')
@@ -159,6 +163,11 @@
                                     <span class="text-success fw-bold">upto</span>
                                     <?= number_format($job->sejob_salary) ?>/mo
                                 </span>
+                                <span class="premium-badge-soft">
+                                    <span class="text-success fw-bold">upto</span>
+                                    <?= number_format($job->sejob_experience) ?> yrs experience
+                                </span>
+
                                 <span class="premium-badge-soft">
                                     <i class="fas fa-clock text-info"></i> <?= ucfirst($job->sejob_workinghours) ?>
                                 </span>
