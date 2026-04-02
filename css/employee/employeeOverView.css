@@ -1,30 +1,68 @@
-body {
+/* --- Global Layout Fix --- */
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    /* Master Fix: Stops the whole page from sliding left/right */
+    overflow-x: hidden; 
     background: linear-gradient(135deg, #eef2ff, #f8fafc);
     font-family: "Inter", sans-serif;
 }
 
-/* Cards */
+/* --- Card: Remove the 'Jumping' effect --- */
 .card {
-    transition: all 0.3s ease;
+    transition: box-shadow 0.3s ease;
+    border: none;
+    border-radius: 15px;
+    background: #fff;
 }
 
 .card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    /* REMOVED: transform: translateY(-6px) */
+    /* This stops the card from moving up/down and shifting the layout */
+    transform: none !important; 
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
 }
 
-/* Progress bar */
+/* --- Table Scrolling (Scrolls ONLY the table, not the page) --- */
+.table-responsive {
+    display: block;
+    width: 100%;
+    overflow-x: auto; /* Enables horizontal scroll for the table only */
+    -webkit-overflow-scrolling: touch;
+    border-radius: 0 0 15px 15px;
+}
+
+/* Prevent table rows from scaling or shifting */
+.table tbody tr:hover {
+    transform: none !important;
+    background-color: #f8fafc !important;
+}
+
+/* Force table data to stay in one line to trigger the scrollbar correctly */
+.table td, .table th {
+    white-space: nowrap; 
+    vertical-align: middle;
+    padding: 12px 15px;
+}
+
+/* --- Progress Bar --- */
 .progress {
     border-radius: 10px;
+    height: 8px;
 }
 
-/* Text styling */
+/* --- Text Styling --- */
 .text-muted {
     font-size: 0.85rem;
 }
 
-/* Mobile */
+/* --- Mobile Fixes --- */
 @media (max-width: 768px) {
+    .container {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
     .card {
         text-align: center;
     }

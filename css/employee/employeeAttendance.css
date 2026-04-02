@@ -1,42 +1,61 @@
-/* Background */
-body {
+/* --- Global Layout Stability --- */
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    /* Master Fix: Stops the whole page from sliding left/right */
+    overflow-x: hidden; 
     background: linear-gradient(135deg, #eef2ff, #f8fafc);
     font-family: "Inter", sans-serif;
 }
 
-/* Card Animation */
+/* --- Card: Remove the 'Jumping' move --- */
 .card {
-    transition: all 0.3s ease;
+    transition: box-shadow 0.3s ease;
+    border: none;
+    border-radius: 15px;
+    background: #fff;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
 }
 
 .card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    /* STOPS THE UP/DOWN JUMP */
+    transform: none !important; 
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08) !important;
 }
 
-/* Table Styling */
-.table th {
-    font-size: 0.85rem;
-    text-transform: uppercase;
-    color: #6b7280;
+/* --- Table Scrolling (Left/Right Only for Table) --- */
+.table-responsive {
+    display: block;
+    width: 100%;
+    overflow-x: auto; /* Enables horizontal scroll for table only */
+    -webkit-overflow-scrolling: touch;
+    border-radius: 0 0 15px 15px;
 }
 
-.table td {
-    font-size: 0.95rem;
-}
-
-/* Row Hover */
+/* Row Hover: Color change only, no scaling */
 .table tbody tr {
-    transition: all 0.2s ease;
+    transition: background-color 0.2s ease;
 }
 
 .table tbody tr:hover {
-    background: #f9fafb;
-    transform: scale(1.01);
+    transform: none !important;
+    background-color: #f8fafc !important;
 }
 
-/* Input Styling */
-.form-control:focus {
-    box-shadow: none;
-    border-color: #7c3aed;
+/* Force text to stay in one line to trigger internal scrollbar */
+.table td, .table th {
+    white-space: nowrap; 
+    vertical-align: middle;
+    padding: 15px;
+}
+
+/* Header Text styling */
+.table thead th {
+    background-color: #f8fafc;
+    color: #6b7280;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid #eef2ff;
 }

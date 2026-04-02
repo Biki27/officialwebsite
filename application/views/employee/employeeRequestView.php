@@ -13,6 +13,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="<?= base_url('css/employee/employeeRequestView.css') ?>">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 </head>
 
 <body>
@@ -121,7 +123,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     <table class="table align-middle table-hover">
                         <thead class="table-light">
                             <tr>
-                                <th>ID</th>
+                                <th>REQ.ID</th>
                                 <th>Reason</th>
                                 <th>Summary</th>
                                 <th>Applied On</th>
@@ -146,7 +148,18 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                     </td>
 
                                     <td class="text-muted">
-                                        <?= $req->seemrq_summary ?>
+                                        <!-- 1. The truncated container -->
+                                        <div class="summary-text"
+                                            style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; max-width: 200px; pointer-events: none;">
+                                            <?= $req->seemrq_summary ?>
+                                        </div>
+
+                                        <!-- 2. The link (Moved outside the div and secured with json_encode) -->
+                                        <a href="javascript:void(0)" class="text-primary small text-decoration-none"
+                                            style="position: relative; z-index: 10;"
+                                            onclick='viewFullSummary(<?= htmlspecialchars(json_encode($req->seemrq_summary), ENT_QUOTES, 'UTF-8') ?>)'>
+                                            view details
+                                        </a>
                                     </td>
 
                                     <td><?= $req->seemrq_reqdate ?></td>
@@ -207,6 +220,24 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         </div>
 
     </div>
+    <div class="modal fade" id="summaryModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold text-primary">
+                        <i class="fas fa-file-alt me-2"></i>Full Request Summary
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <p id="fullSummaryText" class="text-dark" style="white-space: pre-wrap; line-height: 1.6;"></p>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <?php if (validation_errors() && trim(validation_errors()) != ''): ?>
         <script>
@@ -243,8 +274,27 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 }
             });
         }
+        function viewFullSummary(text) {
+            // 1. If text is a JSON string (with quotes), parse it clean
+            let cleanText = text;
+            try {
+                if (typeof text === 'string' && text.startsWith('"') && text.endsWith('"')) {
+                    cleanText = JSON.parse(text);
+                }
+            } catch (e) {
+                cleanText = text;
+            }
+
+            // 2. Inject text
+            document.getElementById('fullSummaryText').innerText = cleanText;
+
+            // 3. Trigger Modal (Bootstrap 5 way)
+            var modalElement = document.getElementById('summaryModal');
+            var myModal = bootstrap.Modal.getOrCreateInstance(modalElement);
+            myModal.show();
+        }
     </script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 </body>
 
 </html>
