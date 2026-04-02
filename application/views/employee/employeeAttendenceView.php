@@ -117,7 +117,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
                                     <?php else: ?>
                                         <span class="badge rounded-pill px-3 py-2 text-muted"
                                             style="background: #f3f4f6; color:#6b7280; border: 1px solid #e5e7eb;">
-                                            <i class="fas fa-user-clock me-1"></i>Working...
+                                            <i class="fas fa-user-clock me-1"></i>Not Logged Out
                                         </span>
                                     <?php endif; ?>
                                 </td>
