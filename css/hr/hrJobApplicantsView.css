@@ -1,181 +1,167 @@
-/* --- Global Layout & Sidebar Offset --- */
+/* ============================================================
+   SUROPRIYO ENTERPRISE — HR JOB APPLICANTS VIEW
+   Targets classes used in hrJobApplicantsView.php exactly.
+   ============================================================ */
+
+/* ══ LAYOUT ══ */
 .main-content {
-    margin-left: 260px;
-    padding: 2.5rem;
-    min-height: 100vh;
-    transition: all 0.4s ease;
-    background: transparent;
+  margin-left: 260px;
+  padding: 32px 36px;
+  min-height: 100vh;
+  animation: pageIn .4s ease both;
 }
+@keyframes pageIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
 
-@media (max-width: 992px) {
-    .main-content {
-        margin-left: 0;
-        padding: 1.5rem;
-        padding-top: 90px !important; /* Space for mobile toggle */
-    }
-}
+/* ══ PAGE HEADER ══ */
+.page-header { margin-bottom: 26px; }
+.page-header h2 { font-size: 1.55rem; font-weight: 800; color: #fff; letter-spacing: -.4px; margin-bottom: 4px; }
+.page-header p  { font-size: .82rem; color: rgba(255,255,255,.6); margin: 0; }
 
-/* --- Header & Search Bar --- */
-.page-header {
-    margin-bottom: 2rem;
-}
-
+/* ══ SEARCH + FILTER BAR ══ */
 .search-container {
-    background: white;
-    border-radius: 50px;
-    padding: 5px;
-    display: flex;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
-    border: 1.5px solid #eee;
-    transition: all 0.3s ease;
-    max-width: 500px;
+  display: flex; align-items: center;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-xs);
+  transition: border-color .2s, box-shadow .2s;
+  height: 42px;
 }
-
 .search-container:focus-within {
-    border-color: #973ce0;
-    box-shadow: 0 10px 30px rgba(151, 60, 224, 0.15);
+  border-color: var(--brand-400);
+  box-shadow: 0 0 0 3px rgba(70,27,185,.1);
 }
-
 .search-bar {
-    flex: 1;
-    border: none;
-    padding: 12px 20px;
-    background: transparent;
-    outline: none;
-    font-size: 0.95rem;
+  flex: 1; border: none; padding: 0 14px;
+  background: transparent; outline: none;
+  font-family: inherit; font-size: .875rem; color: var(--text-primary);
 }
-
 .search-btn {
-    background: linear-gradient(135deg, #461bb9, #973ce0);
-    color: white;
-    border: none;
-    border-radius: 50px;
-    padding: 0 25px;
-    transition: transform 0.2s;
+  height: 100%; padding: 0 16px;
+  background: linear-gradient(135deg, var(--brand-600), var(--brand-500));
+  color: #fff; border: none; cursor: pointer;
+  font-size: .85rem; transition: opacity .2s;
 }
+.search-btn:hover { opacity: .9; }
 
-.search-btn:hover {
-    transform: scale(1.05);
+#statusFilter {
+  height: 42px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 0 14px;
+  font-family: inherit; font-size: .875rem;
+  color: var(--text-primary); background: var(--surface);
+  box-shadow: var(--shadow-xs); cursor: pointer; outline: none;
+  transition: border-color .2s;
 }
+#statusFilter:focus { border-color: var(--brand-400); }
 
-/* --- Table Container (Card Depth) --- */
+/* ══ TABLE CONTAINER ══ */
 .table-container {
-    background: #ffffff;
-    border-radius: 20px;
-    padding: 0;
-    overflow: hidden;
-    border: none;
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08) !important;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
 }
 
 .table thead th {
-    background-color: #fcfaff;
-    color: #888ea8;
-    text-transform: uppercase;
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 1px;
-    padding: 1.25rem 1rem;
-    border-bottom: 2px solid #f1f2f3;
+  background: linear-gradient(135deg, var(--brand-600), var(--brand-500));
+  color: #fff; font-size: .72rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .8px;
+  padding: 14px 16px; border: none;
 }
+.table tbody tr { border-bottom: 1px solid var(--border); transition: background .18s ease; }
+.table tbody tr:hover { background: var(--brand-50) !important; }
+.table tbody td { padding: 13px 16px; border: none; vertical-align: middle; color: var(--text-secondary); font-size: .875rem; }
 
-.table tbody tr {
-    border-bottom: 1px solid #f1f2f3;
-    transition: background-color 0.2s ease;
-}
-
-.table tbody tr:hover {
-    background-color: #fbfaff !important;
-}
-
-.table td {
-    padding: 1.25rem 1rem;
-    vertical-align: middle;
-    font-size: 0.95rem;
-}
-
-/* --- Badges --- */
+/* ══ STATUS BADGES ══ */
 .badge-status {
-    padding: 0.5em 1em;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    border-radius: 50px;
-    font-size: 0.75rem;
-    text-transform: capitalize;
+  display: inline-flex; align-items: center;
+  border-radius: 20px; padding: 3px 11px;
+  font-size: .72rem; font-weight: 700; letter-spacing: .2px;
+  text-transform: capitalize;
 }
-.bg-pending { background-color: #fff3cd; color: #856404; }
-.bg-selected { background-color: #d4edda; color: #155724; }
-.bg-rejected { background-color: #f8d7da; color: #721c24; }
+.bg-pending  { background: var(--warning-bg); color: var(--warning); border: 1px solid #fcd34d; }
+.bg-selected { background: var(--success-bg); color: var(--success); border: 1px solid #a7f3d0; }
+.bg-rejected { background: var(--danger-bg);  color: var(--danger);  border: 1px solid #fca5a5; }
+.bg-primary.text-white { background: var(--brand-600) !important; color: #fff !important; border: none; }
+.bg-info.text-dark { background: var(--info-bg) !important; color: var(--info) !important; border: 1px solid #7dd3fc; }
 
-/* --- Action Buttons --- */
+/* ══ VIEW BUTTON ══ */
 .view-btn {
-    background: #f8f9fa;
-    color: #461bb9;
-    border: 1px solid #e9ecef;
-    padding: 8px 16px;
-    border-radius: 50px;
-    font-weight: 600;
-    font-size: 0.85rem;
-    transition: all 0.3s ease;
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--surface-2); color: var(--brand-600);
+  border: 1.5px solid var(--border); border-radius: var(--r-md);
+  padding: 6px 14px; font-family: inherit; font-size: .82rem; font-weight: 600;
+  cursor: pointer; transition: all .22s ease;
 }
-
 .view-btn:hover {
-    background: linear-gradient(135deg, #461bb9, #973ce0);
-    color: white;
-    border-color: transparent;
-    box-shadow: 0 5px 15px rgba(70, 27, 185, 0.3);
+  background: linear-gradient(135deg, var(--brand-600), var(--brand-500));
+  color: #fff; border-color: transparent;
+  box-shadow: 0 4px 14px rgba(70,27,185,.3);
 }
 
-/* --- Modal Polish & Tabs --- */
-.modal-content {
-    border-radius: 24px;
-    border: none;
-    overflow: hidden;
-}
+/* ══ MODAL ══ */
+.modal-content { border: none; border-radius: var(--r-xl); overflow: hidden; box-shadow: var(--shadow-lg); }
+.modal-header  { border-bottom: 1px solid var(--border); padding: 20px 24px; background: var(--surface); }
+.modal-body    { padding: 24px; }
+.modal-footer  { border-top: 1px solid var(--border); padding: 16px 24px; }
 
 .info-label {
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    color: #888ea8;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    margin-bottom: 4px;
+  font-size: .7rem; text-transform: uppercase; letter-spacing: .6px;
+  font-weight: 700; color: var(--text-muted); margin-bottom: 4px; display: block;
 }
-
 .info-value {
-    font-size: 1rem;
-    color: #333;
-    font-weight: 500;
-    margin-bottom: 1rem;
+  font-size: .9rem; color: var(--text-primary); font-weight: 500; margin-bottom: 14px;
 }
 
-.form-select, .form-control {
-    border-radius: 12px;
-    padding: 12px 15px;
-    border: 1.5px solid #eee;
-}
-
-.form-select:focus, .form-control:focus {
-    border-color: #973ce0;
-    box-shadow: 0 0 0 3px rgba(151, 60, 224, 0.1);
-}
-
+/* Nav pills in modal */
 .nav-pills .nav-link {
-    color: #888ea8;
-    font-weight: 600;
-    font-size: 0.9rem;
-    transition: all 0.3s;
+  color: var(--text-muted) !important;
+  font-weight: 600; font-size: .85rem;
+  border-radius: var(--r-md) !important;
+  padding: 8px 18px !important;
+  transition: all .22s ease;
+  margin-bottom: 0;
+  transform: none !important;
+  background: var(--surface-2);
+  border: 1.5px solid var(--border) !important;
+}
+.nav-pills .nav-link:hover { background: var(--brand-50) !important; color: var(--brand-600) !important; border-color: var(--brand-200) !important; }
+.nav-pills .nav-link.active { background: linear-gradient(135deg, var(--brand-600), var(--brand-500)) !important; color: #fff !important; border-color: transparent !important; box-shadow: 0 4px 14px rgba(70,27,185,.3); }
+.nav-pills .nav-link.active i { color: rgba(255,255,255,.85); }
+
+/* Form controls in modal */
+.form-control, .form-select {
+  border: 1.5px solid var(--border) !important;
+  border-radius: var(--r-md) !important;
+  padding: 10px 14px !important;
+  font-family: inherit; font-size: .875rem;
+  color: var(--text-primary);
+  background: var(--surface-2) !important;
+  transition: border-color .2s, box-shadow .2s;
+}
+.form-control:focus, .form-select:focus {
+  border-color: var(--brand-400) !important;
+  box-shadow: 0 0 0 3px rgba(70,27,185,.1) !important;
+  background: var(--surface) !important;
 }
 
-.nav-pills .nav-link.active {
-    background-color: #461bb9;
-    color: white;
-    box-shadow: 0 4px 10px rgba(70, 27, 185, 0.2);
-}
+/* Interview grid */
+.interview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 
-/* Interview Grid inside Modal */
-.interview-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
+/* ══ RESPONSIVE ══ */
+@media (max-width: 992px) {
+  .main-content { margin-left: 0; padding: 80px 16px 26px; }
+  .page-header  { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .table-container { overflow-x: auto; }
+  table { min-width: 700px; }
+  .interview-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 576px) {
+  .main-content { padding-top: 72px; }
+  .page-header h2 { font-size: 1.3rem; }
+  .search-container { max-width: 100%; }
 }

@@ -1,6 +1,12 @@
+/* ============================================================
+   SUROPRIYO ENTERPRISE — HR GLOBAL STYLESHEET
+   Loaded on every HR page via hrHeaderView.php
+   Mirrors adminHeaderView.css exactly.
+   ============================================================ */
+
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
-/* ── DESIGN TOKENS (available to ALL pages) ── */
+/* ── DESIGN TOKENS ── */
 :root {
   --brand-900: #1e0f5e;
   --brand-700: #3d22b5;
@@ -47,207 +53,174 @@
 
   --sidebar-w: 260px;
 }
-* {
-	margin: 0;
-	padding: 0;
-	box-sizing: border-box;
-}
 
+/* ── RESET ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── GLOBAL BODY ── */
 body {
-	background: radial-gradient(
-		circle at 0% 50%,
-		#461bb9 20%,
-		#973ce0 50%,
-		#6b37e4 100%
-	);
-	font-family: "Inter", sans-serif;
-	min-height: 100vh;
-	color: #333;
-	overflow-x: hidden;
+  background: var(--page-bg);
+  background-image:
+    radial-gradient(circle at 95% 5%,  rgba(107,55,228,.07) 0%, transparent 45%),
+    radial-gradient(circle at 5%  95%, rgba(37,99,235,.05)  0%, transparent 45%);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
 }
-.sidebar {
-	width: 260px; /* Keep this constant */
-	background: rgba(255, 255, 255, 0.97);
-	height: 100vh;
-	position: fixed;
-	top: 0;
-	left: 0;
-	width: 260px;
-	padding: 25px 20px;
-	box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
-	backdrop-filter: blur(10px);
-	z-index: 1000;
 
-	overflow-y: auto;
-	scrollbar-width: thin;
+/* ══════════════════════════════════════
+   SIDEBAR
+══════════════════════════════════════ */
+.sidebar {
+  background: var(--surface);
+  height: 100vh;
+  position: fixed;
+  top: 0; left: 0;
+  width: var(--sidebar-w);
+  padding: 22px 16px;
+  border-right: 1px solid var(--border);
+  box-shadow: 4px 0 20px rgba(70,27,185,.07);
+  z-index: 1000;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--brand-200) transparent;
 }
 
 .logo {
-	text-align: center;
-	margin-bottom: 40px;
-	padding-bottom: 20px;
-	border-bottom: 2px solid rgba(70, 27, 185, 0.1);
+  text-align: center;
+  margin-bottom: 32px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
 }
 
 .logo-icon {
-	width: 70px;
-	height: 70px;
-	background: linear-gradient(135deg, #461bb9, #973ce0);
-	border-radius: 20px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	color: white;
-	font-size: 1.8rem;
-	margin: 0 auto 15px;
-	box-shadow: 0 8px 25px rgba(70, 27, 185, 0.3);
+  width: 56px; height: 56px;
+  background: linear-gradient(135deg, var(--brand-600), var(--brand-500));
+  border-radius: 16px;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 1.5rem;
+  margin: 0 auto 12px;
+  box-shadow: 0 8px 20px rgba(70,27,185,.3);
 }
 
 .logo h5 {
-	color: #461bb9;
-	font-weight: 700;
-	font-size: 1.3rem;
-	margin: 0;
+  color: var(--brand-600);
+  font-weight: 800;
+  font-size: 1.05rem;
+  letter-spacing: -.2px;
+  margin: 0;
 }
 
+/* ── NAV LINKS ── */
 .nav-link {
-	display: flex;
-	align-items: center;
-	color: #6b37e4 !important;
-	font-weight: 500;
-	margin-bottom: 12px;
-	padding: 12px 20px !important;
-	border-radius: 12px;
-	text-decoration: none;
-	transition: all 0.3s ease;
-	font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  color: var(--text-secondary) !important;
+  font-weight: 600;
+  font-size: .875rem;
+  margin-bottom: 4px;
+  padding: 10px 14px !important;
+  border-radius: var(--r-md);
+  text-decoration: none;
+  transition: all .22s ease;
+  gap: 10px;
 }
 
 .nav-link i {
-	margin-right: 12px;
-	width: 20px;
-	text-align: center;
+  width: 18px; text-align: center;
+  font-size: .9rem;
+  color: var(--brand-400);
+  flex-shrink: 0;
+  transition: color .22s ease;
 }
 
-.nav-link:hover {
-	background: linear-gradient(135deg, #461bb9, #973ce0);
-	color: white !important;
-	transform: translateX(8px);
-	box-shadow: 0 8px 25px rgba(70, 27, 185, 0.3);
+.nav-link:hover,
+.nav-link.active {
+  background: var(--brand-50);
+  color: var(--brand-700) !important;
+  transform: translateX(4px);
+  box-shadow: var(--shadow-xs);
+}
+
+.nav-link:hover i,
+.nav-link.active i {
+  color: var(--brand-600);
 }
 
 .nav-link.active {
-	background: linear-gradient(135deg, #461bb9, #973ce0);
-	color: white !important;
+  background: linear-gradient(135deg, var(--brand-600), var(--brand-500));
+  color: #fff !important;
+  transform: none;
+  box-shadow: 0 4px 14px rgba(70,27,185,.3);
 }
 
+.nav-link.active i { color: rgba(255,255,255,.85); }
+
+/* ── FOOTER BAR ── */
 .footer {
-	position: fixed;
-	bottom: 0;
-	left: 260px;
-	right: 0;
-	text-align: center;
-	color: rgba(255, 255, 255, 0.85);
-	font-size: 0.9rem;
-	padding: 15px;
-	background: rgba(70, 27, 185, 0.1);
-	backdrop-filter: blur(10px);
+  position: fixed;
+  bottom: 0;
+  left: var(--sidebar-w);
+  right: 0;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: .8rem;
+  padding: 12px;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  z-index: 50;
 }
 
-/* RESPONSIVE SIDEBAR */
+/* ══════════════════════════════════════
+   MOBILE TOGGLE
+══════════════════════════════════════ */
+.mobile-toggle {
+  position: fixed;
+  top: 14px; left: 14px;
+  z-index: 1100;
+  width: 42px; height: 42px;
+  border-radius: var(--r-md);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--brand-600);
+  font-size: 1.2rem;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  display: none;
+  align-items: center; justify-content: center;
+  transition: all .3s ease;
+}
+.mobile-toggle:hover { box-shadow: var(--shadow-md); transform: scale(1.05); }
+
+.sidebar-overlay {
+  position: fixed; inset: 0;
+  background: rgba(26,19,64,.45);
+  z-index: 999;
+  opacity: 0; visibility: hidden;
+  transition: all .35s ease;
+}
+.sidebar-overlay.active { opacity: 1; visibility: visible; }
+
+/* ══════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════ */
 @media (max-width: 992px) {
-	.sidebar {
-		width: 280px;
-		transform: translateX(-100%);
-		transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-	}
-
-	.sidebar.active {
-		transform: translateX(0);
-	}
-
-	.main-content,
-	.footer {
-		margin-left: 0;
-		transition: margin-left 0.4s ease;
-	}
+  .sidebar {
+    width: 270px;
+    transform: translateX(-100%);
+    transition: transform .38s cubic-bezier(.25,.46,.45,.94);
+  }
+  .sidebar.active { transform: translateX(0); }
+  .sidebar.active ~ .mobile-toggle,
+  .sidebar.active + .mobile-toggle {
+    opacity: 0; visibility: hidden; pointer-events: none;
+  }
+  .mobile-toggle { display: flex; }
+  .main-content, .footer { margin-left: 0 !important; }
+  .footer { left: 0; }
 }
 
 @media (min-width: 993px) {
-	.sidebar {
-		transform: translateX(0) !important;
-	}
+  .sidebar { transform: translateX(0) !important; }
 }
-
-/* MOBILE OVERLAY */
-.sidebar-overlay {
-	position: fixed;
-	top: 0;
-	left: 0;
-	width: 100vw;
-	height: 100vh;
-	background: rgba(0, 0, 0, 0.5);
-	z-index: 999;
-	opacity: 0;
-	visibility: hidden;
-	transition: all 0.4s ease;
-}
-
-.sidebar-overlay.active {
-	opacity: 1;
-	visibility: visible;
-}
-/* Ensure the toggle button has a smooth fade and hide when sidebar is open */
-.sidebar.active ~ .mobile-toggle {
-    opacity: 0 !important;
-    visibility: hidden !important;
-    pointer-events: none;
-}
-
-.mobile-toggle {
-    display: none; /* Hidden by default on desktop */
-    position: fixed;
-    top: 15px; 
-    left: 15px; 
-    z-index: 1100;
-    width: 45px;
-    height: 45px;
-    border-radius: 10px;
-    background: rgba(255, 255, 255, 0.95);
-    border: none;
-    color: #461bb9;
-    font-size: 1.2rem;
-    cursor: pointer;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-    backdrop-filter: blur(20px);
-    transition: all 0.3s ease;
-    align-items: center;
-    justify-content: center;
-}
-
-@media (max-width: 992px) {
-    .mobile-toggle {
-        display: flex; /* Show only on mobile/tablet */
-    }
-}
-.mobile-toggle:hover {
-	transform: scale(1.05);
-	box-shadow: 0 18px 45px rgba(70, 27, 185, 0.4);
-}
-/* Add this to ensure any content following the header is pushed */
-.main-content {
-    margin-left: 260px; /* Must match sidebar width */
-    width: calc(100% - 260px);
-    padding: 2.5rem;
-    min-height: 100vh;
-    transition: all 0.4s ease;
-}
-
-@media (max-width: 992px) {
-    .main-content {
-        margin-left: 0;
-        width: 100%;
-        padding-top: 80px; /* Prevents overlap with mobile toggle */
-    }
-}
- 

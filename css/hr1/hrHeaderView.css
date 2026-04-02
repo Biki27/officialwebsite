@@ -1,0 +1,253 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+/* ── DESIGN TOKENS (available to ALL pages) ── */
+:root {
+  --brand-900: #1e0f5e;
+  --brand-700: #3d22b5;
+  --brand-600: #461bb9;
+  --brand-500: #6b37e4;
+  --brand-400: #8b5cf6;
+  --brand-300: #a78bfa;
+  --brand-200: #c4b5fd;
+  --brand-100: #ede9fe;
+  --brand-50:  #f5f3ff;
+
+  --blue-600:  #2563eb;
+  --blue-500:  #3b82f6;
+  --blue-100:  #dbeafe;
+
+  --success:    #059669;
+  --success-bg: #d1fae5;
+  --warning:    #d97706;
+  --warning-bg: #fef3c7;
+  --danger:     #dc2626;
+  --danger-bg:  #fee2e2;
+  --info:       #0284c7;
+  --info-bg:    #e0f2fe;
+
+  --page-bg:   #f1f4fd;
+  --surface:   #ffffff;
+  --surface-2: #f8f9fe;
+  --border:    #e5e7f4;
+  --border-md: #d1d5f0;
+
+  --text-primary:   #1a1340;
+  --text-secondary: #4b5280;
+  --text-muted:     #7c82aa;
+
+  --shadow-xs: 0 1px 3px rgba(70,27,185,.06), 0 1px 2px rgba(0,0,0,.04);
+  --shadow-sm: 0 4px 12px rgba(70,27,185,.08), 0 1px 3px rgba(0,0,0,.06);
+  --shadow-md: 0 8px 24px rgba(70,27,185,.12), 0 2px 6px rgba(0,0,0,.06);
+  --shadow-lg: 0 16px 40px rgba(70,27,185,.15), 0 4px 12px rgba(0,0,0,.08);
+
+  --r-sm:  8px;
+  --r-md:  12px;
+  --r-lg:  16px;
+  --r-xl:  20px;
+
+  --sidebar-w: 260px;
+}
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+
+body {
+	background: radial-gradient(
+		circle at 0% 50%,
+		#461bb9 20%,
+		#973ce0 50%,
+		#6b37e4 100%
+	);
+	font-family: "Inter", sans-serif;
+	min-height: 100vh;
+	color: #333;
+	overflow-x: hidden;
+}
+.sidebar {
+	width: 260px; /* Keep this constant */
+	background: rgba(255, 255, 255, 0.97);
+	height: 100vh;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 260px;
+	padding: 25px 20px;
+	box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
+	backdrop-filter: blur(10px);
+	z-index: 1000;
+
+	overflow-y: auto;
+	scrollbar-width: thin;
+}
+
+.logo {
+	text-align: center;
+	margin-bottom: 40px;
+	padding-bottom: 20px;
+	border-bottom: 2px solid rgba(70, 27, 185, 0.1);
+}
+
+.logo-icon {
+	width: 70px;
+	height: 70px;
+	background: linear-gradient(135deg, #461bb9, #973ce0);
+	border-radius: 20px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: white;
+	font-size: 1.8rem;
+	margin: 0 auto 15px;
+	box-shadow: 0 8px 25px rgba(70, 27, 185, 0.3);
+}
+
+.logo h5 {
+	color: #461bb9;
+	font-weight: 700;
+	font-size: 1.3rem;
+	margin: 0;
+}
+
+.nav-link {
+	display: flex;
+	align-items: center;
+	color: #6b37e4 !important;
+	font-weight: 500;
+	margin-bottom: 12px;
+	padding: 12px 20px !important;
+	border-radius: 12px;
+	text-decoration: none;
+	transition: all 0.3s ease;
+	font-size: 0.95rem;
+}
+
+.nav-link i {
+	margin-right: 12px;
+	width: 20px;
+	text-align: center;
+}
+
+.nav-link:hover {
+	background: linear-gradient(135deg, #461bb9, #973ce0);
+	color: white !important;
+	transform: translateX(8px);
+	box-shadow: 0 8px 25px rgba(70, 27, 185, 0.3);
+}
+
+.nav-link.active {
+	background: linear-gradient(135deg, #461bb9, #973ce0);
+	color: white !important;
+}
+
+.footer {
+	position: fixed;
+	bottom: 0;
+	left: 260px;
+	right: 0;
+	text-align: center;
+	color: rgba(255, 255, 255, 0.85);
+	font-size: 0.9rem;
+	padding: 15px;
+	background: rgba(70, 27, 185, 0.1);
+	backdrop-filter: blur(10px);
+}
+
+/* RESPONSIVE SIDEBAR */
+@media (max-width: 992px) {
+	.sidebar {
+		width: 280px;
+		transform: translateX(-100%);
+		transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+	}
+
+	.sidebar.active {
+		transform: translateX(0);
+	}
+
+	.main-content,
+	.footer {
+		margin-left: 0;
+		transition: margin-left 0.4s ease;
+	}
+}
+
+@media (min-width: 993px) {
+	.sidebar {
+		transform: translateX(0) !important;
+	}
+}
+
+/* MOBILE OVERLAY */
+.sidebar-overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	background: rgba(0, 0, 0, 0.5);
+	z-index: 999;
+	opacity: 0;
+	visibility: hidden;
+	transition: all 0.4s ease;
+}
+
+.sidebar-overlay.active {
+	opacity: 1;
+	visibility: visible;
+}
+/* Ensure the toggle button has a smooth fade and hide when sidebar is open */
+.sidebar.active ~ .mobile-toggle {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none;
+}
+
+.mobile-toggle {
+    display: none; /* Hidden by default on desktop */
+    position: fixed;
+    top: 15px; 
+    left: 15px; 
+    z-index: 1100;
+    width: 45px;
+    height: 45px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.95);
+    border: none;
+    color: #461bb9;
+    font-size: 1.2rem;
+    cursor: pointer;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    backdrop-filter: blur(20px);
+    transition: all 0.3s ease;
+    align-items: center;
+    justify-content: center;
+}
+
+@media (max-width: 992px) {
+    .mobile-toggle {
+        display: flex; /* Show only on mobile/tablet */
+    }
+}
+.mobile-toggle:hover {
+	transform: scale(1.05);
+	box-shadow: 0 18px 45px rgba(70, 27, 185, 0.4);
+}
+/* Add this to ensure any content following the header is pushed */
+.main-content {
+    margin-left: 260px; /* Must match sidebar width */
+    width: calc(100% - 260px);
+    padding: 2.5rem;
+    min-height: 100vh;
+    transition: all 0.4s ease;
+}
+
+@media (max-width: 992px) {
+    .main-content {
+        margin-left: 0;
+        width: 100%;
+        padding-top: 80px; /* Prevents overlap with mobile toggle */
+    }
+}
+ 
