@@ -1611,7 +1611,6 @@ class Employee extends CI_Controller
             echo json_encode(['status' => 'error', 'message' => $error_msg]);
         }
     }
-    // Load Salary Management View
     // Load Salary Management View (HR/ADMIN Portal)
     public function salaryManagement()
     {
@@ -1621,8 +1620,6 @@ class Employee extends CI_Controller
             // 1. Determine which month HR is looking at (Defaults to current month)
             $selected_month = $this->input->get('month') ? $this->input->get('month') : date('Y-m');
 
-            // 2. Fetch all active employees
-            // $data['employees'] = $this->EmployeeModel->getallemployee_with_joins();
             // 2. Fetch all active regular employees (No Admin/HR)
             $data['employees'] = $this->EmployeeModel->get_payroll_employees();
 
@@ -1644,47 +1641,39 @@ class Employee extends CI_Controller
         }
     }
 
-    // Process and Print the Slip
-    // Process and Print the Slip
-    public function generatePayslip()
-    {
-        if ($this->session->userdata('accesslevel') == 'HR' || $this->session->userdata('accesslevel') == 'ADMIN') {
-            $post = $this->input->post();
+   public function generatePayslip()
+{
+    if ($this->session->userdata('accesslevel') == 'HR' || $this->session->userdata('accesslevel') == 'ADMIN') {
+        $post = $this->input->post();
 
-            if ($post) {
-                // 1. LOAD THE MODEL FIRST!
-                $this->load->model('EmployeeModel');
+        if ($post) {
+            $this->load->model('EmployeeModel');
+            $data = $this->security->xss_clean($post);
 
-                $data = $this->security->xss_clean($post);
+            // Calculate Totals Securely on Server
+            $data['gross_earnings'] = $data['basic'] + $data['transport'] + $data['incentive'] + $data['overtime'] + $data['round_off'];
+            $data['total_deductions'] = $data['pf'] + $data['esi_deduction'] + $data['prof_tax'] + $data['late_fees'] + $data['loss_of_pay'] + $data['loan'];
+            $data['net_salary'] = $data['gross_earnings'] - $data['total_deductions'];
 
-                // Calculate Totals Securely on Server
-                $data['gross_earnings'] = $data['basic'] + $data['transport'] + $data['incentive'] + $data['overtime'] + $data['round_off'];
-                $data['total_deductions'] = $data['pf'] + $data['esi_deduction'] + $data['prof_tax'] + $data['late_fees'] + $data['loss_of_pay'] + $data['loan'];
-                $data['net_salary'] = $data['gross_earnings'] - $data['total_deductions'];
+            $db_data = $data;
+            unset($db_data['emp_name'], $db_data['designation'], $db_data['branch']);
 
-                // Copy the data array specifically for the database
-                $db_data = $data;
-
-                // Remove the fields that belong on the PDF but NOT in the database
-                unset($db_data['emp_name']);
-                unset($db_data['designation']);
-                unset($db_data['branch']);
-
-                // Now this will work because the model is loaded!
-                if ($this->EmployeeModel->slip_already_exists($db_data['seemp_id'], $db_data['slip_month'])) {
-                    // Show error, don't insert
-                    $this->session->set_flashdata('error', 'Slip for this month already exists.');
-                    redirect('Employee/salaryManagement');
-                }
-
-                // Save the clean data to the Database
-                $this->db->insert('sesalaryslips', $db_data);
-
-                // Load the Print Template View using the original $data (which still has the name/designation for printing)
-                $this->load->view('hr/salarySlipPrintView', $data);
+            if ($this->EmployeeModel->slip_already_exists($db_data['seemp_id'], $db_data['slip_month'])) {
+                $this->session->set_flashdata('error', 'Slip for this month already exists.');
+                redirect('Employee/salaryManagement');
             }
-        } else {
-            redirect('Employee/Login');
+
+            // --- THE FIX STARTS HERE ---
+            $this->db->insert('sesalaryslips', $db_data);
+            
+            // Capture the ID of the row just inserted
+            $data['slip_id'] = $this->db->insert_id(); 
+            // --- THE FIX ENDS HERE ---
+
+            $this->load->view('hr/salarySlipPrintView', $data);
         }
+    } else {
+        redirect('Employee/Login');
     }
+}
 }

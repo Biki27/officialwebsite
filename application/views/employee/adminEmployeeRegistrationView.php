@@ -1,10 +1,6 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 ?>
-
-
-
-
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="<?= base_url('css/admin/adminEmployeeRegistrationView.css') ?>">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -175,10 +171,44 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                             value="<?= isset($emp) ? $emp->seempd_increment : '' ?>">
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Project</label>
-                        <input type="text" class="form-control" id="project" name="project"
-                            value="<?= isset($emp) ? $emp->seempd_project : '' ?>">
+                        <label class="form-label">Projects</label>
+                        
+                        <div id="projectContainer">
+                            <?php
+                                // If editing an employee, split their existing projects into an array
+                                $existing_projects = [];
+                                if (isset($emp) && !empty($emp->seempd_project)) {
+                                    $existing_projects = explode(',', $emp->seempd_project);
+                                } else {
+                                    $existing_projects = ['']; // Start with at least one empty box
+                                }
+                            ?>
+                            
+                            <?php foreach($existing_projects as $index => $proj): ?>
+                                <div class="input-group mb-2 project-input-group d-flex align-items-stretch">
+                                    
+                                    <span class="input-group-text bg-light border-end-0 text-muted" style="border-top-right-radius: 0; border-bottom-right-radius: 0;">
+                                        <i class="fas fa-list-ul"></i>
+                                    </span>
+                                    
+                                    <input type="text" class="form-control project-input border-start-0" value="<?= trim($proj) ?>" placeholder="e.g. Website Redesign" style="box-shadow: none;">
+                                    
+                                    <?php if($index == 0): ?>
+                                        <button class="btn btn-outline-primary px-3" type="button" onclick="addProjectField()" title="Add another project" style="border-top-left-radius: 0; border-bottom-left-radius: 0;">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    <?php else: ?>
+                                        <button class="btn btn-outline-danger px-3" type="button" onclick="removeProjectField(this)" title="Remove project" style="border-top-left-radius: 0; border-bottom-left-radius: 0;">
+                                            <i class="fas fa-minus"></i>
+                                        </button>
+                                    <?php endif; ?>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                        
+                        <input type="hidden" id="finalProjectString" name="project" value="<?= isset($emp) ? htmlspecialchars($emp->seempd_project, ENT_QUOTES) : '' ?>">
                     </div>
+
                     <div class="form-group">
                         <label class="form-label">
                             Login Password
@@ -221,6 +251,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 
     <script>
+
         let hasCustomPhoto = <?= (isset($emp) && !empty($emp->seempd_img)) ? 'true' : 'false' ?>;
 
         // Dynamic Avatar live update when typing name
@@ -275,6 +306,17 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         // Form Submission Logic
         document.getElementById('employeeForm').addEventListener('submit', function (e) {
             e.preventDefault(); // ALWAYS stop the form first for SweetAlert
+            
+            // --- NEW: Combine all project inputs into the hidden field ---
+            let allProjects = [];
+            document.querySelectorAll('.project-input').forEach(function(input) {
+                if (input.value.trim() !== '') {
+                    allProjects.push(input.value.trim());
+                }
+            });
+            document.getElementById('finalProjectString').value = allProjects.join(', ');
+
+
             const empid = document.getElementById('empid').value.trim();
             const empName = document.getElementById('empName').value.trim();
             const email = document.getElementById('email').value.trim();
@@ -352,6 +394,30 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 icon.classList.add("fa-eye");
             }
         }
+
+        // Function to dynamically add a new project input field
+        function addProjectField() {
+            const container = document.getElementById('projectContainer');
+            const div = document.createElement('div');
+            // Matching the new flexbox alignment
+            div.className = 'input-group mb-2 project-input-group d-flex align-items-stretch';
+            div.innerHTML = `
+                <span class="input-group-text bg-light border-end-0 text-muted" style="border-top-right-radius: 0; border-bottom-right-radius: 0;">
+                    <i class="fas fa-list-ul"></i>
+                </span>
+                <input type="text" class="form-control project-input border-start-0" placeholder="e.g. New App Development" style="box-shadow: none;">
+                <button class="btn btn-outline-danger px-3" type="button" onclick="removeProjectField(this)" title="Remove project" style="border-top-left-radius: 0; border-bottom-left-radius: 0;">
+                    <i class="fas fa-minus"></i>
+                </button>
+            `;
+            container.appendChild(div);
+        }
+
+        // Function to remove a specific project input field
+        function removeProjectField(button) {
+            button.closest('.project-input-group').remove();
+        }
+
     </script>
 </body>
 
