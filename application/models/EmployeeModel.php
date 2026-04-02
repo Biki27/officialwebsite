@@ -212,13 +212,18 @@ class EmployeeModel extends CI_Model
         }
         return ['code' => 1];
     }
+    // Get All Attendance Records for an Employee DESCENDING (Newest First)
     function get_all_loginlog_for_thisempid()
     {
         $empid = $this->session->userdata('empid');
-        $res = $this->db->from('seemployeeloginlog')->where('seemp_logempid =', $empid)->get()->result();
+        $res = $this->db->from('seemployeeloginlog')
+            ->where('seemp_logempid =', $empid)
+            ->order_by('seemp_logdate', 'DESC') // Sort by date (Newest first)
+            ->order_by('seemp_logintime', 'DESC') // Sort by time (Latest login first)
+            ->get()
+            ->result();
         return $res;
     }
-
     // for add employee from admin panel
     public function register_employee($employee, $details)
     {
@@ -416,14 +421,14 @@ class EmployeeModel extends CI_Model
             ->get('sesalaryslips')
             ->row_array(); // Return as array to easily pass to the print view
     }
-     
-  // Check if a salary slip already exists for an employee for a specific month
+
+    // Check if a salary slip already exists for an employee for a specific month
     public function slip_already_exists($empid, $month)
     {
         $this->db->where('seemp_id', $empid);
         $this->db->where('slip_month', $month);
         $query = $this->db->get('sesalaryslips');
-        
+
         // Returns true if a slip is found, false if it is safe to generate
         return $query->num_rows() > 0;
     }

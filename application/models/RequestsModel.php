@@ -141,6 +141,12 @@ class RequestsModel extends CI_Model
         return $this->db->get()->result();
     }
 
+    // add code for setting reminder for pending requests (for HR dashboard)
+    public function set_reminder($id)
+    {
+        $this->db->where('seemrq_id', $id);
+        return $this->db->update('seemprequests', ['seemrq_reminder' => 1]);
+    }
 }
 
 ?>

@@ -14,6 +14,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="<?= base_url() ?>css/hr/hrDashboardView.css">
 </head>
+
 <body>
     <div class="main-content">
         <div class="container-fluid">
@@ -23,7 +24,25 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     <i class="fas fa-calendar-alt me-2"></i> <?= date('l, d M Y') ?>
                 </div>
             </div>
+            <?php
+            $reminder_count = 0;
+            foreach ($recent_leaves as $l) {
+                if ($l['seemrq_reminder'] == 1)
+                    $reminder_count++;
+            }
 
+            if ($reminder_count > 0): ?>
+                <div class="alert alert-warning border-0 shadow-sm rounded-4 mb-4 d-flex align-items-center">
+                    <div class="bg-warning text-white rounded-circle p-2 me-3">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <div>
+                        <h6 class="mb-0 fw-bold text-dark">Action Required</h6>
+                        <small class="text-dark">You have <strong><?= $reminder_count ?></strong> leave requests with
+                            pending reminders.</small>
+                    </div>
+                </div>
+            <?php endif; ?>
             <div class="row g-4 mb-4">
                 <div class="col-md-3">
                     <div class="stat-card">
@@ -74,7 +93,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                         <th class="text-center">Action</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <!-- <tbody>
                                     <?php if (!empty($recent_leaves)): ?>
                                         <?php foreach ($recent_leaves as $leave): ?>
                                             <?php
@@ -82,6 +101,18 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                             $remaining = 20 - $taken;
                                             $status_color = ($taken >= 18) ? 'text-danger' : 'text-success';
                                             ?>
+                                            <tr class="<?= ($leave['seemrq_reminder'] == 1) ? 'table-warning' : '' ?>">
+                                                <td>
+                                                    <div class="fw-bold text-dark">
+                                                        <?= $leave['seempd_name'] ?>
+                                                        <?php if ($leave['seemrq_reminder'] == 1): ?>
+                                                            <span class="badge bg-danger ms-1"
+                                                                style="font-size: 0.6rem;">REMINDER</span>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                    <small class="text-muted"><?= $leave['seemrq_empid'] ?></small>
+                                                </td>
+                                            </tr>
                                             <tr>
                                                 <td>
                                                     <div class="fw-bold text-dark"><?= $leave['seempd_name'] ?></div>
@@ -124,6 +155,84 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                                             class="btn btn-danger rounded-circle d-flex align-items-center justify-content-center"
                                                             style="width: 40px; height: 40px; transition: all 0.3s ease;"
                                                             title="Reject">
+                                                            <i class="fas fa-times"></i>
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    <?php else: ?>
+                                        <tr>
+                                            <td colspan="5" class="text-center py-5 text-muted">
+                                                <i class="fas fa-inbox fa-2x mb-2 d-block opacity-25"></i>
+                                                No pending leave requests.
+                                            </td>
+                                        </tr>
+                                    <?php endif; ?>
+                                </tbody>  -->
+                                <tbody>
+                                    <?php if (!empty($recent_leaves)): ?>
+                                        <?php foreach ($recent_leaves as $leave): ?>
+                                            <?php
+                                            // Calculate stats
+                                            $taken = isset($leave['total_taken']) ? $leave['total_taken'] : 0;
+                                            $remaining = 20 - $taken;
+                                            $status_color = ($taken >= 18) ? 'text-danger' : 'text-success';
+
+                                            // Check for reminder flag
+                                            $is_reminded = (isset($leave['seemrq_reminder']) && $leave['seemrq_reminder'] == 1);
+                                            ?>
+
+                                            <tr class="<?= $is_reminded ? 'table-warning' : '' ?>">
+                                                <td>
+                                                    <div class="fw-bold text-dark">
+                                                        <?= $leave['seempd_name'] ?>
+                                                        <?php if ($is_reminded): ?>
+                                                            <span class="badge bg-danger ms-1"
+                                                                style="font-size: 0.6rem; vertical-align: middle;">REMINDER</span>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                    <small class="text-muted"><?= $leave['seemrq_empid'] ?></small>
+                                                </td>
+
+                                                <td>
+                                                    <span
+                                                        class="badge bg-light text-dark border fw-normal"><?= $leave['seemrq_reason'] ?></span>
+                                                    <br>
+                                                    <a href="javascript:void(0)" class="text-primary small text-decoration-none"
+                                                        onclick="showLeaveDetails('<?= htmlspecialchars($leave['seempd_name'], ENT_QUOTES) ?>', '<?= htmlspecialchars($leave['seemrq_reason'], ENT_QUOTES) ?>', '<?= htmlspecialchars(json_encode($leave['seemrq_summary']), ENT_QUOTES) ?>', '<?= $leave['seemrq_fromdate'] ?>', '<?= $leave['seemrq_todate'] ?>')">
+                                                        <i class="fas fa-info-circle"></i> View details
+                                                    </a>
+                                                </td>
+
+                                                <td class="fw-bold text-primary">
+                                                    <?= $leave['seemrq_days'] ?> Days
+                                                </td>
+
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="me-2 fw-bold <?= $status_color ?>"><?= $taken ?>/20</span>
+                                                        <div class="progress w-100"
+                                                            style="height: 6px; border-radius: 10px; background-color: rgba(0,0,0,0.05);">
+                                                            <div class="progress-bar <?= ($taken >= 18) ? 'bg-danger' : 'bg-primary' ?>"
+                                                                role="progressbar"
+                                                                style="width: <?= min(($taken / 20) * 100, 100) ?>%"></div>
+                                                        </div>
+                                                    </div>
+                                                    <small
+                                                        class="text-muted"><?= ($remaining > 0) ? $remaining . ' days left' : 'Limit reached' ?></small>
+                                                </td>
+
+                                                <td class="text-center">
+                                                    <div class="d-flex justify-content-center gap-2">
+                                                        <a href="<?= base_url('Employee/updateLeaveStatus/' . $leave['seemrq_id'] . '/approved') ?>"
+                                                            class="btn btn-success rounded-circle d-flex align-items-center justify-content-center"
+                                                            style="width: 40px; height: 40px;" title="Approve">
+                                                            <i class="fas fa-check"></i>
+                                                        </a>
+                                                        <a href="<?= base_url('Employee/updateLeaveStatus/' . $leave['seemrq_id'] . '/rejected') ?>"
+                                                            class="btn btn-danger rounded-circle d-flex align-items-center justify-content-center"
+                                                            style="width: 40px; height: 40px;" title="Reject">
                                                             <i class="fas fa-times"></i>
                                                         </a>
                                                     </div>
@@ -213,14 +322,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         </div>
     </div>
 
-    
+
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2" crossorigin="anonymous">
-    </script>   
+        </script>
 
     <script>
-        
+
         function showLeaveDetails(name, reason, summary, from, to) {
 
             let cleanSummary = summary;
@@ -241,7 +350,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             myModal.show();
         }
     </script>
-   
+
 </body>
 </body>
 

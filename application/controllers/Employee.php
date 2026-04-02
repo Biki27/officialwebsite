@@ -849,8 +849,8 @@ class Employee extends CI_Controller
             $bank_data = array(
                 'sebank_empid' => $this->session->userdata('empid'),
                 'sebank_ac_no' => $data['bank_ac'],
-                'sebank_ifsc'  => strtoupper($data['bank_ifsc']), // Force uppercase for IFSC
-                'sebank_esi'   => $data['bank_esi']
+                'sebank_ifsc' => strtoupper($data['bank_ifsc']), // Force uppercase for IFSC
+                'sebank_esi' => $data['bank_esi']
             );
 
             $this->load->model('EmployeeModel');
@@ -1044,6 +1044,18 @@ class Employee extends CI_Controller
 
         return TRUE;
     }
+
+    // Added code for sending Request leave reminders to HR.
+    public function sendLeaveReminder($reqId)
+    {
+        if (!$this->session->has_userdata('empid')) {
+            echo json_encode(['status' => 'error']);
+            return;
+        }
+        $this->load->model('RequestsModel');
+        $success = $this->RequestsModel->set_reminder($reqId);
+        echo json_encode(['status' => $success ? 'success' : 'error']);
+    }
     function ChangePassword()
     {
         if (
@@ -1111,7 +1123,7 @@ class Employee extends CI_Controller
             $this->load->view('errors/invalidAccessView');
         }
     }
-    
+
     // HR Dashboard
     function HRDashboard()
     {
