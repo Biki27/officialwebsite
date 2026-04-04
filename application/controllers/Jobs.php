@@ -31,19 +31,25 @@ class Jobs extends CI_Controller
         $this->load->view('footerView');
     }
 
-    public function SearchJob()
-    {
-        $search_query = $this->input->post();
-        $ques = isset($search_query['search']) ? $search_query['search'] : '';
+    // Update SearchJob method
+    /* public function SearchJob()
+     {
+         $search_query = $this->input->post();
+         $ques = isset($search_query['search']) ? $search_query['search'] : '';
 
-        $query = $this->JobsModel->get_search_in_anyfield_query($ques);
-        $result = $this->JobsModel->get_jobmodel_query_result($query);
+         $query = $this->JobsModel->get_search_in_anyfield_query($ques);
+         $result = $this->JobsModel->get_jobmodel_query_result($query);
 
-        $viewData = array('res' => $result);
-        $this->load->view('jobsView', $viewData);
-        $this->load->view('footerView');
-    }
+         // Add 'search_val' to the data array
+         $viewData = array(
+             'res' => $result,
+             'search_val' => $ques
+         );
+         $this->load->view('jobsView', $viewData);
+         $this->load->view('footerView');
+     }*/
 
+    // Update FilterJob method
     public function FilterJob()
     {
         $filter_query = $this->input->post();
@@ -55,7 +61,11 @@ class Jobs extends CI_Controller
         $query = $this->JobsModel->filter_jobs_query($title, $location, $skills, $experience);
         $result = $this->JobsModel->get_jobmodel_query_result($query);
 
-        $viewData = array('res' => $result);
+        $viewData = array(
+            'res' => $result,
+            'filter_vals' => $filter_query,
+            'scrollToResults' => true // Add this flag
+        );
         $this->load->view('jobsView', $viewData);
         $this->load->view('footerView');
     }
