@@ -7,7 +7,7 @@ class Employee extends CI_Controller
     public function __construct()
     {
         parent::__construct();
-        
+
         // Prevent browser caching for security (Solves the Back Button issue)
         $this->output->set_header('Last-Modified: ' . gmdate("D, d M Y H:i:s") . ' GMT');
         $this->output->set_header('Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0');
@@ -18,50 +18,62 @@ class Employee extends CI_Controller
     {
         $this->Login();
     }
-
-   function Login()
-    {
-        // ---> ADD THIS NEW CHECK <---
-        // If the user is already logged in, redirect them away from the login page
+    function Login()
+    {    
+        
         if ($this->session->has_userdata('empid') && $this->session->userdata('status') != 'inactive') {
             redirect('Employee/Dashboard');
             return; // Stop executing the rest of the function
         }
+        
 
-        // Your existing login logic starts here
         $credentials = $this->input->post();
         $data = $this->security->xss_clean($credentials);
 
-        if (!isset($data['username'])) {
-            $this->load->view('employee/employeeLoginView');
-            return;
-        }
-        if (!isset($data['password'])) {
+        if (!isset($data['username']) || !isset($data['password'])) {
             $this->load->view('employee/employeeLoginView');
             return;
         }
 
         $this->load->model('EmployeeModel');
-        $info = $this->EmployeeModel->check_if_employee_exist($data['username'], $data['password']);
+        $result = $this->EmployeeModel->check_if_employee_exist($data['username'], $data['password']);
 
-        if ($info['code'] != 0) {
-            $this->session->sess_destroy();
-            $this->load->view('employee/employeeLoginView', array('error' => 'Login details not found.'));
+        if ($result['code'] != 0) {
+            // CASE 1: Username does not exist
+            $this->load->view('employee/employeeLoginView', array(
+                'error' => 'Incorrect Username. This email is not registered.',
+                'old_username' => $data['username']
+            ));
         } else {
-            if (password_verify($data['password'], $info[0]->seemp_pass) && $info[0]->seemp_status == 'active') {
-                $sdata = array(
-                    'email' => $info[0]->seemp_email,
-                    'status' => $info[0]->seemp_status,
-                    'empid' => $info[0]->seemp_id,
-                    'accesslevel' => $info[0]->seemp_acesslevel,
-                    'branch' => $info[0]->seemp_branch,
-                    'lastlogin' => $info[0]->seemp_lastlogin,
-                );
-                $this->session->set_userdata($sdata);
-                redirect('Employee/Dashboard');
+            $user = $result['user'];
+
+            // CASE 2: Check Password
+            if (password_verify($data['password'], $user->seemp_pass)) {
+
+                // CASE 3: Check if Active
+                if ($user->seemp_status == 'active') {
+                    $sdata = array(
+                        'email' => $user->seemp_email,
+                        'status' => $user->seemp_status,
+                        'empid' => $user->seemp_id,
+                        'accesslevel' => $user->seemp_acesslevel,
+                        'branch' => $user->seemp_branch,
+                        'lastlogin' => $user->seemp_lastlogin,
+                    );
+                    $this->session->set_userdata($sdata);
+                    redirect('Employee/Dashboard');
+                } else {
+                    $this->load->view('employee/employeeLoginView', array(
+                        'error' => 'Your account is inactive. Please contact HR.',
+                        'old_username' => $data['username']
+                    ));
+                }
             } else {
-                $this->session->sess_destroy();
-                $this->load->view('employee/employeeLoginView', array('error' => 'Login details not found.'));
+                // CASE 4: Username correct, but Password wrong
+                $this->load->view('employee/employeeLoginView', array(
+                    'error' => 'Incorrect Password. Please try again.',
+                    'old_username' => $data['username']
+                ));
             }
         }
     }
@@ -830,7 +842,7 @@ class Employee extends CI_Controller
             $emp = $empdetails[0];
 
             $this->session->set_userdata('empname', $emp->seempd_name);
- 
+
             $this->load->model('EmployeeModel');
             $bank_details = $this->EmployeeModel->get_bank_details($this->session->userdata('empid'));
 
@@ -1708,6 +1720,57 @@ class Employee extends CI_Controller
             }
         } else {
             redirect('Employee/Login');
+        }
+    }
+
+    public function google_login()
+    {
+        // 1. Initialize Google Client (Requires composer require google/apiclient)
+        $client = new Google\Client();
+        $client->setClientId(getenv('LOGIN_CLIENT_ID')); // Use environment variable for security
+        $client->setClientSecret(getenv('LOGIN_CLIENT_SECRET')); // Use environment variable for security
+        $client->setRedirectUri(base_url('Employee/google_login'));
+        $client->addScope("email");
+        $client->addScope("profile");
+
+        if (!isset($_GET['code'])) {
+            redirect($client->createAuthUrl());
+        } else {
+            $token = $client->fetchAccessTokenWithAuthCode($_GET['code']);
+            $client->setAccessToken($token);
+            $google_oauth = new Google\Service\Oauth2($client);
+            $google_info = $google_oauth->userinfo->get();
+
+            $email = $google_info->email;
+
+            // 2. Check if email exists in your seemployee table
+            $this->load->model('EmployeeModel');
+            $this->db->where('seemp_email', $email);
+            $query = $this->db->get('seemployee');
+            $user = $query->row();
+
+            if ($user) {
+                if ($user->seemp_status == 'active') {
+                    $sdata = array(
+                        'email' => $user->seemp_email,
+                        'status' => $user->seemp_status,
+                        'empid' => $user->seemp_id,
+                        'accesslevel' => $user->seemp_acesslevel,
+                        'branch' => $user->seemp_branch,
+                        'lastlogin' => $user->seemp_lastlogin,
+                    );
+                    $this->session->set_userdata($sdata);
+                    redirect('Employee/Dashboard');
+                } else {
+                    // Account exists but is inactive
+                    $this->session->set_flashdata('login_error', 'Your account is currently inactive. Contact Admin.');
+                    redirect('Employee/Login');
+                }
+            } else {
+                // THE FIX: Account does not exist in DB
+                $this->session->set_flashdata('login_error', 'This email is not registered in our system. Please contact HR.');
+                redirect('Employee/Login');
+            }
         }
     }
 }

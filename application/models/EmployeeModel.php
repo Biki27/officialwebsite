@@ -80,7 +80,7 @@ class EmployeeModel extends CI_Model
     function check_if_employee_exist($username = '', $pass = '')
     {
         if (trim($username) == '' || trim($pass) == '') {
-            return array('code' => 1);
+            return array('code' => 1); // Username/Pass empty
         }
 
         $query = $this->db->from('seemployee')
@@ -89,17 +89,13 @@ class EmployeeModel extends CI_Model
             ->get();
 
         $res = $query->result();
+
         if (empty($res)) {
-            $res += array(
-                'code' => 1
-            );
-            return $res;
+            return array('code' => 1); // USERNAME NOT FOUND
         }
 
-        $res += array(
-            'code' => 0
-        );
-        return $res;
+        // USER FOUND: Return the user object
+        return array('code' => 0, 'user' => $res[0]);
     }
 
 
