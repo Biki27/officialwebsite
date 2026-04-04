@@ -245,6 +245,7 @@ function fmtVal($val)
 </head>
 
 <body>
+     
 
     <div class="slip-container">
         <img src="<?= base_url('imgs/logo-without-bg.png') ?>" class="watermark-bg" alt="Watermark">

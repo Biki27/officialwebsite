@@ -37,6 +37,8 @@ defined('BASEPATH') or exit('No direct script access allowed');
     <div id="employees" class="section active">
       <h2 class="text-white mb-4">Employee Management</h2>
 
+     
+
       <!-- Search Box -->
       <?= form_open('Employee/viewEmployee') ?>
       <div class="search-box">

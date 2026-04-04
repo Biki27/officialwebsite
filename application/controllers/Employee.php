@@ -25,8 +25,6 @@ class Employee extends CI_Controller
             redirect('Employee/Dashboard');
             return; // Stop executing the rest of the function
         }
-
-
         $credentials = $this->input->post();
         $data = $this->security->xss_clean($credentials);
 
@@ -168,7 +166,6 @@ class Employee extends CI_Controller
             $this->load->view('errors/invalidAccessView');
         }
     }
-
 
     // AdminEmployee
     public function viewEmployee()

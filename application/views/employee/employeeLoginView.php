@@ -58,8 +58,8 @@ defined('BASEPATH') or exit('No direct script access allowed');
       <button type="submit" class="btn btn-login w-100">
         <i class="fas fa-sign-in-alt"></i> Login
       </button>
-
-      <div class="my-3 text-muted">OR</div>
+      <!-- color white -->
+      <div class="my-3 text-white">OR</div>
 
       <a href="<?= base_url('Employee/google_login') ?>" class="custom-google-btn">
         <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" width="20" class="me-2">
