@@ -50,90 +50,185 @@
             </div>
         </div>
 
-        <?= form_open('Employee/viewAttendance') ?>
+        <div class="attendance-search-form">
 
-        <div class="search-form-wrapper">
-            <div class="search-group">
-                <label for="searchempid" class="text-white"><b>Employee ID</b></label>
-                <input type="text" name="searchempid" class="search-bar" placeholder="Enter ID">
-            </div>
-
-            <div class="search-group">
-                <label for="startdate" class="text-white"><b>Start Date</b></label>
-                <input type="date" name="startdate" class="search-bar">
-            </div>
-
-            <div class="search-group">
-                <label for="enddate" class="text-white"><b>End Date</b></label>
-                <input type="date" name="enddate" class="search-bar">
-            </div>
-
-            <div class="search-group">
-                <button type="submit" class="search-btn">
-                    <i class="fas fa-search"></i> Search
-                </button>
-            </div>
-        </div>
-
-        <?= form_close() ?>
-
-        <div class="table-section mt-4">
-            <h2 class="table-title">Attendance Records</h2>
-            <table class="table-custom">
-                <thead>
-                    <tr>
-                        <th><i class="fas fa-calendar-day me-2"></i>Date</th>
-                        <th><i class="fas fa-id-badge me-2"></i>Employee ID</th>
-                        <th><i class="fas fa-user me-2"></i>Employee Name</th>
-                        <th><i class="fas fa-clock me-2"></i>Login Time</th>
-                        <th><i class="fas fa-clock me-3"></i>Logout Time</th>
-                        <th><i class="fas fa-laptop me-2"></i>Device</th>
-                        <th><i class="fas fa-network-wired me-2"></i>IP Address</th>
-                    </tr>
-                </thead>
-                <tbody id="attendanceTable">
-                    <?php if (!empty($atten)): ?>
-                        <?php foreach ($atten as $att): ?>
-                            <tr>
-                                <td><?= date("d-M-Y", strtotime($att->seemp_logdate)) ?></td>
-                                <td><span class="emp-id"><?= $att->seemp_logempid ?></span></td>
-                                <td><strong><?= $att->seempd_name ?? 'Unknown Employee' ?></strong></td>
-                                <td class="login-time">
-                                    <i class="fas fa-sign-in-alt me-1"></i>
-                                    <?= date("h:i A", strtotime($att->seemp_logintime)) ?>
-                                </td>
-                                <td class="logout-time">
-                                    <i class="fas fa-sign-out-alt me-1"></i>
-                                    <?= ($att->seemp_logouttime && $att->seemp_logouttime != '0000-00-00 00:00:00')
-                                        ? date("h:i A", strtotime($att->seemp_logouttime))
-                                        : '<span class="text-muted">Not Logged Out</span>' ?>
-                                </td>
-                                <td><small class="text-muted"><?= $att->seemp_device_info ?? 'N/A' ?></small></td>
-                                <td><code><?= $att->seemp_ip_address ?? '0.0.0.0' ?></code></td>
-                            </tr>
-                        <?php endforeach; ?>
-                    <?php else: ?>
-                        <tr>
-                            <td colspan="5" class="text-center p-4">No attendance records found.</td>
-                        </tr>
-                    <?php endif; ?>
-                </tbody>
-            </table>
-        </div>
+            <div class="search-form-wrapper">
+    <div class="search-group">
+        <label class="text-white"><b>Employee ID</b></label>
+        <input type="text" id="searchempid" name="searchempid" class="search-bar" placeholder="Enter ID">
     </div>
 
-    <script>
-        document.querySelector('[name="searchempid"]').addEventListener('input', function (e) {
-            const searchTerm = e.target.value.toLowerCase();
-            const rows = document.querySelectorAll('#attendanceTable tr');
-            rows.forEach(row => {
-                // Check if it's not the "No records found" row
-                if (row.cells.length > 1) {
-                    row.style.display = row.textContent.toLowerCase().includes(searchTerm) ? '' : 'none';
-                }
+    <div class="search-group">
+        <label class="text-white"><b>Start Date</b></label>
+        <input type="date" id="startdate" name="startdate" class="search-bar">
+    </div>
+
+    <div class="search-group">
+        <label class="text-white"><b>End Date</b></label>
+        <input type="date" id="enddate" name="enddate" class="search-bar">
+    </div>
+
+    <div class="search-group">
+        <button type="button" id="ajaxSearchBtn" class="search-btn">
+            <i class="fas fa-search"></i> Search
+        </button>
+    </div>
+</div>
+
+            <?= form_close() ?>
+
+            <div class="table-section mt-4">
+                <h2 class="table-title">Attendance Records</h2>
+                <table class="table-custom">
+                    <thead>
+                        <tr>
+                            <th><i class="fas fa-calendar-day me-2"></i>Date</th>
+                            <th><i class="fas fa-id-badge me-2"></i>Employee ID</th>
+                            <th><i class="fas fa-user me-2"></i>Employee Name</th>
+                            <th><i class="fas fa-clock me-2"></i>Login Time</th>
+                            <th><i class="fas fa-clock me-3"></i>Logout Time</th>
+                            <th><i class="fas fa-laptop me-2"></i>Device</th>
+                            <th><i class="fas fa-network-wired me-2"></i>IP Address</th>
+                        </tr>
+                    </thead>
+                    <tbody id="attendanceTable">
+                        <?php if (!empty($atten)): ?>
+                            <?php foreach ($atten as $att): ?>
+                                <tr>
+                                    <td><?= date("d-M-Y", strtotime($att->seemp_logdate)) ?></td>
+                                    <td><span class="emp-id"><?= $att->seemp_logempid ?></span></td>
+                                    <td><strong><?= $att->seempd_name ?? 'Unknown Employee' ?></strong></td>
+                                    <td class="login-time">
+                                        <i class="fas fa-sign-in-alt me-1"></i>
+                                        <?= date("h:i A", strtotime($att->seemp_logintime)) ?>
+                                    </td>
+                                    <td class="logout-time">
+                                        <i class="fas fa-sign-out-alt me-1"></i>
+                                        <?= ($att->seemp_logouttime && $att->seemp_logouttime != '0000-00-00 00:00:00')
+                                            ? date("h:i A", strtotime($att->seemp_logouttime))
+                                            : '<span class="text-muted">Not Logged Out</span>' ?>
+                                    </td>
+                                    <td><small class="text-muted"><?= $att->seemp_device_info ?? 'N/A' ?></small></td>
+                                    <td><code><?= $att->seemp_ip_address ?? '0.0.0.0' ?></code></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <tr>
+                                <td colspan="5" class="text-center p-4">No attendance records found.</td>
+                            </tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <script>
+            document.querySelector('[name="searchempid"]').addEventListener('input', function (e) {
+                const searchTerm = e.target.value.toLowerCase();
+                const rows = document.querySelectorAll('#attendanceTable tr');
+                rows.forEach(row => {
+                    // Check if it's not the "No records found" row
+                    if (row.cells.length > 1) {
+                        row.style.display = row.textContent.toLowerCase().includes(searchTerm) ? '' : 'none';
+                    }
+                });
             });
-        });
-    </script>
+        </script>
+
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script>
+            $(document).ready(function () {
+                // 1. LETTER-BASED LIVE FILTERING (Client-side)
+                // This filters the rows currently loaded in the table as you type
+                $('#searchempid').on('input', function () {
+                    const searchTerm = $(this).val().toLowerCase();
+                    const $rows = $('#attendanceTable tr');
+                    let visibleCount = 0;
+
+                    $rows.each(function () {
+                        const $row = $(this);
+                        // Skip the "No records found" or "Loading" rows
+                        if ($row.find('td').length > 1) {
+                            const text = $row.text().toLowerCase();
+                            if (text.includes(searchTerm)) {
+                                $row.show();
+                                visibleCount++;
+                            } else {
+                                $row.hide();
+                            }
+                        }
+                    });
+
+                    // Toggle "No results" message if everything is filtered out
+                    if (visibleCount === 0 && searchTerm !== "") {
+                        if ($('#noResultsLive').length === 0) {
+                            $('#attendanceTable').append('<tr id="noResultsLive"><td colspan="7" class="text-center p-4">No matching records visible. Press Search for deep search.</td></tr>');
+                        }
+                    } else {
+                        $('#noResultsLive').remove();
+                    }
+                });
+
+                // 2. SERVER-SIDE SEARCH (AJAX)
+                // This fetches new data from the database based on ID and Date Range
+                function performAjaxSearch() {
+                    const empid = $('#searchempid').val();
+                    const start = $('#startdate').val();
+                    const end = $('#enddate').val();
+
+                    $('#attendanceTable').html('<tr><td colspan="7" class="text-center p-4"><i class="fas fa-spinner fa-spin me-2"></i>Searching records...</td></tr>');
+
+                    $.ajax({
+                        url: '<?= base_url("Employee/viewAttendanceAjax") ?>',
+                        type: 'POST',
+                        data: {
+                            searchempid: empid,
+                            startdate: start,
+                            enddate: end,
+                            '<?= $this->security->get_csrf_token_name(); ?>': '<?= $this->security->get_csrf_hash(); ?>'
+                        },
+                        dataType: 'json',
+                        success: function (response) {
+                            let html = '';
+                            if (response.length > 0) {
+                                response.forEach(function (att) {
+                                    html += `
+                        <tr>
+                            <td>${att.formatted_date}</td>
+                            <td><span class="emp-id">${att.seemp_logempid}</span></td>
+                            <td><strong>${att.seempd_name || 'Unknown'}</strong></td>
+                            <td class="login-time"><i class="fas fa-sign-in-alt me-1"></i>${att.formatted_login}</td>
+                            <td class="logout-time"><i class="fas fa-sign-out-alt me-1"></i>${att.formatted_logout}</td>
+                            <td><small class="text-muted">${att.seemp_device_info || 'N/A'}</small></td>
+                            <td><code>${att.seemp_ip_address || '0.0.0.0'}</code></td>
+                        </tr>`;
+                                });
+                            } else {
+                                html = '<tr><td colspan="7" class="text-center p-4">No attendance records found.</td></tr>';
+                            }
+                            $('#attendanceTable').html(html);
+                        },
+                        error: function () {
+                            $('#attendanceTable').html('<tr><td colspan="7" class="text-center text-danger p-4">Error connecting to server.</td></tr>');
+                        }
+                    });
+                }
+
+                // Trigger AJAX on Button Click
+                $('#ajaxSearchBtn').on('click', function (e) {
+                    e.preventDefault();
+                    performAjaxSearch();
+                });
+
+                // Trigger AJAX on Enter Key
+                $('.search-bar').on('keypress', function (e) {
+                    if (e.which == 13) {
+                        e.preventDefault();
+                        performAjaxSearch();
+                    }
+                });
+            });
+        </script>
 
 </body>
 

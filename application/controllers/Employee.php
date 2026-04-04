@@ -135,30 +135,30 @@ class Employee extends CI_Controller
 
             // ── Payroll counts for current month ──
             // Uses the same model methods as salaryManagement() so counts always match.
-            $payroll_employees   = $this->EmployeeModel->get_payroll_employees();
-            $monthly_slips_now   = $this->EmployeeModel->get_slips_by_month(date('Y-m'));
-            $total_staff_count   = $this->EmployeeModel->get_total_staff_count();
+            $payroll_employees = $this->EmployeeModel->get_payroll_employees();
+            $monthly_slips_now = $this->EmployeeModel->get_slips_by_month(date('Y-m'));
+            $total_staff_count = $this->EmployeeModel->get_total_staff_count();
             $processed_count_now = count($monthly_slips_now);   // Slips Generated  (PAID)
-            $pending_count_now   = count($payroll_employees) - $processed_count_now; // Pending (UNPAID)
+            $pending_count_now = count($payroll_employees) - $processed_count_now; // Pending (UNPAID)
 
             // Fetch dashboard statistics
             $data = array(
-                'projpending'      => count($this->ProjectsModel->getPendingProjects()),
-                'projrunning'      => count($this->ProjectsModel->getRunningProjects()),
-                'projcompleted'    => count($this->ProjectsModel->getCompletedProjects()),
-                'total_staff'      => $total_staff_count,
-                'present_today'    => $this->AttendanceModel->get_present_today_count(),
-                'new_apps'         => $this->jobApplicationModel->get_new_applicants_count(),
+                'projpending' => count($this->ProjectsModel->getPendingProjects()),
+                'projrunning' => count($this->ProjectsModel->getRunningProjects()),
+                'projcompleted' => count($this->ProjectsModel->getCompletedProjects()),
+                'total_staff' => $total_staff_count,
+                'present_today' => $this->AttendanceModel->get_present_today_count(),
+                'new_apps' => $this->jobApplicationModel->get_new_applicants_count(),
 
-                'recent_projs'     => $this->ProjectsModel->getRecentProjects(5),
-                'deadlines'        => $this->ProjectsModel->getUpcomingDeadlines(3),
+                'recent_projs' => $this->ProjectsModel->getRecentProjects(5),
+                'deadlines' => $this->ProjectsModel->getUpcomingDeadlines(3),
 
                 // Payroll summary
-                'processed_count'  => $processed_count_now,
-                'pending_count'    => $pending_count_now,
+                'processed_count' => $processed_count_now,
+                'pending_count' => $pending_count_now,
 
                 // Leave requests
-                'leave_pending'    => $this->RequestsModel->get_pending_requests_count(),
+                'leave_pending' => $this->RequestsModel->get_pending_requests_count(),
             );
 
             $this->load->view('employee/adminHeaderView');
@@ -357,6 +357,37 @@ class Employee extends CI_Controller
             $this->session->sess_destroy();
             $this->load->view('errors/invalidAccessView');
         }
+    }
+    public function viewAttendanceAjax()
+    {
+        // 1. Authorization check similar to your existing viewAttendance method
+        $access = $this->session->userdata('accesslevel');
+        if ($this->session->userdata('status') != 'active' || !($access == 'ADMIN' || $access == 'HR')) {
+            echo json_encode([]);
+            return;
+        }
+
+        $this->load->model('AttendanceModel');
+
+        // 2. Get and Clean Input
+        $s_id = trim($this->input->post('searchempid', TRUE));
+        $start = $this->input->post('startdate', TRUE);
+        $end = $this->input->post('enddate', TRUE);
+
+        // 3. Fetch data using your existing model logic
+        $list = $this->AttendanceModel->find_empid_with_daterange($s_id, $start, $end);
+
+        // 4. Format the dates/times for the JSON output
+        foreach ($list as &$att) {
+            $att->formatted_date = date("d-M-Y", strtotime($att->seemp_logdate));
+            $att->formatted_login = date("h:i A", strtotime($att->seemp_logintime));
+            $att->formatted_logout = ($att->seemp_logouttime && $att->seemp_logouttime != '0000-00-00 00:00:00')
+                ? date("h:i A", strtotime($att->seemp_logouttime))
+                : '<span class="text-muted">Not Logged Out</span>';
+        }
+
+        // 5. Send JSON response back to the browser
+        echo json_encode($list);
     }
     // Admin view fetch job applicants details
     public function getApplicantDetails($id)

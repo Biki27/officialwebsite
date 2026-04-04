@@ -33,8 +33,8 @@
 
             <div class="page-header d-flex justify-content-between align-items-center mb-4">
                 <div>
-                    <h2 class="text-white fw-bold mb-1">Employee Request Management</h2>
-                    <h4><p class="text-white-50 small">History of Manage leave and requests</p></h4>
+                    <h2 class="text-black fw-bold mb-1">Employee Request Management</h2>
+                    <h4><p class="text-black-50 small">History of Manage leave and requests</p></h4>
                 </div>
 
                 <div class="d-flex gap-2">
