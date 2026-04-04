@@ -4,13 +4,31 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 class Employee extends CI_Controller
 {
+    public function __construct()
+    {
+        parent::__construct();
+        
+        // Prevent browser caching for security (Solves the Back Button issue)
+        $this->output->set_header('Last-Modified: ' . gmdate("D, d M Y H:i:s") . ' GMT');
+        $this->output->set_header('Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0');
+        $this->output->set_header('Pragma: no-cache');
+        $this->output->set_header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
+    }
     function index()
     {
         $this->Login();
     }
 
-    function Login()
+   function Login()
     {
+        // ---> ADD THIS NEW CHECK <---
+        // If the user is already logged in, redirect them away from the login page
+        if ($this->session->has_userdata('empid') && $this->session->userdata('status') != 'inactive') {
+            redirect('Employee/Dashboard');
+            return; // Stop executing the rest of the function
+        }
+
+        // Your existing login logic starts here
         $credentials = $this->input->post();
         $data = $this->security->xss_clean($credentials);
 
@@ -47,7 +65,6 @@ class Employee extends CI_Controller
             }
         }
     }
-
     function Dashboard()
     {
         if (
@@ -813,23 +830,25 @@ class Employee extends CI_Controller
             $emp = $empdetails[0];
 
             $this->session->set_userdata('empname', $emp->seempd_name);
-
-            // Fetch Bank Details for the Dashboard Alert
+ 
             $this->load->model('EmployeeModel');
             $bank_details = $this->EmployeeModel->get_bank_details($this->session->userdata('empid'));
+
+            // ---> ADD THESE TWO LINES <---
+            $this->load->model('AttendanceModel');
+            $todayAttendance = $this->AttendanceModel->get_today_login_logout($this->session->userdata('empid'));
 
             $data = array(
                 'holidays_taken' => $holidaycount,
                 'holidays_used' => 20 - $holidaycount,
                 'holidays_percent' => 100 * (20 - $holidaycount) / 20,
                 'empdetails' => $emp,
-                'bank_details' => $bank_details // Add this line!
+                'bank_details' => $bank_details,
+                'todayAttendance' => $todayAttendance // ---> ADD THIS LINE <---
             );
 
             $this->load->view('employee/employeeHeaderView');
             $this->load->view('employee/employeeOverView', $data);
-            // $this->load->view('employee/employeeFooterView');
-
         } else {
 
             $this->session->sess_destroy();
@@ -1564,7 +1583,7 @@ class Employee extends CI_Controller
         $this->session->set_flashdata('msg', 'Job posting removed');
         redirect('Employee/viewJobs');
     }
-    //geo location tracking for employee attendance
+
     // --- AJAX ATTENDANCE & GEOFENCING ROUTE ---
     public function SubmitAttendanceAjax()
     {
