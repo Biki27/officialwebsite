@@ -204,11 +204,15 @@
                                     <div class="d-flex justify-content-center gap-2">
                                         <?php if ($is_processed): ?>
                                             <a href="<?= base_url('Employee/viewMySlip/' . $slip_data->slip_id) ?>" target="_blank" class="btn btn-sm btn-success rounded-pill px-3 shadow-sm">
-                                                <i class="fas fa-file-pdf me-1"></i> View Slip
+                                                <i class="fas fa-file-pdf me-1"></i> View
                                             </a>
+                                            <button class="btn btn-sm btn-outline-danger rounded-pill px-3 shadow-sm"
+                                                onclick="confirmResetSlip('<?= $slip_data->slip_id ?>', '<?= $emp->seempd_name ?>')">
+                                                <i class="fas fa-undo me-1"></i> Edit
+                                            </button>
                                         <?php else: ?>
                                             <button class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm"
-                                                onclick="openSlipModal('<?= $emp->seemp_id ?>', '<?= htmlspecialchars($emp->seempd_name, ENT_QUOTES) ?>', '<?= $emp->seempd_designation ?>', '<?= $emp->seemp_branch ?>', '<?= $emp->seempd_salary ?>', '<?= $emp->sebank_ac_no ?? '' ?>', '<?= $emp->sebank_ifsc ?? '' ?>', '<?= $emp->sebank_esi ?? '' ?>', '<?= $selected_month ?>')">
+                                                onclick="openSlipModal('<?= $emp->seemp_id ?>', '<?= htmlspecialchars($emp->seempd_name, ENT_QUOTES) ?>','<?= $emp->seempd_designation ?>', '<?= $emp->seemp_branch ?>', '<?= $emp->seempd_salary ?>', '<?= $emp->sebank_ac_no ?? '' ?>', '<?= $emp->sebank_ifsc ?? '' ?>', '<?= $emp->sebank_esi ?? '' ?>', '<?= $selected_month ?>')">
                                                 <i class="fas fa-calculator me-1"></i> Process Slip
                                             </button>
                                         <?php endif; ?>
@@ -432,6 +436,46 @@
             document.getElementById('display_gross').innerText = "₹ " + gross.toFixed(2);
             document.getElementById('display_deduction').innerText = "₹ " + ded.toFixed(2);
             document.getElementById('display_net').innerText = "₹ " + (net < 0 ? 0 : net).toFixed(2);
+        }
+
+        function confirmResetSlip(slipId, empName) {
+            Swal.fire({
+                title: 'Edit Salary Slip?',
+                text: `This will remove the generated slip for ${empName}. You can then re-enter the correct values and generate it again.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#4f46e5',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Yes, Edit Slip'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Delete old slip via AJAX
+                    $.ajax({
+                        url: "<?= base_url('Employee/deleteSlipAjax') ?>",
+                        type: 'POST',
+                        data: {
+                            slip_id: slipId,
+                            "<?= $this->security->get_csrf_token_name(); ?>": "<?= $this->security->get_csrf_hash(); ?>"
+                        },
+                        dataType: 'json',
+                        success: function(response) {
+                            if (response.status === 'success') {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Slip Reset',
+                                    text: 'The incorrect slip was removed. Page will reload to allow re-processing.',
+                                    timer: 1500,
+                                    showConfirmButton: false
+                                }).then(() => {
+                                    location.reload(); // Reload to refresh the table state
+                                });
+                            } else {
+                                Swal.fire('Error', response.message, 'error');
+                            }
+                        }
+                    });
+                }
+            });
         }
     </script>
 </body>

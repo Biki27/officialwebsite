@@ -1775,7 +1775,19 @@ class Employee extends CI_Controller
             redirect('Employee/Login');
         }
     }
-    
+    public function deleteSlipAjax()
+    {
+        if ($this->session->userdata('accesslevel') == 'HR' || $this->session->userdata('accesslevel') == 'ADMIN') {
+            $slip_id = $this->input->post('slip_id');
+            $this->load->model('EmployeeModel');
+
+            if ($this->EmployeeModel->delete_salary_slip($slip_id)) {
+                echo json_encode(['status' => 'success', 'message' => 'Slip removed. You can now re-generate it.']);
+            } else {
+                echo json_encode(['status' => 'error', 'message' => 'Could not remove slip.']);
+            }
+        }
+    }
 
     public function google_login()
     {
