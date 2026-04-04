@@ -19,13 +19,13 @@ class Employee extends CI_Controller
         $this->Login();
     }
     function Login()
-    {    
-        
+    {
+
         if ($this->session->has_userdata('empid') && $this->session->userdata('status') != 'inactive') {
             redirect('Employee/Dashboard');
             return; // Stop executing the rest of the function
         }
-        
+
 
         $credentials = $this->input->post();
         $data = $this->security->xss_clean($credentials);
@@ -430,16 +430,11 @@ class Employee extends CI_Controller
         ) {
             $this->load->model('ProjectsModel');
 
-            $status = $this->input->get('status');
-
-            if ($status) {
-                $projects = $this->ProjectsModel->getProjectsByStatus($status);
-            } else {
-                $projects = $this->ProjectsModel->getAllProjects();
-            }
+            // CHANGE: Always fetch all projects so JavaScript can filter them
+            // This prevents "losing" projects when you switch filters
+            $projects = $this->ProjectsModel->getAllProjects();
 
             $data['projects'] = $projects;
-
             $data['total'] = $this->ProjectsModel->count_all_projects();
             $data['running'] = $this->ProjectsModel->count_running_projects();
             $data['pending'] = $this->ProjectsModel->count_pending_projects();
@@ -563,6 +558,79 @@ class Employee extends CI_Controller
             }
         }
     }
+
+    /**
+     * AJAX — Delete a project by ID.
+     * POST params: id (integer)
+     * Returns JSON: { success, message, csrf_hash }
+     */
+    public function deleteProject()
+    {
+        // Auth guard
+        if (
+            !$this->session->has_userdata('empid') ||
+            $this->session->userdata('status')      !== 'active' ||
+            $this->session->userdata('accesslevel') !== 'ADMIN'
+        ) {
+            echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+            return;
+        }
+
+        $id = $this->input->post('id');
+        $id = (int) preg_replace('/[^0-9]/', '', $id);
+
+        if ($id <= 0) {
+            echo json_encode(['success' => false, 'message' => 'Invalid project ID.']);
+            return;
+        }
+
+        $this->load->model('ProjectsModel');
+        $deleted = $this->ProjectsModel->delete_project($id);
+
+        if ($deleted) {
+            echo json_encode([
+                'success'   => true,
+                'message'   => 'Project deleted successfully.',
+                'csrf_hash' => $this->security->get_csrf_hash(),   // Refresh token for next request
+            ]);
+        } else {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Could not delete the project. It may no longer exist.',
+            ]);
+        }
+    }
+
+    /**
+     * AJAX — Check whether a project with the given name already exists.
+     * POST params: name (string)
+     * Returns JSON: full project row object, or null if no match.
+     */
+    public function checkDuplicateProject()
+    {
+        // Auth guard
+        if (
+            !$this->session->has_userdata('empid') ||
+            $this->session->userdata('status') !== 'active'
+        ) {
+            echo json_encode(null);
+            return;
+        }
+
+        $name = $this->input->post('name');
+        $name = trim($this->security->xss_clean($name));
+
+        if (empty($name)) {
+            echo json_encode(null);
+            return;
+        }
+
+        $this->load->model('ProjectsModel');
+        $project = $this->ProjectsModel->getProjectByName($name);
+
+        echo json_encode($project);   // null if not found, object if found
+    }
+
     function RegisterEmployee()
     {
         if (

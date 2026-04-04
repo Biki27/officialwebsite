@@ -65,9 +65,9 @@ $leave_approved = isset($leave_approved) ? $leave_approved : '—';
         <?= date('l, d M Y') ?>
       </div>
     </div>
-    <a href="<?= base_url('Employee/addProjectPage') ?>" class="btn-brand">
+    <!-- <a href="<?= base_url('Employee/viewProjects') ?>" class="btn-brand">
       <i class="fas fa-plus-circle"></i> Initialize Project
-    </a>
+    </a> -->
   </div>
 
   <!-- ══════════════ KPI CARDS ══════════════ -->
