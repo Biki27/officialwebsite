@@ -451,4 +451,9 @@ class EmployeeModel extends CI_Model
             ->get()
             ->result();
     }
+    // Add this to EmployeeModel.php
+    public function delete_salary_slip($slip_id)
+    {
+        return $this->db->where('slip_id', $slip_id)->delete('sesalaryslips');
+    }
 }

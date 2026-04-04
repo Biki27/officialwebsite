@@ -1387,30 +1387,6 @@ class Employee extends CI_Controller
 
         redirect('Employee/Dashboard');
     }
-    /**
-     * HR Attendance Monitoring
-     */
-    // public function hrAttendance()
-    // {
-    //     if ($this->session->userdata('accesslevel') == 'HR') {
-    //         $this->load->model('AttendanceModel');
-
-    //         // FIX 1: Fetch the HR's specific login/logout times for the left card
-    //         $empid = $this->session->userdata('empid');
-    //         $data['todayAttendance'] = $this->AttendanceModel->get_today_login_logout($empid);
-
-    //         // Get all logs to show HR the history in the right table
-    //         $data['atten'] = $this->AttendanceModel->get_attendance_of_all_employee();
-
-    //         $this->load->view('hr/hrHeaderView');
-    //         // Reusing the Admin Attendance View for data consistency
-    //         $this->load->view('employee/adminAttendanceView', $data);
-    //     } else {
-    //         $this->session->sess_destroy();
-    //         $this->load->view('errors/invalidAccessView');
-    //     }
-    // }
-
     // Logout Function
     function Logout()
     {
@@ -1424,33 +1400,6 @@ class Employee extends CI_Controller
             ->set_header('Cache-Control: no-store, no-cache, must-revalidate')
             ->set_header('Pragma: no-cache');
         redirect('Employee/Login');
-    }
-
-
-
-    /**
-     * Reset Employee Functionality
-     */
-    public function resetEmployee($empid = '')
-    {
-        if (!$this->session->has_userdata('empid') || $this->session->userdata('accesslevel') != 'ADMIN') {
-            redirect('login');
-            return;
-        }
-
-        // Reset password to default
-        $default_password = 'temp123456';
-        $hashed_password = password_hash($default_password, PASSWORD_DEFAULT);
-
-        $result = $this->EmployeeModel->reset_employee_password($empid, $hashed_password);
-
-        if ($result['code'] == 0) {
-            $this->session->set_flashdata('success', 'Employee password reset successfully. Default password: temp123456');
-        } else {
-            $this->session->set_flashdata('error', 'Failed to reset employee password');
-        }
-
-        redirect('Employee/viewEmployee');
     }
 
     /**
@@ -1799,7 +1748,12 @@ class Employee extends CI_Controller
                 $data['gross_earnings'] = $data['basic'] + $data['transport'] + $data['incentive'] + $data['overtime'] + $data['round_off'];
                 $data['total_deductions'] = $data['pf'] + $data['esi_deduction'] + $data['prof_tax'] + $data['late_fees'] + $data['loss_of_pay'] + $data['loan'];
                 $data['net_salary'] = $data['gross_earnings'] - $data['total_deductions'];
-
+                // MAJOR ERROR FIX: Stop execution if Net Salary is negative
+                if ($data['net_salary'] < 0) {
+                    $this->session->set_flashdata('error', 'Error: Deductions exceed Gross Earnings. Net Salary cannot be negative.');
+                    redirect('Employee/salaryManagement');
+                    return;
+                }
                 $db_data = $data;
                 unset($db_data['emp_name'], $db_data['designation'], $db_data['branch']);
 
@@ -1821,6 +1775,7 @@ class Employee extends CI_Controller
             redirect('Employee/Login');
         }
     }
+    
 
     public function google_login()
     {

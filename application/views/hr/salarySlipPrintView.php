@@ -372,7 +372,7 @@ function fmtVal($val)
                 </tr>
                 <tr class="net-salary-row">
                     <th colspan="3" style="border-right: 1px solid #000;">NET SALARY</th>
-                    <th class="text-right">₹ <?= number_format($net_salary, 2) ?></th>
+                    <th class="text-right">₹ <?= number_format(max(0, $net_salary), 2) ?></th>
                 </tr>
             </tbody>
         </table>
