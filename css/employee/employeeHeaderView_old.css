@@ -1,0 +1,32 @@
+/* Background */
+body {
+    background: linear-gradient(135deg, #eef2ff, #f8fafc);
+    font-family: "Inter", sans-serif;
+}
+
+/* Card hover */
+.card {
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+}
+
+/* Nav buttons */
+.nav-section-btn {
+    transition: all 0.3s ease;
+}
+
+.nav-section-btn:hover {
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    color: white !important;
+    border: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .navbar-brand {
+        font-size: 0.9rem;
+    }
+}

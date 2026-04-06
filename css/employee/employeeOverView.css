@@ -3,45 +3,49 @@ html, body {
     margin: 0;
     padding: 0;
     width: 100%;
-    /* Master Fix: Stops the whole page from sliding left/right */
-    overflow-x: hidden; 
+    overflow-x: hidden;
     background: linear-gradient(135deg, #eef2ff, #f8fafc);
     font-family: "Inter", sans-serif;
 }
 
-/* --- Card: Remove the 'Jumping' effect --- */
+/* --- Card base --- */
 .card {
     transition: box-shadow 0.3s ease;
     border: none;
-    border-radius: 15px;
+    border-radius: 16px;
     background: #fff;
 }
 
 .card:hover {
-    /* REMOVED: transform: translateY(-6px) */
-    /* This stops the card from moving up/down and shifting the layout */
-    transform: none !important; 
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+    transform: none !important;
+    box-shadow: 0 12px 28px rgba(79, 70, 229, 0.08) !important;
 }
 
-/* --- Table Scrolling (Scrolls ONLY the table, not the page) --- */
+/* --- Stat cards accent border --- */
+.stat-card {
+    border-left: 4px solid transparent !important;
+    transition: border-left-color .3s, box-shadow .3s !important;
+}
+.stat-card:hover {
+    border-left-color: #4f46e5 !important;
+}
+
+/* --- Table --- */
 .table-responsive {
     display: block;
     width: 100%;
-    overflow-x: auto; /* Enables horizontal scroll for the table only */
+    overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     border-radius: 0 0 15px 15px;
 }
 
-/* Prevent table rows from scaling or shifting */
 .table tbody tr:hover {
     transform: none !important;
     background-color: #f8fafc !important;
 }
 
-/* Force table data to stay in one line to trigger the scrollbar correctly */
 .table td, .table th {
-    white-space: nowrap; 
+    white-space: nowrap;
     vertical-align: middle;
     padding: 12px 15px;
 }
@@ -50,20 +54,44 @@ html, body {
 .progress {
     border-radius: 10px;
     height: 8px;
+    background: #e2e8f0;
 }
 
-/* --- Text Styling --- */
-.text-muted {
-    font-size: 0.85rem;
+/* --- Bank masked badge --- */
+.bank-masked {
+    font-family: 'Courier New', monospace;
+    background: rgba(79,70,229,0.08);
+    color: #4f46e5;
+    border-radius: 8px;
+    padding: 4px 12px;
+    font-size: 0.9rem;
+    letter-spacing: 3px;
+    border: 1px solid rgba(79,70,229,0.15);
 }
 
-/* --- Mobile Fixes --- */
+/* --- Clock button --- */
+.btn-primary {
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    border: none;
+}
+.btn-primary:hover {
+    opacity: 0.92;
+    transform: none !important;
+}
+.btn-danger {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    border: none;
+}
+
+/* --- Pulse alert for missing bank --- */
+@keyframes pulse-border {
+    0%,100% { box-shadow: 0 0 0 0 rgba(245,158,11,0.4); }
+    50%      { box-shadow: 0 0 0 8px rgba(245,158,11,0); }
+}
+.pulse-alert { animation: pulse-border 2.5s infinite; }
+
+/* --- Mobile --- */
 @media (max-width: 768px) {
-    .container {
-        padding-left: 15px;
-        padding-right: 15px;
-    }
-    .card {
-        text-align: center;
-    }
+    .container { padding-left: 15px; padding-right: 15px; }
+    .bank-masked { font-size: 0.8rem; letter-spacing: 2px; }
 }
