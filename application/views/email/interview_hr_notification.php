@@ -89,8 +89,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                             <p style="margin:0;font-size:13px;">
                                 <a href="https://suropriyo.in"
                                     style="color:#9ca3af;text-decoration:none;margin:0 10px;">www.suropriyo.in</a> <br>
-                                <a href="tel:+91 87772 70124"
-                                    style="color:#9ca3af;text-decoration:none;margin:0 10px;">+91 87772 70124</a>
+                                
                             </p>
                         </td>
                     </tr>
