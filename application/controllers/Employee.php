@@ -1733,45 +1733,82 @@ class Employee extends CI_Controller
     }
 
     public function generatePayslip()
-    {
-        if ($this->session->userdata('accesslevel') == 'HR' || $this->session->userdata('accesslevel') == 'ADMIN') {
-            $post = $this->input->post();
+{
+    // Authorization Check: Ensure only HR or ADMIN can access
+    if ($this->session->userdata('accesslevel') == 'HR' || $this->session->userdata('accesslevel') == 'ADMIN') {
+        $post = $this->input->post();
 
-            if ($post) {
-                $this->load->model('EmployeeModel');
-                $data = $this->security->xss_clean($post);
+        if ($post) {
+            $this->load->model('EmployeeModel');
+            
+            // Clean the data for security
+            $data = $this->security->xss_clean($post);
 
-                // Calculate Totals Securely on Server
-                $data['gross_earnings'] = $data['basic'] + $data['transport'] + $data['incentive'] + $data['overtime'] + $data['round_off'];
-                $data['total_deductions'] = $data['pf'] + $data['esi_deduction'] + $data['prof_tax'] + $data['late_fees'] + $data['loss_of_pay'] + $data['loan'];
-                $data['net_salary'] = $data['gross_earnings'] - $data['total_deductions'];
-                // MAJOR ERROR FIX: Stop execution if Net Salary is negative
-                if ($data['net_salary'] < 0) {
-                    $this->session->set_flashdata('error', 'Error: Deductions exceed Gross Earnings. Net Salary cannot be negative.');
-                    redirect('Employee/salaryManagement');
-                    return;
-                }
-                $db_data = $data;
-                unset($db_data['emp_name'], $db_data['designation'], $db_data['branch']);
+            /** * 1. CAST TO FLOAT: This is the critical fix for the "non-numeric" error.
+             * Even if a field is empty, (float) will convert it to 0.00.
+             */
+            $basic      = (float)$this->input->post('basic');
+            $transport  = (float)$this->input->post('transport');
+            $incentive  = (float)$this->input->post('incentive');
+            $overtime   = (float)$this->input->post('overtime');
+            $round_off  = (float)$this->input->post('round_off');
 
-                if ($this->EmployeeModel->slip_already_exists($db_data['seemp_id'], $db_data['slip_month'])) {
-                    $this->session->set_flashdata('error', 'Slip for this month already exists.');
-                    redirect('Employee/salaryManagement');
-                }
+            $pf             = (float)$this->input->post('pf');
+            $esi_deduction  = (float)$this->input->post('esi_deduction');
+            $prof_tax       = (float)$this->input->post('prof_tax');
+            $late_fees      = (float)$this->input->post('late_fees');
+            $loss_of_pay    = (float)$this->input->post('loss_of_pay');
+            $loan           = (float)$this->input->post('loan');
 
-                // --- THE FIX STARTS HERE ---
-                $this->db->insert('sesalaryslips', $db_data);
+            /**
+             * 2. PERFORM CALCULATIONS SECURELY
+             * Logic follows your required structure from the salary slips table.
+             */
+            $data['gross_earnings']   = $basic + $transport + $incentive + $overtime + $round_off;
+            $data['total_deductions'] = $pf + $esi_deduction + $prof_tax + $late_fees + $loss_of_pay + $loan;
+            $data['net_salary']       = $data['gross_earnings'] - $data['total_deductions'];
 
-                // Capture the ID of the row just inserted
-                $data['slip_id'] = $this->db->insert_id();
-                // --- THE FIX ENDS HERE ---
-
-                $this->load->view('hr/salarySlipPrintView', $data);
+            /**
+             * 3. SAFETY GUARD: Prevent negative salary generation
+             */
+            if ($data['net_salary'] < 0) {
+                $this->session->set_flashdata('error', 'Error: Deductions exceed Gross Earnings. Net Salary cannot be negative.');
+                redirect('Employee/salaryManagement');
+                return;
             }
-        } else {
-            redirect('Employee/Login');
+
+            /**
+             * 4. DUPLICATE CHECK: Prevent generating two slips for the same month
+             */
+            if ($this->EmployeeModel->slip_already_exists($data['seemp_id'], $data['slip_month'])) {
+                $this->session->set_flashdata('error', 'Slip for this month already exists for this employee.');
+                redirect('Employee/salaryManagement');
+                return;
+            }
+
+            /**
+             * 5. DATABASE PERSISTENCE
+             * Prepare data for DB insertion by removing non-table fields
+             */
+            $db_data = $data;
+            unset($db_data['emp_name'], $db_data['designation'], $db_data['branch']);
+
+            $this->db->insert('sesalaryslips', $db_data);
+            
+            // Capture the new ID to pass to the print view
+            $data['slip_id'] = $this->db->insert_id();
+
+            /**
+             * 6. LOAD PRINT VIEW
+             * Pass the fully calculated $data array to the print view
+             */
+            $this->load->view('hr/salarySlipPrintView', $data);
         }
+    } else {
+        // Redirect unauthorized users
+        redirect('Employee/Login');
     }
+}
     public function deleteSlipAjax()
     {
         if ($this->session->userdata('accesslevel') == 'HR' || $this->session->userdata('accesslevel') == 'ADMIN') {
