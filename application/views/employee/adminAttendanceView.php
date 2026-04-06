@@ -16,9 +16,9 @@
 <body>
     <?php if (isset($alert)):
         $isError = (stripos($alert, 'error') !== false || stripos($alert, 'failed') !== false);
-        ?>
+    ?>
         <script>
-            document.addEventListener("DOMContentLoaded", function () {
+            document.addEventListener("DOMContentLoaded", function() {
                 Swal.fire({
                     title: '<?= $isError ? "Notice" : "Success" ?>',
                     text: <?= json_encode($alert) ?>,
@@ -53,29 +53,29 @@
         <div class="attendance-search-form">
 
             <div class="search-form-wrapper">
-    <div class="search-group">
-        <label class="text-white"><b>Employee ID</b></label>
-        <input type="text" id="searchempid" name="searchempid" class="search-bar" placeholder="Enter ID">
-    </div>
+                <div class="search-group">
+                    <label class="text-white"><b>Employee ID</b></label>
+                    <input type="text" id="searchempid" name="searchempid" class="search-bar" placeholder="Enter ID">
+                </div>
 
-    <div class="search-group">
-        <label class="text-white"><b>Start Date</b></label>
-        <input type="date" id="startdate" name="startdate" class="search-bar">
-    </div>
+                <div class="search-group">
+                    <label class="text-white"><b>Start Date</b></label>
+                    <input type="date" id="startdate" name="startdate" class="search-bar">
+                </div>
 
-    <div class="search-group">
-        <label class="text-white"><b>End Date</b></label>
-        <input type="date" id="enddate" name="enddate" class="search-bar">
-    </div>
+                <div class="search-group">
+                    <label class="text-white"><b>End Date</b></label>
+                    <input type="date" id="enddate" name="enddate" class="search-bar">
+                </div>
 
-    <div class="search-group">
-        <button type="button" id="ajaxSearchBtn" class="search-btn">
-            <i class="fas fa-search"></i> Search
-        </button>
-    </div>
-</div>
+                <div class="search-group">
+                    <button type="button" id="ajaxSearchBtn" class="search-btn">
+                        <i class="fas fa-search"></i> Search
+                    </button>
+                </div>
+            </div>
 
-            <?= form_close() ?>
+
 
             <div class="table-section mt-4">
                 <h2 class="table-title">Attendance Records</h2>
@@ -123,7 +123,7 @@
         </div>
 
         <script>
-            document.querySelector('[name="searchempid"]').addEventListener('input', function (e) {
+            document.querySelector('[name="searchempid"]').addEventListener('input', function(e) {
                 const searchTerm = e.target.value.toLowerCase();
                 const rows = document.querySelectorAll('#attendanceTable tr');
                 rows.forEach(row => {
@@ -137,15 +137,15 @@
 
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script>
-            $(document).ready(function () {
+            $(document).ready(function() {
                 // 1. LETTER-BASED LIVE FILTERING (Client-side)
                 // This filters the rows currently loaded in the table as you type
-                $('#searchempid').on('input', function () {
+                $('#searchempid').on('input', function() {
                     const searchTerm = $(this).val().toLowerCase();
                     const $rows = $('#attendanceTable tr');
                     let visibleCount = 0;
 
-                    $rows.each(function () {
+                    $rows.each(function() {
                         const $row = $(this);
                         // Skip the "No records found" or "Loading" rows
                         if ($row.find('td').length > 1) {
@@ -188,10 +188,10 @@
                             '<?= $this->security->get_csrf_token_name(); ?>': '<?= $this->security->get_csrf_hash(); ?>'
                         },
                         dataType: 'json',
-                        success: function (response) {
+                        success: function(response) {
                             let html = '';
                             if (response.length > 0) {
-                                response.forEach(function (att) {
+                                response.forEach(function(att) {
                                     html += `
                         <tr>
                             <td>${att.formatted_date}</td>
@@ -208,20 +208,20 @@
                             }
                             $('#attendanceTable').html(html);
                         },
-                        error: function () {
+                        error: function() {
                             $('#attendanceTable').html('<tr><td colspan="7" class="text-center text-danger p-4">Error connecting to server.</td></tr>');
                         }
                     });
                 }
 
                 // Trigger AJAX on Button Click
-                $('#ajaxSearchBtn').on('click', function (e) {
+                $('#ajaxSearchBtn').on('click', function(e) {
                     e.preventDefault();
                     performAjaxSearch();
                 });
 
                 // Trigger AJAX on Enter Key
-                $('.search-bar').on('keypress', function (e) {
+                $('.search-bar').on('keypress', function(e) {
                     if (e.which == 13) {
                         e.preventDefault();
                         performAjaxSearch();
