@@ -26,21 +26,29 @@ class Services extends CI_Controller
     function Searchservice()
     {
         $this->load->model('ServicesModel');
+        $query = $this->input->post();
 
-        // hques comes from the header bar, ques comes from the search page bar
-        $query = $this->input->get('ques') ?? $this->input->get('hques');
+        if (isset($query['ques'])) {
+            $all_srv = $this->ServicesModel->get_filtered_service($query['ques']);
+            $data = array(
+                'allserv' => $all_srv
+            );
 
-        if (!empty($query)) {
-            $all_srv = $this->ServicesModel->get_filtered_service($query);
+            $this->load->view('headerView');
+            $this->load->view('searchServiceView', $data);
+            $this->load->view('footerView');
         } else {
+
             $all_srv = $this->ServicesModel->get_all_services();
+            $data = array(
+                'allserv' => $all_srv
+            );
+
+            $this->load->view('headerView');
+            $this->load->view('searchServiceView', $data);
+            $this->load->view('footerView');
         }
 
-        $data = array('allserv' => $all_srv);
-
-        $this->load->view('headerView');
-        $this->load->view('searchServiceView', $data);
-        $this->load->view('footerView');
     }
 
     // function ServiceDescription()
@@ -78,11 +86,11 @@ public function ServiceDescription($serv_id = NULL)
     if ($serv_id === NULL) {
         $serv_id = $this->input->post('serv_id');
     }
-
+ 
     if ($serv_id) {
         $this->load->model('ServicesModel');
         $list = $this->ServicesModel->get_service_by_id($serv_id);
-
+ 
         if ($list) {
             $data = array('serv' => $list);
             $this->load->view('headerView');

@@ -34,7 +34,9 @@ class Candidate extends CI_Controller
         }
     }
 
+    // ==========================================
     // 1. CANDIDATE REGISTRATION
+    // ==========================================
     public function register()
     {
         // Redirect if already logged in
@@ -110,7 +112,9 @@ class Candidate extends CI_Controller
         }
     }
 
+    // ==========================================
     // 3. CANDIDATE LOGOUT
+    // ==========================================
     public function logout()
     {
         // Safely remove ONLY candidate data so HR admins testing the site aren't logged out
@@ -122,7 +126,9 @@ class Candidate extends CI_Controller
         redirect('Careers');
     }
 
+    // ==========================================
     // 4. THE MAIN DASHBOARD
+    // ==========================================
     public function dashboard()
     {
         // Notice we don't need a session check here because the __construct() handles it!
@@ -151,7 +157,10 @@ class Candidate extends CI_Controller
         $this->load->view('candidate/layout', $data);
     }
 
+    // ==========================================
     // 5. HELPER FUNCTIONS
+    // ==========================================
+
     // Sets the secure session array
     private function set_candidate_session($id, $email)
     {
@@ -184,137 +193,7 @@ class Candidate extends CI_Controller
         redirect('Candidate/dashboard');
     }
 
-    // ==========================================
-    // 7. APPLY FORM SERVER-SIDE VALIDATION
-    // ==========================================
-    // Called by Jobs/ApplyStatus BEFORE saving the application.
-    // Returns TRUE if all rules pass; FALSE + sets flashdata if not.
-    //
-    // Usage in Jobs controller (ApplyStatus method):
-    //
-    //   $this->load->controller('Candidate');           // or use a shared model/library
-    //   if (!$this->Candidate->validate_apply_form()) {
-    //       redirect('Candidate/dashboard');
-    //   }
-    //
-    // Because the form is a modal on the dashboard we redirect back
-    // to the dashboard on failure; the view reads flashdata to
-    // re-open the modal and highlight the bad fields.
-    // ==========================================
-    public function validate_apply_form()
-    {
-        // Rules
-        $this->form_validation->set_rules(
-            'full_name', 'Full Name',
-            'required|trim|min_length[2]|max_length[80]|regex_match[/^[A-Za-z\s.\'\-]+$/]',
-            array(
-                'required'     => 'Full name is required.',
-                'min_length'   => 'Name must be at least 2 characters.',
-                'max_length'   => 'Name cannot exceed 80 characters.',
-                'regex_match'  => 'Name may only contain letters, spaces, dots, or hyphens.'
-            )
-        );
-
-        $this->form_validation->set_rules(
-            'phone', 'Phone Number',
-            'required|trim|regex_match[/^(\+91|91|0)?[6-9]\d{9}$/]',
-            array(
-                'required'    => 'Phone number is required.',
-                'regex_match' => 'Enter a valid 10-digit Indian mobile number.'
-            )
-        );
-
-        $this->form_validation->set_rules(
-            'experience', 'Years of Experience',
-            'required|decimal|greater_than_equal_to[0]|less_than_equal_to[50]',
-            array(
-                'required'               => 'Experience is required.',
-                'decimal'                => 'Experience must be a number (e.g. 2 or 2.5).',
-                'greater_than_equal_to'  => 'Experience cannot be negative.',
-                'less_than_equal_to'     => 'Experience cannot exceed 50 years.'
-            )
-        );
-
-        $this->form_validation->set_rules(
-            'expected_salary', 'Expected Salary',
-            'required|integer|greater_than_equal_to[1000]',
-            array(
-                'required'              => 'Expected salary is required.',
-                'integer'               => 'Salary must be a whole number.',
-                'greater_than_equal_to' => 'Salary must be at least ₹1,000 per month.'
-            )
-        );
-
-        $this->form_validation->set_rules(
-            'coverletter', 'Cover Letter',
-            'required|trim|min_length[50]|max_length[2000]',
-            array(
-                'required'   => 'A cover letter is required.',
-                'min_length' => 'Cover letter must be at least 50 characters.',
-                'max_length' => 'Cover letter cannot exceed 2000 characters.'
-            )
-        );
-
-        if ($this->form_validation->run() == FALSE) {
-            // Build a field-keyed error map for the view
-            $fields = array('full_name', 'phone', 'experience', 'expected_salary', 'coverletter');
-            $error_map = array();
-            foreach ($fields as $f) {
-                $err = $this->form_validation->error($f);
-                if (!empty(strip_tags($err))) {
-                    $error_map[$f] = strip_tags($err);
-                }
-            }
-
-            // Server-side file check (CI's form_validation cannot validate files)
-            if (empty($_FILES['resume']['name'])) {
-                $error_map['resume'] = 'A PDF resume is required.';
-            } else {
-                $allowed_mime  = array('application/pdf');
-                $file_mime     = mime_content_type($_FILES['resume']['tmp_name']);
-                $file_ext      = strtolower(pathinfo($_FILES['resume']['name'], PATHINFO_EXTENSION));
-                $max_size      = 5 * 1024 * 1024; // 5 MB
-
-                if (!in_array($file_mime, $allowed_mime) || $file_ext !== 'pdf') {
-                    $error_map['resume'] = 'Only PDF files are accepted for the resume.';
-                } elseif ($_FILES['resume']['size'] > $max_size) {
-                    $error_map['resume'] = 'Resume must be smaller than 5 MB.';
-                }
-            }
-
-            if (!empty($error_map)) {
-                // Preserve old POST values so the view can re-populate fields
-                $old_values = array();
-                foreach (array('full_name', 'phone', 'experience', 'expected_salary', 'coverletter') as $f) {
-                    $old_values[$f] = $this->input->post($f, TRUE);
-                }
-
-                // Store errors + old values as flashdata, then signal the dashboard
-                // to re-open the modal with the correct job ID
-                $this->session->set_flashdata('apply_errors', json_encode($error_map));
-                $this->session->set_flashdata('apply_old',    json_encode($old_values));
-
-                // Re-trigger modal on dashboard for the same job
-                $job_id = $this->uri->segment(3); // Jobs/ApplyStatus/{job_id}
-                $this->session->set_flashdata('auto_open_job_id', $job_id);
-
-                return FALSE; // Caller must redirect('Candidate/dashboard')
-            }
-        }
-
-        // Extra file validation when form_validation passed but file still unchecked
-        if (empty($_FILES['resume']['name'])) {
-            $this->session->set_flashdata('apply_errors', json_encode(
-                array('resume' => 'A PDF resume is required.')
-            ));
-            $job_id = $this->uri->segment(3);
-            $this->session->set_flashdata('auto_open_job_id', $job_id);
-            return FALSE;
-        }
-
-        return TRUE; // All good — caller may proceed to save
-    }
-
+     // 6. GOOGLE OAUTH 2.0 INTEGRATION
     public function google_login()
     {
         require_once FCPATH . 'vendor/autoload.php';
