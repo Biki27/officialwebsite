@@ -1,8 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 ?>
-<!-- Must Provide $alertclass of Bootstap css like 'alert-success' and $heading -->
-<!-- TODO("Design the alert visually") -->
+ 
 
 
 <!-- <div class="alert <?php echo trim($alertclass) == '' ? 'alert-success' : $alertclass ?>" role="alert">

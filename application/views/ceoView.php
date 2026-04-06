@@ -1,4 +1,4 @@
-<?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
+<?php defined('BASEPATH') or exit('No direct script access allowed'); ?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -14,7 +14,6 @@
         rel="stylesheet">
 
     <style>
-       
         * {
             box-sizing: border-box;
             margin: 0;
@@ -30,13 +29,13 @@
             overflow-x: hidden !important;
         }
 
-         
 
-.row {
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-}
-        
+
+        .row {
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+        }
+
         .premium-ceo-hero {
             background: #0F172A !important;
             color: white !important;
@@ -49,12 +48,12 @@
             max-width: 100vw !important;
             margin-left: calc(-50vw + 50%) !important; */
             background: #0F172A !important;
-    color: white !important;
-    padding: 120px 0 160px !important;
-    width: 100%;
-    overflow: hidden;
-    position: relative;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
+            color: white !important;
+            padding: 120px 0 160px !important;
+            width: 100%;
+            overflow: hidden;
+            position: relative;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
             margin-top: 0 !important;
             border-radius: 0 !important;
             /* Kills the rogue rounded corners */
@@ -70,9 +69,9 @@
             top: -20%;
             /* right: -10%;
             width: 800px; */
-             width: 500px;
-    max-width: 100%;
-    right: -20%;
+            width: 500px;
+            max-width: 100%;
+            right: -20%;
             height: 800px;
             background: radial-gradient(circle, rgba(37, 99, 235, 0.2) 0%, rgba(15, 23, 42, 0) 70%);
             z-index: 1;
@@ -101,12 +100,12 @@
             z-index: -1;
         } */
 
-            .ceo-avatar-wrapper::after {
-    top: 10px;
-    left: 0;
-    right: 0;
-    bottom: 0;
-}
+        .ceo-avatar-wrapper::after {
+            top: 10px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
 
         .ceo-photo-main {
             width: 100%;
@@ -311,12 +310,8 @@
             box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.15);
             border: 1px solid #E2E8F0;
         }
-        /* img {
-    max-width: 100%;
-    height: auto;
-    display: block;
-} */
 
+     
         /* =========================================
            MOBILE RESPONSIVENESS
            ========================================= */

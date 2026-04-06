@@ -2,11 +2,6 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 ?>
 
-
-
-
-
-
 <link rel="stylesheet" href="<?= base_url(); ?>css/About.css">
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"

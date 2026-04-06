@@ -109,10 +109,7 @@
                     <span class="contact-text">Kolkata, West Bengal, India</span>
                 </div>
 
-                <!-- <div class="contact-detail-row">
-                    <div class="contact-icon"><i class="fas fa-phone"></i></div>
-                    <a href="tel:+918777270124" class="contact-text contact-link">+91 87772 70124</a>
-                </div> -->
+                 
 
                 <div class="contact-detail-row">
                     <div class="contact-icon"><i class="fas fa-envelope"></i></div>
