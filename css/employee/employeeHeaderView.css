@@ -4,29 +4,41 @@ body {
     font-family: "Inter", sans-serif;
 }
 
-/* Card hover */
-.card {
-    transition: all 0.3s ease;
+/* Navbar brand */
+.navbar-brand {
+    font-size: 1rem;
+    letter-spacing: -0.3px;
 }
 
+/* Welcome card */
+.card {
+    transition: box-shadow 0.3s ease;
+}
 .card:hover {
-    transform: translateY(-4px);
+    transform: none !important;
+    box-shadow: 0 12px 28px rgba(79,70,229,0.08) !important;
 }
 
 /* Nav buttons */
 .nav-section-btn {
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    font-size: 0.9rem;
 }
 
+.nav-section-btn.active,
 .nav-section-btn:hover {
-    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    background: linear-gradient(135deg, #4f46e5, #7c3aed) !important;
     color: white !important;
-    border: none;
+    border-color: transparent !important;
 }
+
+/* Password strength bar */
+.strength-bar { height: 4px; border-radius: 2px; transition: width .3s, background .3s; }
+.strength-label { font-size: 0.75rem; font-weight: 600; }
 
 /* Responsive */
 @media (max-width: 768px) {
-    .navbar-brand {
-        font-size: 0.9rem;
-    }
+    .navbar-brand { font-size: 0.85rem; }
+    .nav-section-btn { font-size: 0.8rem; padding: 6px 14px; }
 }
