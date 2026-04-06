@@ -1495,6 +1495,7 @@ class Employee extends CI_Controller
     // admin add new product for his website.
     public function addProduct()
     {
+        
         $name = $this->input->post('productName');
         $info = $this->input->post('productInfo');
         $link = $this->input->post('productLink');

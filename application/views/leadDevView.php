@@ -1,4 +1,4 @@
-<?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
+<?php defined('BASEPATH') or exit('No direct script access allowed'); ?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -21,59 +21,40 @@
             margin: 0;
             padding: 0;
         }
-   
-.row {
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-}
+
+        .row {
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+        }
 
         /* FIX 1: Locks horizontal scroll & removes top gap */
         body {
             font-family: 'Inter', sans-serif !important;
             background-color: #F8FAFC !important;
             color: #475569 !important;
-            padding-top: 0px !important; /* Kills the white gap under navbar */
-            overflow-x: hidden !important; /* Kills horizontal scrolling */
+            padding-top: 0px !important;
+            /* Kills the white gap under navbar */
+            overflow-x: hidden !important;
+            /* Kills horizontal scrolling */
             display: flex;
             flex-direction: column;
             min-height: 100vh;
         }
 
-        /* =========================================
-           PREMIUM HERO SECTION
-           ========================================= */
-        /* FIX 2: Full bleed hero section */
-        /* .premium-profile-hero {
+
+
+        .premium-profile-hero {
             background: #0F172A !important;
             color: white !important;
-            
-            
-            padding: 140px 0 120px !important; 
-            
-          
-            width: 100vw !important;
-            max-width: 100vw !important;
-            margin-left: calc(-50vw + 50%) !important;
-            margin-top: 0 !important;
-            border-radius: 0 !important; 
-            
+            padding: 140px 0 120px !important;
+
+            width: 100%;
+            max-width: 100%;
+
             position: relative;
             overflow: hidden;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-        } */
-
-            .premium-profile-hero {
-    background: #0F172A !important;
-    color: white !important;
-    padding: 140px 0 120px !important;
-
-    width: 100%;
-    max-width: 100%;
-
-    position: relative;
-    overflow: hidden;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-}
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
 
         /* Subtle glowing orb in the background */
         .hero-glow {
@@ -82,7 +63,7 @@
             right: -10%;
             width: 800px;
             height: 800px;
-            background: radial-gradient(circle, rgba(37,99,235,0.2) 0%, rgba(15,23,42,0) 70%);
+            background: radial-gradient(circle, rgba(37, 99, 235, 0.2) 0%, rgba(15, 23, 42, 0) 70%);
             z-index: 1;
             pointer-events: none;
         }
@@ -100,24 +81,30 @@
         .profile-avatar-wrapper::after {
             content: '';
             position: absolute;
-            top: 15px; left: -15px; right: 15px; bottom: -15px;
+            top: 15px;
+            left: -15px;
+            right: 15px;
+            bottom: -15px;
             border: 2px solid rgba(37, 99, 235, 0.4);
             border-radius: 50%;
             z-index: -1;
         }
 
-         .profile-photo-main {
+        .profile-photo-main {
             width: 100%;
             max-width: 320px;
-            aspect-ratio: 1 / 1; /* FIX: Forces a perfect circle mathematically */
+            aspect-ratio: 1 / 1;
+            /* FIX: Forces a perfect circle mathematically */
             object-fit: cover;
             border-radius: 50%;
             border: 6px solid #1e293b;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
             transition: transform 0.4s ease;
             display: block;
-            margin: 0 auto; /* Ensures it stays centered */
+            margin: 0 auto;
+            /* Ensures it stays centered */
         }
+
         .profile-photo-main:hover {
             transform: translateY(-10px);
         }
@@ -134,7 +121,7 @@
         .hero-subtitle {
             font-size: 1.35rem;
             font-weight: 500;
-            color: #94A3B8 !important; 
+            color: #94A3B8 !important;
             margin-bottom: 30px;
             line-height: 1.6;
         }
@@ -176,14 +163,14 @@
             font-size: 1.05rem;
             text-decoration: none;
             transition: all 0.3s ease;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
             display: inline-flex;
             align-items: center;
         }
 
         .btn-premium-primary:hover {
             transform: translateY(-3px);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
             color: #1d4ed8 !important;
         }
 
@@ -193,7 +180,8 @@
         .experience-section {
             background: #F8FAFC;
             padding: 80px 0;
-            flex-grow: 1; /* Pushes footer to bottom */
+            flex-grow: 1;
+            /* Pushes footer to bottom */
         }
 
         .premium-exp-card {
@@ -202,7 +190,8 @@
             border-radius: 20px;
             box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.08);
             border: 1px solid #E2E8F0;
-            border-top: 5px solid #2563eb; /* Signature Brand Line */
+            border-top: 5px solid #2563eb;
+            /* Signature Brand Line */
             transition: transform 0.3s ease;
             height: 100%;
         }
@@ -246,13 +235,15 @@
         }
 
         .exp-list li i {
-            color: #10B981; /* Premium Emerald */
+            color: #10B981;
+            /* Premium Emerald */
             margin-top: 5px;
             font-size: 0.9rem;
         }
 
         .exp-list.achievements li i {
-            color: #F59E0B; /* Premium Gold for Achievements */
+            color: #F59E0B;
+            /* Premium Gold for Achievements */
         }
 
         /* =========================================
@@ -263,12 +254,16 @@
                 text-align: center;
                 padding: 120px 0 80px !important;
             }
+
             .profile-avatar-wrapper {
                 margin-bottom: 40px;
             }
+
             .profile-avatar-wrapper::after {
-                display: none; /* Hide offset border on mobile to save space */
+                display: none;
+                /* Hide offset border on mobile to save space */
             }
+
             .skills-wrapper {
                 justify-content: center;
             }
@@ -278,10 +273,12 @@
             .premium-exp-card {
                 padding: 30px 20px;
             }
+
             .btn-premium-primary {
                 width: 100%;
                 justify-content: center;
             }
+
             .experience-section {
                 padding: 50px 0;
             }
@@ -295,11 +292,11 @@
         <div class="hero-glow"></div>
         <div class="container hero-content-wrapper">
             <div class="row align-items-center flex-column-reverse flex-lg-row g-5">
-                
+
                 <div class="col-lg-7">
                     <h1 class="hero-title">Lead Web Developer</h1>
                     <p class="hero-subtitle">10+ Years Building Enterprise Web Solutions</p>
-                    
+
                     <div class="skills-wrapper">
                         <span class="premium-skill-tag">React</span>
                         <span class="premium-skill-tag">Next.js</span>
@@ -328,7 +325,7 @@
     <section class="experience-section">
         <div class="container">
             <div class="row g-4">
-                
+
                 <div class="col-lg-6">
                     <div class="premium-exp-card">
                         <h4 class="exp-card-title">
@@ -350,7 +347,8 @@
                         <h4 class="exp-card-title">
                             <i class="fas fa-trophy text-warning me-2"></i> Key Achievements
                         </h4>
-                        <span class="exp-card-subtitle" style="visibility: hidden;">Spacer</span> <ul class="exp-list achievements mt-n4">
+                        <span class="exp-card-subtitle" style="visibility: hidden;">Spacer</span>
+                        <ul class="exp-list achievements mt-n4">
                             <li><i class="fas fa-star"></i> 500K+ users served globally</li>
                             <li><i class="fas fa-star"></i> 99.9% uptime across platforms</li>
                             <li><i class="fas fa-star"></i> Reduced load times by 70%</li>
@@ -366,4 +364,5 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
+
 </html>
