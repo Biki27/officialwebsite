@@ -25,7 +25,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
         });
         Toast.fire({
           icon: '<?= $icon ?>',
-          title: '<?= $msg ?>'
+          title: <?= json_encode($msg) ?>
         });
       });
     </script>

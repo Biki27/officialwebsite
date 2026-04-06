@@ -8,27 +8,51 @@ $unique_slip_no = "{$company_prefix}/{$branch_code}/{$month_code}/" . str_pad($d
 
 function numberToWords($num)
 {
-    $ones    = [0=>"Zero",1=>"One",2=>"Two",3=>"Three",4=>"Four",5=>"Five",6=>"Six",7=>"Seven",8=>"Eight",9=>"Nine",10=>"Ten",11=>"Eleven",12=>"Twelve",13=>"Thirteen",14=>"Fourteen",15=>"Fifteen",16=>"Sixteen",17=>"Seventeen",18=>"Eighteen",19=>"Nineteen"];
-    $tens    = [0=>"Zero",1=>"Ten",2=>"Twenty",3=>"Thirty",4=>"Forty",5=>"Fifty",6=>"Sixty",7=>"Seventy",8=>"Eighty",9=>"Ninety"];
+    $ones = [0=>"Zero",1=>"One",2=>"Two",3=>"Three",4=>"Four",5=>"Five",6=>"Six",7=>"Seven",8=>"Eight",9=>"Nine",10=>"Ten",11=>"Eleven",12=>"Twelve",13=>"Thirteen",14=>"Fourteen",15=>"Fifteen",16=>"Sixteen",17=>"Seventeen",18=>"Eighteen",19=>"Nineteen"];
+    $tens = [0=>"Zero",1=>"Ten",2=>"Twenty",3=>"Thirty",4=>"Forty",5=>"Fifty",6=>"Sixty",7=>"Seventy",8=>"Eighty",9=>"Ninety"];
     $hundreds = ["Hundred","Thousand","Million","Billion","Trillion"];
-    if ($num == 0) return "Zero";
-    $num     = number_format($num, 2, ".", "");
+    
+    if ($num == 0) return "Zero Rupees Only";
+
+    // Format number to 2 decimal places
+    $num = number_format($num, 2, ".", ",");
     $num_arr = explode(".", $num);
-    $wholenum = $num_arr[0];
-    $decnum   = $num_arr[1];
+    $wholenum = str_replace(",", "", $num_arr[0]); // Remove commas for calculation
+    $decnum = $num_arr[1];
+
+    // Helper to process chunks of numbers
+    $processChunk = function($n) use ($ones, $tens, $hundreds) {
+        $txt = "";
+        $n = (int)$n;
+        if ($n < 20) {
+            $txt .= $ones[$n];
+        } elseif ($n < 100) {
+            $txt .= $tens[substr($n, 0, 1)] . " " . $ones[substr($n, 1, 1)];
+        } else {
+            $txt .= $ones[substr($n, 0, 1)] . " " . $hundreds[0] . " " . $tens[substr($n, 1, 1)] . " " . $ones[substr($n, 2, 1)];
+        }
+        return str_replace(" Zero", "", $txt);
+    };
+
+    // Process Rupees (Whole number)
     $whole_arr = array_reverse(explode(",", number_format($wholenum)));
     krsort($whole_arr);
-    $rettxt = "";
+    $rupeeTxt = "";
     foreach ($whole_arr as $key => $i) {
-        $i = (int)$i;
-        if ($i == 0) continue;
-        if ($i < 20) $rettxt .= $ones[$i];
-        elseif ($i < 100) $rettxt .= $tens[substr($i,0,1)]." ".$ones[substr($i,1,1)];
-        else $rettxt .= $ones[substr($i,0,1)]." ".$hundreds[0]." ".$tens[substr($i,1,1)]." ".$ones[substr($i,2,1)];
-        if ($key > 0) $rettxt .= " ".$hundreds[$key]." ";
+        if ((int)$i == 0) continue;
+        $rupeeTxt .= $processChunk($i);
+        if ($key > 0) $rupeeTxt .= " " . $hundreds[$key] . " ";
     }
-    $res = trim($rettxt) . ($decnum > 0 ? " and ".$decnum."/100" : "");
-    return $res . " Rupees Only";
+
+    $final_string = trim($rupeeTxt) . " Rupees";
+
+    // Process Paise (Decimals)
+    if ((int)$decnum > 0) {
+        $paiseTxt = $processChunk($decnum);
+        $final_string .= " and " . trim($paiseTxt) . " Paise";
+    }
+
+    return $final_string . " Only";
 }
 
 function fmtVal($val)
@@ -303,7 +327,7 @@ $net_before_round = $final_net - $round_off_val;          // gross - deductions 
                     <td class="text-right"><?= fmtVal($prof_tax) ?></td>
                 </tr>
                 <tr>
-                    <td>Overtime / Half Day</td>
+                    <td>Overtime </td>
                     <td class="text-right" style="border-right:2px solid #000;"><?= fmtVal($overtime) ?></td>
                     <td>Late Fees / NPL</td>
                     <td class="text-right"><?= fmtVal($late_fees) ?></td>
