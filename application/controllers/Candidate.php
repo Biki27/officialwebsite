@@ -103,10 +103,13 @@ class Candidate extends CI_Controller
                 $this->set_candidate_session($user->id, $user->email);
                 $this->handle_redirect();
             } else {
-                // Login failed
                 $this->session->set_flashdata('error', 'Invalid Email or Password.');
-                redirect('Candidate/login');
+                // reload the form — POST data stays alive for set_value()
+                $data['title'] = "Candidate Login | Suropriyo Enterprise";
+                $data['content'] = $this->load->view('candidate/candidateLoginView', '', TRUE);
+                $this->load->view('candidate/layout', $data);
             }
+
         }
     }
 
@@ -163,7 +166,7 @@ class Candidate extends CI_Controller
         $this->session->set_userdata($session_data);
     }
 
-  
+
     private function handle_redirect()
     {
         $job_id = $this->session->userdata('redirect_to_job');
@@ -205,51 +208,56 @@ class Candidate extends CI_Controller
     {
         // Rules
         $this->form_validation->set_rules(
-            'full_name', 'Full Name',
+            'full_name',
+            'Full Name',
             'required|trim|min_length[2]|max_length[80]|regex_match[/^[A-Za-z\s.\'\-]+$/]',
             array(
-                'required'     => 'Full name is required.',
-                'min_length'   => 'Name must be at least 2 characters.',
-                'max_length'   => 'Name cannot exceed 80 characters.',
-                'regex_match'  => 'Name may only contain letters, spaces, dots, or hyphens.'
+                'required' => 'Full name is required.',
+                'min_length' => 'Name must be at least 2 characters.',
+                'max_length' => 'Name cannot exceed 80 characters.',
+                'regex_match' => 'Name may only contain letters, spaces, dots, or hyphens.'
             )
         );
 
         $this->form_validation->set_rules(
-            'phone', 'Phone Number',
+            'phone',
+            'Phone Number',
             'required|trim|regex_match[/^(\+91|91|0)?[6-9]\d{9}$/]',
             array(
-                'required'    => 'Phone number is required.',
+                'required' => 'Phone number is required.',
                 'regex_match' => 'Enter a valid 10-digit Indian mobile number.'
             )
         );
 
         $this->form_validation->set_rules(
-            'experience', 'Years of Experience',
+            'experience',
+            'Years of Experience',
             'required|decimal|greater_than_equal_to[0]|less_than_equal_to[50]',
             array(
-                'required'               => 'Experience is required.',
-                'decimal'                => 'Experience must be a number (e.g. 2 or 2.5).',
-                'greater_than_equal_to'  => 'Experience cannot be negative.',
-                'less_than_equal_to'     => 'Experience cannot exceed 50 years.'
+                'required' => 'Experience is required.',
+                'decimal' => 'Experience must be a number (e.g. 2 or 2.5).',
+                'greater_than_equal_to' => 'Experience cannot be negative.',
+                'less_than_equal_to' => 'Experience cannot exceed 50 years.'
             )
         );
 
         $this->form_validation->set_rules(
-            'expected_salary', 'Expected Salary',
+            'expected_salary',
+            'Expected Salary',
             'required|integer|greater_than_equal_to[1000]',
             array(
-                'required'              => 'Expected salary is required.',
-                'integer'               => 'Salary must be a whole number.',
+                'required' => 'Expected salary is required.',
+                'integer' => 'Salary must be a whole number.',
                 'greater_than_equal_to' => 'Salary must be at least ₹1,000 per month.'
             )
         );
 
         $this->form_validation->set_rules(
-            'coverletter', 'Cover Letter',
+            'coverletter',
+            'Cover Letter',
             'required|trim|min_length[50]|max_length[2000]',
             array(
-                'required'   => 'A cover letter is required.',
+                'required' => 'A cover letter is required.',
                 'min_length' => 'Cover letter must be at least 50 characters.',
                 'max_length' => 'Cover letter cannot exceed 2000 characters.'
             )
@@ -270,10 +278,10 @@ class Candidate extends CI_Controller
             if (empty($_FILES['resume']['name'])) {
                 $error_map['resume'] = 'A PDF resume is required.';
             } else {
-                $allowed_mime  = array('application/pdf');
-                $file_mime     = mime_content_type($_FILES['resume']['tmp_name']);
-                $file_ext      = strtolower(pathinfo($_FILES['resume']['name'], PATHINFO_EXTENSION));
-                $max_size      = 5 * 1024 * 1024; // 5 MB
+                $allowed_mime = array('application/pdf');
+                $file_mime = mime_content_type($_FILES['resume']['tmp_name']);
+                $file_ext = strtolower(pathinfo($_FILES['resume']['name'], PATHINFO_EXTENSION));
+                $max_size = 5 * 1024 * 1024; // 5 MB
 
                 if (!in_array($file_mime, $allowed_mime) || $file_ext !== 'pdf') {
                     $error_map['resume'] = 'Only PDF files are accepted for the resume.';
@@ -292,8 +300,7 @@ class Candidate extends CI_Controller
                 // Store errors + old values as flashdata, then signal the dashboard
                 // to re-open the modal with the correct job ID
                 $this->session->set_flashdata('apply_errors', json_encode($error_map));
-                $this->session->set_flashdata('apply_old',    json_encode($old_values));
-
+                $this->session->set_flashdata('apply_old', json_encode($old_values));
                 // Re-trigger modal on dashboard for the same job
                 $job_id = $this->uri->segment(3); // Jobs/ApplyStatus/{job_id}
                 $this->session->set_flashdata('auto_open_job_id', $job_id);
