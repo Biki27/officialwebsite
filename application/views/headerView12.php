@@ -44,12 +44,12 @@
             </ul>
 
             <!-- Search Bar -->
-            <?= form_open('Services/Searchservice', array('method' => 'get')) ?>
+            <?= form_open('Services/Searchservice') ?>
             <div class="input-group input-group-sm search-input-wrapper">
-                <input type="search" name="hques" class="form-control search-input" placeholder="Search services..."
-                    aria-label="Search" value="<?= isset($_GET['hques']) ? htmlspecialchars($_GET['hques']) : '' ?>">
-                <button class="input-group-text search-icon" type="submit">
-                    <i class="fas fa-search"></i>
+                <input type="search" name="ques" class="form-control search-input" placeholder="Search services..."
+                    aria-label="Search">
+                <button class="input-group-text search-icon">
+                    <i type="submit" class="fas fa-search"></i>
                 </button>
             </div>
             <?= form_close() ?>

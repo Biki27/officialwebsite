@@ -1002,9 +1002,7 @@ class Employee extends CI_Controller
             $this->session->sess_destroy();
             redirect('Employee/Login');
         }
-        // ... rest of function
-
-
+        
         $empid = $this->session->userdata('empid');
         $this->load->model('EmployeeModel');
 

@@ -122,7 +122,7 @@
             </div>
         </div>
 
-        <script>
+        <!-- <script>
             document.querySelector('[name="searchempid"]').addEventListener('input', function(e) {
                 const searchTerm = e.target.value.toLowerCase();
                 const rows = document.querySelectorAll('#attendanceTable tr');
@@ -133,7 +133,7 @@
                     }
                 });
             });
-        </script>
+        </script> -->
 
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script>

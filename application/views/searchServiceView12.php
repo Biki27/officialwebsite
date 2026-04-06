@@ -299,10 +299,9 @@
 
     <div class="search-hero">
         <div class="container">
-            <?= form_open('Services/Searchservice', array('method' => 'get')) ?>
+            <?= form_open('Services/Searchservice') ?>
             <div class="standalone-search">
-                <input type="text" name="ques" class="search-input" placeholder="Search our services..."
-                    value="<?= isset($_GET['ques']) ? htmlspecialchars($_GET['ques']) : '' ?>">
+                <input type="text" name="ques" class="search-input" placeholder="Search our services...">
                 <button type="submit" class="search-btn">
                     <i class="fas fa-search me-2 d-inline d-md-none"></i>Search
                 </button>
