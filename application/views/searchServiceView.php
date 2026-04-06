@@ -13,7 +13,7 @@
         rel="stylesheet">
 
     <style>
-    <style>
+    
 
     /* =========================================
             GLOBAL & NAVBAR SPACING
