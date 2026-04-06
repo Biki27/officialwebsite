@@ -1282,8 +1282,7 @@
                                         <span style="font-size:.68rem;background:rgba(16,185,129,.1);color:#059669;border-radius:4px;padding:1px 6px;font-weight:700;">EARNING</span>
                                     </div>
                                     <div class="field-desc">
-                                        Pay for extra/overtime hours worked &nbsp;·&nbsp;
-                                        <span style="color:#ef4444;font-weight:600;">Half-day deductions → Step 3 (Deductions)</span>
+                                        Pay for extra/overtime hours worked &nbsp; 
                                     </div>
                                 </div>
                                 <div class="salary-input-wrap">
