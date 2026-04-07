@@ -107,7 +107,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         <label class="form-label">Salary (₹) <span class="required">*</span></label>
                         <input type="number" class="form-control" id="salary" name="salary"
                             value="<?= isset($emp) ? $emp->seempd_salary : (isset($prefill_applicant) ? htmlspecialchars($prefill_applicant->sejoba_exp_salary, ENT_QUOTES) : '') ?>"
-                            required>
+                            step="0.01" min="0"   required>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Experience (Years) <span class="required">*</span></label>
@@ -322,6 +322,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             const email = document.getElementById('email').value.trim();
             const phone = document.getElementById('phone').value.trim();
             const aadhar = document.getElementById('aadhar').value.trim();
+            const salary = parseFloat(document.getElementById('salary').value);
             const password = document.querySelector('input[name="password"]').value;
             const cvInput = document.getElementById('cvInput').files.length;
             const isUpdate = <?= isset($emp) ? 'true' : 'false' ?>;
@@ -334,6 +335,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             if (!/^[a-zA-Z0-9\-]+$/.test(empid)) errors.push("Employee ID must be alphanumeric (hyphens allowed).");
 
             if (empName.length < 2) errors.push("Employee name is required and must be at least 2 characters.");
+
+            // Salary validation
+            if (isNaN(salary) || salary <= 0) errors.push("Salary must be a positive number.");
+            if (salary > 9999999.99) errors.push("Salary cannot exceed ₹9,999,999.99. Please enter a valid amount.");
 
 
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

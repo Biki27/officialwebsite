@@ -674,7 +674,7 @@ class Employee extends CI_Controller
         $this->load->library('upload');
         $this->load->model('EmployeeModel');
         $this->load->library('form_validation');
-
+ 
         //  Set Validation Rules
         $this->form_validation->set_rules('empName', 'Employee Name', 'required|trim');
         $this->form_validation->set_rules('empid', 'Employee ID', 'required|trim|is_unique[seemployee.seemp_id]');
@@ -685,47 +685,49 @@ class Employee extends CI_Controller
         $this->form_validation->set_rules('branch', 'Branch', 'required');
         $this->form_validation->set_rules('status', 'Status', 'required');
         $this->form_validation->set_rules('accessLevel', 'Access Level', 'required');
-
+        $this->form_validation->set_rules('salary', 'Salary', 'required|numeric|greater_than[0]|less_than_equal_to[9999999.99]',
+            array('less_than_equal_to' => 'Salary cannot exceed ₹9,999,999.99.'));
+ 
         // 2. Check Validation Result
         if ($this->form_validation->run() == FALSE) {
             // Strip HTML tags and separate errors with a standard newline
             $error_msg = strip_tags(validation_errors('', "\n"));
-
+ 
             $this->session->set_flashdata('msg', "Validation Failed:\n" . $error_msg);
             redirect('Employee/RegisterEmployee');
             return;
         }
-
+ 
         //  Prepare Upload Configuration
         $config['upload_path'] = './uploads/';
         $config['allowed_types'] = 'gif|jpg|png|jpeg|pdf|doc|docx';
         $config['max_size'] = 5120; // 5MB
         $config['encrypt_name'] = TRUE;
         $this->upload->initialize($config);
-
+ 
         // Handle Photo & CV Uploads
         $photo_name = '';
-
+ 
         if (!empty($_FILES['photo']['name'])) {
             if ($_FILES['photo']['size'] > 5 * 1024 * 1024) {
-
+ 
                 $this->session->set_flashdata('msg', '❌ Please upload an image smaller than 5MB.');
                 redirect('Employee/RegisterEmployee');
                 return;
             }
-
+ 
             // Now upload
             if ($this->upload->do_upload('photo')) {
-
+ 
                 $photo_name = $this->upload->data('file_name');
             } else {
-
+ 
                 $this->session->set_flashdata('msg', 'Photo Upload Error: ' . strip_tags($this->upload->display_errors('', '')));
                 redirect('Employee/RegisterEmployee');
                 return;
             }
         }
-
+ 
         $cv_name = '';
         if (empty($_FILES['cv']['name'])) {
             $this->session->set_flashdata('msg', 'Error: CV Document is required for new employees.');
@@ -738,9 +740,9 @@ class Employee extends CI_Controller
             redirect('Employee/RegisterEmployee');
             return;
         }
-
+ 
         $formData = $this->input->post();
-
+ 
         $employee = [
             'seemp_id' => $formData['empid'],
             'seemp_branch' => $formData['branch'],
@@ -749,7 +751,7 @@ class Employee extends CI_Controller
             'seemp_status' => strtolower($formData['status']),
             'seemp_acesslevel' => $formData['accessLevel']
         ];
-
+ 
         $details = [
             'seempd_empid' => $formData['empid'],
             'seempd_name' => $formData['empName'],
@@ -769,18 +771,18 @@ class Employee extends CI_Controller
             'seempd_cv' => $cv_name,
             'seempd_jobaid' => !empty($formData['linked_applicant_id']) ? $formData['linked_applicant_id'] : NULL
         ];
-
+ 
         $result = $this->EmployeeModel->register_employee($employee, $details);
-
+ 
         if ($result['code'] == 0) {
-
+ 
             // Auto-Remove from Applicant Section by marking as 'hired'
             $linked_app_id = $this->input->post('linked_applicant_id', TRUE);
             if (!empty($linked_app_id)) {
                 $this->db->where('sejoba_id', $linked_app_id);
                 $this->db->update('sejobapplicant', ['sejoba_state' => 'hired']);
             }
-
+ 
             $this->session->set_flashdata('msg', 'Employee Added & Removed from Applicant List!');
             redirect('Employee/viewEmployee');
         } else {
@@ -794,18 +796,19 @@ class Employee extends CI_Controller
         $this->load->library('upload');
         $this->load->model('EmployeeModel');
         $this->load->library('form_validation');
-
         // Fetch current employee details FIRST (Before validation)
         $current = $this->EmployeeModel->get_employee_full_details($empid);
         if (empty($current)) {
             show_error('Employee not found');
         }
-
+        
         // Set Standard Validation Rules
         $this->form_validation->set_rules('empName', 'Employee Name', 'required|trim');
         $this->form_validation->set_rules('phone', 'Phone', 'required|numeric|exact_length[10]');
         $this->form_validation->set_rules('aadhar', 'Aadhar', 'required|numeric|exact_length[12]');
-
+        $this->form_validation->set_rules('salary', 'Salary', 'required|numeric|greater_than[0]|less_than_equal_to[9999999.99]',
+            array('less_than_equal_to' => 'Salary cannot exceed ₹9,999,999.99.'));
+ 
         // Email Uniqueness Check
         $posted_email = $this->input->post('email');
         if (trim($posted_email) !== $current[0]->seemp_email) {
@@ -820,7 +823,7 @@ class Employee extends CI_Controller
             // They kept their current email, just validate the format
             $this->form_validation->set_rules('email', 'Email', 'required|trim|valid_email');
         }
-
+ 
         //  Employee ID Uniqueness Check (In case they bypassed the readonly HTML)
         $posted_empid = $this->input->post('empid');
         if (trim($posted_empid) !== $current[0]->seemp_id) {
@@ -831,41 +834,41 @@ class Employee extends CI_Controller
                 array('is_unique' => 'This Employee ID is already taken.')
             );
         }
-
+ 
         // Password Validation (Only if they typed something)
         if (!empty($this->input->post('password'))) {
             $this->form_validation->set_rules('password', 'Password', 'min_length[6]');
         }
-
+ 
         // Run Validation
         if ($this->form_validation->run() == FALSE) {
             $error_msg = strip_tags(validation_errors('', "\n"));
-
+ 
             $this->session->set_flashdata('msg', "Validation Failed:\n" . $error_msg);
             redirect('Employee/RegisterEmployee');
             return;
         }
-
+ 
         // File Upload Config
         $photo_name = $current[0]->seempd_img;
         $cv_name = $current[0]->seempd_cv;
-
+ 
         $config['upload_path'] = './uploads/';
         $config['allowed_types'] = 'gif|jpg|png|jpeg|pdf|doc|docx';
         $config['max_size'] = 5120;
         $config['encrypt_name'] = TRUE;
         $this->upload->initialize($config);
-
+ 
         // Process Uploads (Only overwrite if new file exists)
         if (!empty($_FILES['photo']['name'])) {
-
+ 
             if ($_FILES['photo']['size'] > 5 * 1024 * 1024) {
-
+ 
                 $this->session->set_flashdata('msg', '❌ Please upload an image smaller than 5MB.');
                 redirect('Employee/RegisterEmployee');
                 return;
             }
-
+ 
             if ($this->upload->do_upload('photo')) {
                 $photo_name = $this->upload->data('file_name');
             } else {
@@ -877,7 +880,7 @@ class Employee extends CI_Controller
         if (!empty($_FILES['cv']['name']) && $this->upload->do_upload('cv')) {
             $cv_name = $this->upload->data('file_name');
         }
-
+ 
         // Update Data
         $updateData = [
             'new_empid' => $this->input->post('empid'), // New Employee ID
@@ -901,9 +904,9 @@ class Employee extends CI_Controller
             'photo' => $photo_name,
             'cv' => $cv_name
         ];
-
+ 
         $result = $this->EmployeeModel->update_employee($empid, $updateData);
-
+ 
         if ($result['code'] == 0) {
             $this->session->set_flashdata('msg', 'Employee Updated Successfully');
         } else {
