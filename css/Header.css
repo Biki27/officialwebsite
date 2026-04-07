@@ -23,7 +23,7 @@ body {
 }
 .navbar {
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    background: rgba(255, 255, 255, 0.95) !important;
+    background: white!important;
 	/* remove */
     /* backdrop-filter: blur(20px); */
     padding: 15px 0;
@@ -81,7 +81,7 @@ body {
 	border-radius: 25px;
 	overflow: hidden;
 	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-	backdrop-filter: blur(10px);
+	/* backdrop-filter: blur(10px); */
 	border: 1px solid rgba(37, 99, 235, 0.1);
 	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 	max-width: 280px;
