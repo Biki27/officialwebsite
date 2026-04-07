@@ -95,3 +95,83 @@ html, body {
     .container { padding-left: 15px; padding-right: 15px; }
     .bank-masked { font-size: 0.8rem; letter-spacing: 2px; }
 }
+/* --- Advanced Responsiveness Overrides --- */
+
+/* Target the Action Required Alert specifically */
+.pulse-alert {
+    display: flex !important;
+    flex-direction: column !important; /* Stack vertically on mobile */
+    text-align: center !important;
+    padding: 1.25rem !important;
+}
+
+/* Adjust Alert Icon for mobile */
+.pulse-alert i.fa-exclamation-circle {
+    margin-right: 0 !important;
+    margin-bottom: 1rem !important;
+}
+
+/* Adjust Alert Button for mobile */
+.pulse-alert button {
+    width: 100% !important; /* Full width button for easier tapping */
+    margin-top: 1rem !important;
+}
+
+/* Target Stat Cards and Info Rows */
+.stat-card .d-flex.justify-content-between {
+    flex-direction: column !important; /* Stack labels and values */
+    align-items: flex-start !important;
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 8px;
+    margin-bottom: 8px;
+}
+
+.stat-card .d-flex.justify-content-between span.text-end {
+    text-align: left !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    display: block !important;
+    margin-top: 4px;
+}
+
+/* Desktop Restoration: Revert stacking on screens larger than 768px */
+@media (min-width: 768px) {
+    .pulse-alert {
+        flex-direction: row !important;
+        text-align: left !important;
+    }
+
+    .pulse-alert i.fa-exclamation-circle {
+        margin-bottom: 0 !important;
+        margin-right: 1rem !important;
+    }
+
+    .pulse-alert button {
+        width: auto !important;
+        margin-top: 0 !important;
+    }
+
+    .stat-card .d-flex.justify-content-between {
+        flex-direction: row !important;
+        align-items: center !important;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .stat-card .d-flex.justify-content-between span.text-end {
+        text-align: right !important;
+        max-width: 60% !important;
+        margin-top: 0;
+    }
+}
+
+/* Global Mobile Fixes */
+@media (max-width: 576px) {
+    h4.fw-bold { font-size: 1.1rem !important; }
+    h3.fw-bold { font-size: 1.4rem !important; }
+    
+    .bank-masked {
+        letter-spacing: 1px !important;
+        font-size: 0.8rem !important;
+        padding: 4px 8px !important;
+    }
+}
