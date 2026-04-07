@@ -14,12 +14,12 @@
 
 <body>
 
-   <?php if ($this->session->flashdata('msg')) { 
+    <?php if ($this->session->flashdata('msg')) {
         $msg = $this->session->flashdata('msg');
         $icon = (stripos($msg, 'Success') !== false || stripos($msg, 'Updated') !== false) ? 'success' : 'info';
-    ?>
+        ?>
         <script>
-            document.addEventListener("DOMContentLoaded", function() {
+            document.addEventListener("DOMContentLoaded", function () {
                 const Toast = Swal.mixin({
                     toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, timerProgressBar: true
                 });
@@ -64,33 +64,35 @@
 
                         <div class="mb-3">
                             <label class="form-label">
-                                Product Image 
+                                Product Image
                                 <?php if (!isset($product)): ?>
                                     <span class="required">*</span>
                                 <?php endif; ?>
                             </label>
-                            
-                            <div class="position-relative text-center p-4 rounded-3 bg-light d-flex flex-column justify-content-center align-items-center" 
-                                 style="border: 2px dashed #cbd5e1; cursor: pointer; transition: all 0.3s ease; min-height: 220px;"
-                                 onmouseover="this.style.borderColor='#461bb9'; this.style.backgroundColor='#f8fafc';" 
-                                 onmouseout="this.style.borderColor='#cbd5e1'; this.style.backgroundColor='#f8f9fa';">
-                                 
-                                <input type="file" name="productImg" id="productImg" accept="image/*" 
-                                       class="position-absolute top-0 start-0 w-100 h-100 opacity-0" 
-                                       style="cursor: pointer; z-index: 10;" 
-                                       <?= isset($product) ? '' : 'required' ?>>
-                                
-                                <div id="uploadPrompt" style="<?= isset($product) && !empty($product->seprod_img) ? 'display: none;' : 'display: block;' ?>">
-                                    <i class="fas fa-cloud-upload-alt fa-3x mb-3" style="color: #461bb9; opacity: 0.8;"></i>
+
+                            <div class="position-relative text-center p-4 rounded-3 bg-light d-flex flex-column justify-content-center align-items-center"
+                                style="border: 2px dashed #cbd5e1; cursor: pointer; transition: all 0.3s ease; min-height: 220px;"
+                                onmouseover="this.style.borderColor='#461bb9'; this.style.backgroundColor='#f8fafc';"
+                                onmouseout="this.style.borderColor='#cbd5e1'; this.style.backgroundColor='#f8f9fa';">
+
+                                <input type="file" name="productImg" id="productImg" accept="image/*"
+                                    class="position-absolute top-0 start-0 w-100 h-100 opacity-0"
+                                    style="cursor: pointer; z-index: 10;" <?= isset($product) ? '' : 'required' ?>>
+
+                                <div id="uploadPrompt"
+                                    style="<?= isset($product) && !empty($product->seprod_img) ? 'display: none;' : 'display: block;' ?>">
+                                    <i class="fas fa-cloud-upload-alt fa-3x mb-3"
+                                        style="color: #461bb9; opacity: 0.8;"></i>
                                     <h6 class="fw-bold text-dark mb-1">Click to upload or drag and drop</h6>
                                     <p class="text-muted small mb-0">SVG, PNG, JPG or GIF (max. 5MB)</p>
                                 </div>
 
-                                <div id="previewContainer" style="<?= isset($product) && !empty($product->seprod_img) ? 'display: block;' : 'display: none;' ?>">
-                                    <img id="imagePreview" 
-                                         src="<?= isset($product) && !empty($product->seprod_img) ? base_url('uploads/products/' . $product->seprod_img) : '#' ?>" 
-                                         class="img-fluid rounded-3 shadow-sm border" 
-                                         style="max-height: 160px; object-fit: contain;">
+                                <div id="previewContainer"
+                                    style="<?= isset($product) && !empty($product->seprod_img) ? 'display: block;' : 'display: none;' ?>">
+                                    <img id="imagePreview"
+                                        src="<?= isset($product) && !empty($product->seprod_img) ? base_url('uploads/products/' . $product->seprod_img) : '#' ?>"
+                                        class="img-fluid rounded-3 shadow-sm border"
+                                        style="max-height: 160px; object-fit: contain;">
                                     <div class="mt-2 text-primary small fw-bold">
                                         <i class="fas fa-edit me-1"></i>Click to change image
                                     </div>
@@ -101,8 +103,8 @@
 
                         <div class="mb-3">
                             <label class="form-label">Product Information <span class="required">*</span></label>
-                            <textarea name="productInfo"
-                                class="form-control form-control-textarea" required><?= isset($product) ? $product->seprod_inf : '' ?></textarea>
+                            <textarea name="productInfo" class="form-control form-control-textarea"
+                                required><?= isset($product) ? $product->seprod_inf : '' ?></textarea>
                         </div>
 
                         <div class="mb-3">
@@ -126,9 +128,9 @@
                             </button>
                         <?php } ?>
 
-                        <button type="reset" class="btn btn-secondary" onclick="resetImagePreview()">
+                        <!-- <button type="button" class="btn btn-secondary" onclick="resetForm()">
                             <i class="fas fa-undo me-2"></i> Reset
-                        </button>
+                        </button> -->
 
                     </div>
 
@@ -139,7 +141,7 @@
 
     <script>
         // 1. Unified Image Preview Logic
-        document.getElementById('productImg').addEventListener('change', function(e) {
+        document.getElementById('productImg').addEventListener('change', function (e) {
             const file = this.files[0];
             const uploadPrompt = document.getElementById('uploadPrompt');
             const previewContainer = document.getElementById('previewContainer');
@@ -159,7 +161,7 @@
                 }
 
                 const reader = new FileReader();
-                reader.onload = function(e) {
+                reader.onload = function (e) {
                     previewImage.src = e.target.result;
                     // Hide the cloud text, show the image
                     uploadPrompt.style.display = 'none';
@@ -170,35 +172,50 @@
         });
 
         // 2. Reset Preview when Reset button is clicked
-        function resetImagePreview() {
-            const uploadPrompt = document.getElementById('uploadPrompt');
-            const previewContainer = document.getElementById('previewContainer');
-            const previewImage = document.getElementById('imagePreview');
-
+        function resetForm() {
             <?php if (isset($product)): ?>
-                // Revert to original database image
-                previewImage.src = '<?= base_url('uploads/products/' . $product->seprod_img) ?>';
+                // 1. Restore Text Values using safely encoded PHP strings
+                document.querySelector('[name="productName"]').value = <?= json_encode($product->seprod_name) ?>;
+                document.querySelector('[name="productInfo"]').value = <?= json_encode($product->seprod_inf) ?>;
+                document.querySelector('[name="productLink"]').value = <?= json_encode($product->seprod_link) ?>;
+
+                // 2. Restore Original Image Preview
+                const previewImage = document.getElementById('imagePreview');
+                const uploadPrompt = document.getElementById('uploadPrompt');
+                const previewContainer = document.getElementById('previewContainer');
+                const fileInput = document.getElementById('productImg');
+
+                // Reset the source to the original database path
+                previewImage.src = '<?= base_url("uploads/products/" . $product->seprod_img) ?>';
+
+                // Ensure container is visible and prompt is hidden (Edit Mode default)
                 uploadPrompt.style.display = 'none';
                 previewContainer.style.display = 'block';
+
+                // 3. Clear any pending file selection
+                fileInput.value = '';
+
             <?php else: ?>
-                // Show cloud prompt, hide image for new products
-                previewContainer.style.display = 'none';
-                uploadPrompt.style.display = 'block';
-                previewImage.src = '#';
+                // Standard reset for Add Mode
+                document.getElementById('productForm').reset();
+                document.getElementById('previewContainer').style.display = 'none';
+                document.getElementById('uploadPrompt').style.display = 'block';
+                document.getElementById('imagePreview').src = '#';
+                document.getElementById('productImg').value = '';
             <?php endif; ?>
         }
 
         // 3. Form Submission & SweetAlert
-        document.getElementById('productForm').addEventListener('submit', function(e) {
+        document.getElementById('productForm').addEventListener('submit', function (e) {
             // Let the browser's native HTML5 validation run first
             if (!this.checkValidity()) {
-                return; 
+                return;
             }
 
             e.preventDefault(); // Stop standard submission to show SweetAlert
-            
+
             let isUpdate = <?= isset($product) ? 'true' : 'false' ?>;
-            
+
             Swal.fire({
                 title: isUpdate ? 'Update Product?' : 'Add Product?',
                 text: isUpdate ? "Apply changes to this product?" : "Add this new product to the database?",
@@ -221,4 +238,5 @@
     </script>
 
 </body>
+
 </html>

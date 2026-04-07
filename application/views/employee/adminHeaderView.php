@@ -46,14 +46,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             <a class="nav-link" href="<?= base_url() ?>Employee/viewAttendance">
                 <i class="fas fa-calendar-alt"></i> Attendance
             </a>
-          
+
             <a class="nav-link" href="<?= base_url() ?>Employee/viewProjects">
                 <i class="fas fa-project-diagram"></i> Projects
             </a>
             <a class="nav-link" href="<?= base_url() ?>Employee/products">
                 <i class="fas fa-box"></i> Product
             </a>
-            <a class="nav-link"  onclick="logout()">
+            <a class="nav-link" onclick="logout()">
                 <i class="fas fa-sign-out-alt"></i> Logout
             </a>
         </nav>
@@ -80,19 +80,29 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             }
         });
 
-         window.logout = function() {
-                Swal.fire({
-                    title: 'Ready to leave?',
-                    text: "You will be logged out of the Admin Dashboard.",
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonColor: '#461bb9',
-                    cancelButtonColor: '#64748b',
-                    confirmButtonText: 'Yes, Logout'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.location.href = '<?= base_url() ?>Employee/logout';
-                    }
-                });
-            };
+        window.logout = function () {
+            Swal.fire({
+                title: 'Ready to leave?',
+                text: "You will be logged out of the Admin Dashboard.",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#461bb9',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Yes, Logout'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '<?= base_url() ?>Employee/logout';
+                }
+            });
+        };
+        // Active nav link highlight
+        document.addEventListener('DOMContentLoaded', function () {
+            const currentUrl = window.location.href;
+            const navLinks = document.querySelectorAll('.sidebar .nav-link');
+            navLinks.forEach(link => {
+                if (link.href && currentUrl.includes(link.getAttribute('href'))) {
+                    link.classList.add('active');
+                }
+            });
+        });
     </script>
