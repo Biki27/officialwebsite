@@ -44,7 +44,8 @@
             </div> -->
             <?= form_close() ?>
 
-            <?= form_open("Jobs/FilterJob") ?>
+            <!-- <?= form_open("Jobs/FilterJob") ?> -->
+             <?= form_open("Jobs/FilterJob", ['method' => 'get']) ?>
             <div class="row g-3 justify-content-center">
                 <div class="col-lg col-md-4 col-sm-6">
                     <div class="premium-filter-group">
