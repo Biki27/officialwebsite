@@ -209,7 +209,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
                                 </div>
                                 <div class="col-md-3">
                                     <label>Increment (%)</label>
-                                    <input type="number" step="0.01" class="form-control" name="inc_percentage" id="inc_percentage" oninput="calculateIncrement()" max="100">
+                                    <input type="number" step="0.01" class="form-control" name="inc_percentage" id="inc_percentage" oninput="calculateIncrement()" min='1' max="100" >
                                 </div>
                                 <div class="col-md-3">
                                     <label>Increment Amount (₹)</label>
