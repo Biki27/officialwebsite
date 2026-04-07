@@ -67,10 +67,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                             <div class="info-value">₹ <?= $info->seempd_salary ?></div>
                         </div>
 
-                        <div class="info-item">
+                        <!-- <div class="info-item">
                             <div class="info-label">Increment</div>
                             <div class="info-value"><?= $info->seempd_increment ?>%</div>
-                        </div>
+                        </div> -->
 
                         <div class="info-item">
                             <div class="info-label">Date of Birth</div>

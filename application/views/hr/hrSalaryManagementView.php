@@ -1080,20 +1080,32 @@
                                                 <i class="fas fa-undo me-1"></i>Edit
                                             </button>
                                         <?php else: ?>
-                                            <button class="btn-process"
-                                                onclick="openSlipModal(
-                                    '<?= addslashes($emp->seemp_id) ?>',
-                                    '<?= addslashes($emp->seempd_name) ?>',
-                                    '<?= addslashes($emp->seempd_designation) ?>',
-                                    '<?= addslashes($emp->seemp_branch) ?>',
-                                    '<?= $emp->seempd_salary ?>',
-                                    '<?= addslashes($emp->sebank_ac_no ?? '') ?>',
-                                    '<?= addslashes($emp->sebank_ifsc ?? '') ?>',
-                                    '<?= addslashes($emp->sebank_esi ?? '') ?>',
-                                    '<?= $selected_month ?>'
-                                )">
-                                                <i class="fas fa-calculator me-1"></i>Process Slip
-                                            </button>
+                                            <?php if ($has_bank): ?>
+                                                <button class="btn-process"
+                                                    onclick="openSlipModal(
+                                                        '<?= addslashes($emp->seemp_id) ?>',
+                                                        '<?= addslashes($emp->seempd_name) ?>',
+                                                        '<?= addslashes($emp->seempd_designation) ?>',
+                                                        '<?= addslashes($emp->seemp_branch) ?>',
+                                                        '<?= $emp->seempd_salary ?>',
+                                                        '<?= addslashes($emp->sebank_ac_no ?? '') ?>',
+                                                        '<?= addslashes($emp->sebank_ifsc ?? '') ?>',
+                                                        '<?= addslashes($emp->sebank_esi ?? '') ?>',
+                                                        '<?= $selected_month ?>'
+                                                    )">
+                                                    <i class="fas fa-calculator me-1"></i>Process Slip
+                                                </button>
+                                            <?php else: ?>
+                                                <div class="d-flex flex-column align-items-center">
+                                                    <button class="btn-process" style="background: #cbd5e1; cursor: not-allowed; opacity: 1;" disabled title="Bank details missing">
+                                                        <i class="fas fa-lock me-1"></i>Locked
+                                                    </button>
+                                                    <span style="font-size: 0.7rem; color: #ef4444; margin-top: 4px; text-align: center; line-height: 1.2;">
+                                                        Missing Bank Details<br>
+                                                        
+                                                    </span>
+                                                </div>
+                                            <?php endif; ?>
                                         <?php endif; ?>
                                     </div>
                                 </td>
@@ -1282,7 +1294,7 @@
                                         <span style="font-size:.68rem;background:rgba(16,185,129,.1);color:#059669;border-radius:4px;padding:1px 6px;font-weight:700;">EARNING</span>
                                     </div>
                                     <div class="field-desc">
-                                        Pay for extra/overtime hours worked &nbsp; 
+                                        Pay for extra/overtime hours worked &nbsp;
                                     </div>
                                 </div>
                                 <div class="salary-input-wrap">
@@ -1732,6 +1744,18 @@
         function validateStep1() {
             const month = document.getElementById('slip_month').value;
             const days = parseInt(document.getElementById('slip_paydays').value);
+            const bankac = document.getElementById('slip_bankac').value.trim();
+            const ifsc = document.getElementById('slip_ifsc').value.trim();
+
+            // Bank account validation (basic)
+            if (!bankac || bankac.length < 9 || bankac.length > 18) {
+                showErr('Please enter the employee\'s bank account number (9-18 characters).');
+                return false;
+            }
+            if (!ifsc || ifsc.length !== 11) {
+                showErr('Please enter the IFSC code for the employee\'s bank branch (11 characters).');
+                return false;
+            }
             if (!month) {
                 showErr('Please select a salary month.');
                 return false;

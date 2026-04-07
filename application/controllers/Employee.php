@@ -627,7 +627,7 @@ class Employee extends CI_Controller
 
         echo json_encode($project);   // null if not found, object if found
     }
-
+    // remove
     function RegisterEmployee()
     {
         if (
@@ -669,6 +669,7 @@ class Employee extends CI_Controller
             $this->load->view('errors/invalidAccessView');
         }
     }
+    //
     public function addEmployee()
     {
         $this->load->library('upload');
@@ -762,7 +763,7 @@ class Employee extends CI_Controller
             'seempd_experience' => $formData['experience'],
             'seempd_dob' => $formData['dob'],
             'seempd_joiningdate' => $formData['joiningDate'],
-            'seempd_increment' => $formData['increment'],
+            // 'seempd_increment' => $formData['increment'],
             'seempd_address_permanent' => $formData['permAddress'],
             'seempd_address_current' => $formData['currentAddress'],
             'seempd_aadhar' => $formData['aadhar'],
@@ -900,7 +901,7 @@ class Employee extends CI_Controller
             'pan' => $this->input->post('pan'),
             'accessLevel' => $this->input->post('accessLevel'),
             'project' => $this->input->post('project'),
-            'increment' => $this->input->post('increment'),
+            // 'increment' => $this->input->post('increment'),
             'photo' => $photo_name,
             'cv' => $cv_name
         ];
@@ -1873,6 +1874,55 @@ class Employee extends CI_Controller
                 $this->session->set_flashdata('login_error', 'This email is not registered in our system. Please contact HR.');
                 redirect('Employee/Login');
             }
+        }
+    }
+    // --- Employee Increment Routes ---
+
+    // Fetch history via AJAX to show in a modal
+    public function getIncrementHistoryAjax($empid)
+    {
+        if ($this->session->userdata('accesslevel') != 'ADMIN' && $this->session->userdata('accesslevel') != 'HR') {
+            echo json_encode(['error' => 'Unauthorized']);
+            return;
+        }
+
+        $this->load->model('EmployeeModel');
+        $history = $this->EmployeeModel->get_increment_history($empid);
+        echo json_encode($history);
+    }
+
+    // Handle the submission of a new increment
+    public function applyIncrement()
+    {
+        if ($this->session->userdata('accesslevel') != 'ADMIN' && $this->session->userdata('accesslevel') != 'HR') {
+            show_error('Unauthorized', 403);
+        }
+
+        $post = $this->security->xss_clean($this->input->post());
+
+        if ($post) {
+            $this->load->model('EmployeeModel');
+
+            $increment_data = [
+                'inc_empid' => $post['inc_empid'],
+                'inc_effective_date' => $post['inc_date'],
+                'inc_percentage' => (float)$post['inc_percentage'],
+                'inc_amount' => (float)$post['inc_amount'],
+                'old_salary' => (float)$post['old_salary'],
+                'new_salary' => (float)$post['new_salary'],
+                'inc_reason' => $post['inc_reason']
+            ];
+
+            $result = $this->EmployeeModel->add_salary_increment($increment_data);
+
+            if ($result['code'] == 0) {
+                $this->session->set_flashdata('msg', 'Increment recorded and salary updated successfully!');
+            } else {
+                $this->session->set_flashdata('error', 'Failed to record increment.');
+            }
+
+            // Redirect back to the employee view page
+            redirect('Employee/viewEmployee');
         }
     }
 }

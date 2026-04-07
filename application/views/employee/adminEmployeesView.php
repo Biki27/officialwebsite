@@ -13,9 +13,9 @@ defined('BASEPATH') or exit('No direct script access allowed');
   <?php if ($this->session->flashdata('msg')):
     $msg = $this->session->flashdata('msg');
     $icon = (stripos($msg, 'Success') !== false) ? 'success' : 'info';
-    ?>
+  ?>
     <script>
-      document.addEventListener("DOMContentLoaded", function () {
+      document.addEventListener("DOMContentLoaded", function() {
         const Toast = Swal.mixin({
           toast: true,
           position: 'top-end',
@@ -37,7 +37,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
     <div id="employees" class="section active">
       <h2 class="text-white mb-4">Employee Management</h2>
 
-     
+
 
       <!-- Search Box -->
       <?= form_open('Employee/viewEmployee') ?>
@@ -116,6 +116,10 @@ defined('BASEPATH') or exit('No direct script access allowed');
                     <i class="fas fa-edit"></i>
                   </button>
                   <?= form_close() ?>
+                  <!-- increments btn -->
+                  <button class="btn btn-sm btn-outline-success" onclick="openIncrementModal('<?= $emp->seemp_id ?>', '<?= $emp->seempd_name ?>', <?= $emp->seempd_salary ?>)">
+                    <i class="fas fa-chart-line"></i> Increments
+                  </button>
                 </td>
               </tr>
 
@@ -180,7 +184,78 @@ defined('BASEPATH') or exit('No direct script access allowed');
       </div>
     </div>
   </div>
-  <!-- Employee Details Modal -->
+  <!--  Increment Modal -->
+   <div class="modal fade" id="incrementModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Increment History: <span id="inc_emp_name" class="fw-bold"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                
+                <div class="card bg-light mb-4">
+                    <div class="card-body">
+                        <h6 class="card-title mb-3"><i class="fas fa-plus-circle text-primary"></i> Apply New Increment</h6>
+                        <form action="<?= base_url('Employee/applyIncrement') ?>" method="POST">
+                            <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>">
+                            <input type="hidden" name="inc_empid" id="inc_empid">
+                            <input type="hidden" name="old_salary" id="old_salary">
+
+                            <div class="row g-3">
+                                <div class="col-md-3">
+                                    <label>Current Salary</label>
+                                    <input type="text" class="form-control" id="display_old_salary" readonly>
+                                </div>
+                                <div class="col-md-3">
+                                    <label>Increment (%)</label>
+                                    <input type="number" step="0.01" class="form-control" name="inc_percentage" id="inc_percentage" oninput="calculateIncrement()" max="100">
+                                </div>
+                                <div class="col-md-3">
+                                    <label>Increment Amount (₹)</label>
+                                    <input type="number" step="0.01" class="form-control" name="inc_amount" id="inc_amount" oninput="calculateIncrementFromAmount()">
+                                </div>
+                                <div class="col-md-3">
+                                    <label>New Salary (₹)</label>
+                                    <input type="number" step="0.01" class="form-control" name="new_salary" id="new_salary" readonly>
+                                </div>
+                                <div class="col-md-4">
+                                    <label>Effective Date</label>
+                                    <input type="date" class="form-control" name="inc_date" required>
+                                </div>
+                                <div class="col-md-8">
+                                    <label>Reason / Note</label>
+                                    <input type="text" class="form-control" name="inc_reason" placeholder="e.g. Annual Appraisal 2026">
+                                </div>
+                                <div class="col-12 text-end">
+                                    <button type="submit" class="btn btn-success">Apply Increment</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <h6 class="mb-3"><i class="fas fa-history text-secondary"></i> Past Increments</h6>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped text-sm">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Date</th>
+                                <th>Old Salary</th>
+                                <th>Increment</th>
+                                <th>New Salary</th>
+                                <th>Reason</th>
+                            </tr>
+                        </thead>
+                        <tbody id="incrementHistoryBody">
+                            </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
@@ -209,7 +284,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
         url: '<?= base_url("Employee/getEmployeeLeaveSummary/") ?>' + empid,
         type: 'GET',
         dataType: 'json',
-        success: function (res) {
+        success: function(res) {
           document.getElementById('dt_leave_count').innerText = res.approved_days;
 
           let html = '';
@@ -233,12 +308,12 @@ defined('BASEPATH') or exit('No direct script access allowed');
           }
           document.getElementById('dt_leave_history').innerHTML = html;
         },
-        error: function () {
+        error: function() {
           document.getElementById('dt_leave_history').innerHTML = '<tr><td colspan="7" class="text-center text-danger">Error loading data.</td></tr>';
         }
       });
     }
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function() {
       const searchInput = document.getElementById('searchInput');
       const statusFilter = document.getElementById('statusFilter');
       const noDataRow = document.getElementById('noDataRow');
@@ -278,7 +353,65 @@ defined('BASEPATH') or exit('No direct script access allowed');
       searchInput.addEventListener('input', filterEmployees);
       statusFilter.addEventListener('change', filterEmployees);
     });
-  </script>
-</body>
+    // increment modal functions
+   
+    function openIncrementModal(empid, name, currentSalary) {
+        // Set basic info
+        document.getElementById('inc_emp_name').textContent = name;
+        document.getElementById('inc_empid').value = empid;
+        document.getElementById('old_salary').value = currentSalary;
+        document.getElementById('display_old_salary').value = '₹ ' + currentSalary;
+        
+        // Reset form inputs
+        document.getElementById('inc_percentage').value = '';
+        document.getElementById('inc_amount').value = '';
+        document.getElementById('new_salary').value = currentSalary;
 
-</html>
+        // Fetch History
+        fetch('<?= base_url("Employee/getIncrementHistoryAjax/") ?>' + empid)
+            .then(response => response.json())
+            .then(data => {
+                let tbody = document.getElementById('incrementHistoryBody');
+                tbody.innerHTML = '';
+                if(data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No past increments found.</td></tr>';
+                } else {
+                    data.forEach(inc => {
+                        tbody.innerHTML += `
+                            <tr>
+                                <td>${inc.inc_effective_date}</td>
+                                <td>₹${parseFloat(inc.old_salary).toFixed(2)}</td>
+                                <td class="text-success">+₹${parseFloat(inc.inc_amount).toFixed(2)} (${inc.inc_percentage}%)</td>
+                                <td><strong>₹${parseFloat(inc.new_salary).toFixed(2)}</strong></td>
+                                <td>${inc.inc_reason || '-'}</td>
+                            </tr>
+                        `;
+                    });
+                }
+            });
+
+        // Show Modal
+        new bootstrap.Modal(document.getElementById('incrementModal')).show();
+    }
+
+    // Auto-calculate new salary based on % input
+    function calculateIncrement() {
+        let old = parseFloat(document.getElementById('old_salary').value) || 0;
+        let pct = parseFloat(document.getElementById('inc_percentage').value) || 0;
+        let amount = old * (pct / 100);
+        
+        document.getElementById('inc_amount').value = amount.toFixed(2);
+        document.getElementById('new_salary').value = (old + amount).toFixed(2);
+    }
+
+    // Auto-calculate % based on flat amount input
+    function calculateIncrementFromAmount() {
+        let old = parseFloat(document.getElementById('old_salary').value) || 0;
+        let amount = parseFloat(document.getElementById('inc_amount').value) || 0;
+        let pct = (amount / old) * 100;
+        
+        document.getElementById('inc_percentage').value = pct.toFixed(2);
+        document.getElementById('new_salary').value = (old + amount).toFixed(2);
+    }
+  </script>
+ 
