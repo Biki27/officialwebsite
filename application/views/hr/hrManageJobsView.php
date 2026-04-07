@@ -142,8 +142,14 @@
                         <div class="col-md-6">
                             <label class="small fw-bold text-muted mb-1">Location <span
                                     class="text-danger">*</span></label>
-                            <input type="text" name="address" id="address" class="form-control"
-                                placeholder="e.g. Mumbai, MH (Hybrid)" required>
+                                    <!-- Added the drop down -->
+                            <!-- <input type="text" name="address" id="address" class="form-control"
+                                placeholder="e.g. Mumbai, MH (Hybrid)" required> -->
+                                 <select name="address" id="address" class="form-select" required>
+                                        <option value="">Select Location</option>
+                                        <option value="Howrah">Howrah </option>
+                                        <option value="Kolkata">Kolkata</option>
+                                    </select>
                         </div>
                         <div class="col-md-4">
                             <label class="small fw-bold text-muted mb-1">Experience (Years) <span
@@ -180,6 +186,7 @@
                         </div>
                         <div class="col-md-4">
                             <label class="small fw-bold text-muted mb-1">Required Skills</label>
+                            <!-- i want a feature to add multiple skills like add one skill then click on add(+) after the add another value then add instead of add typing this. -->
                             <input type="text" name="skills" id="skills" class="form-control"
                                 placeholder="e.g. React, PHP, SQL">
                         </div>

@@ -87,9 +87,21 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     </div>
                     <div class="form-group">
                         <label class="form-label">Designation <span class="required">*</span></label>
-                        <input type="text" class="form-control" id="designation" name="designation"
+                        <!-- <input type="text" class="form-control" id="designation" name="designation"
                             value="<?= isset($emp) ? $emp->seempd_designation : (isset($prefill_applicant) ? htmlspecialchars($prefill_applicant->sejoba_position, ENT_QUOTES) : '') ?>"
-                            required>
+                            required> -->
+                        <!-- add drop down for designations -->
+                        <select class="form-select" id="designation" name="designation" required>
+                            <option value="">Select Designation</option>
+                            <option value="Jr. Php developer" <?= (isset($emp) && $emp->seempd_designation == 'Jr. Php developer') ? 'selected' : '' ?>>Jr. Php developer</option>
+                            <option value="Sr. Php developer" <?= (isset($emp) && $emp->seempd_designation == 'Sr. Php developer') ? 'selected' : '' ?>>Sr. Php developer</option>
+                            <option value="Html designer" <?= (isset($emp) && $emp->seempd_designation == 'Html designer') ? 'selected' : '' ?>>Html designer</option>
+                            <option value="Bidder" <?= (isset($emp) && $emp->seempd_designation == 'Bidder') ? 'selected' : '' ?>>Bidder</option>
+                            <option value="Sr. Video editor" <?= (isset($emp) && $emp->seempd_designation == 'Sr. Video editor') ? 'selected' : '' ?>> Sr. Video editor</option>
+                            <option value="Jr. Video editor" <?= (isset($emp) && $emp->seempd_designation == 'Jr. Video editor') ? 'selected' : '' ?>> Jr. Video editor</option>
+                            <option value="HR" <?= (isset($emp) && $emp->seempd_designation == 'HR') ? 'selected' : '' ?>>HR</option>
+                            <option value="Branch Manager" <?= (isset($emp) && $emp->seempd_designation == 'Branch Manager') ? 'selected' : '' ?>>Branch Manager</option>
+                        </select>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Email <span class="required">*</span></label>
@@ -107,7 +119,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         <label class="form-label">Salary (₹) <span class="required">*</span></label>
                         <input type="number" class="form-control" id="salary" name="salary"
                             value="<?= isset($emp) ? $emp->seempd_salary : (isset($prefill_applicant) ? htmlspecialchars($prefill_applicant->sejoba_exp_salary, ENT_QUOTES) : '') ?>"
-                            step="0.01" min="0"   required>
+                            step="0.01" min="0" required>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Experience (Years) <span class="required">*</span></label>
@@ -142,14 +154,28 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         </select>
                     </div>
                 </div>
+
                 <div class="row g-3 mb-4">
+                    <!-- Permanent Address -->
                     <div class="col-md-6">
                         <label class="form-label">Permanent Address <span class="required">*</span></label>
                         <textarea class="form-control" name="permAddress" id="permAddress" rows="3"
                             required><?= isset($emp) ? $emp->seempd_address_permanent : '' ?></textarea>
                     </div>
+
+                    <!-- Current Address -->
                     <div class="col-md-6">
-                        <label class="form-label">Current Address <span class="required">*</span></label>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="form-label mb-0">Current Address <span class="required">*</span></label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="sameAddressCheck"
+                                    onclick="copyAddress()">
+                                <label class="form-check-label small text-muted" for="sameAddressCheck"
+                                    style="cursor: pointer;">
+                                    Same as Permanent
+                                </label>
+                            </div>
+                        </div>
                         <textarea class="form-control" name="currentAddress" id="currentAddress" rows="3"
                             required><?= isset($emp) ? $emp->seempd_address_current : '' ?></textarea>
                     </div>
@@ -172,41 +198,49 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     </div>
                     <div class="form-group">
                         <label class="form-label">Projects</label>
-                        
+
                         <div id="projectContainer">
                             <?php
-                                // If editing an employee, split their existing projects into an array
-                                $existing_projects = [];
-                                if (isset($emp) && !empty($emp->seempd_project)) {
-                                    $existing_projects = explode(',', $emp->seempd_project);
-                                } else {
-                                    $existing_projects = ['']; // Start with at least one empty box
-                                }
+                            // If editing an employee, split their existing projects into an array
+                            $existing_projects = [];
+                            if (isset($emp) && !empty($emp->seempd_project)) {
+                                $existing_projects = explode(',', $emp->seempd_project);
+                            } else {
+                                $existing_projects = ['']; // Start with at least one empty box
+                            }
                             ?>
-                            
-                            <?php foreach($existing_projects as $index => $proj): ?>
+
+                            <?php foreach ($existing_projects as $index => $proj): ?>
                                 <div class="input-group mb-2 project-input-group d-flex align-items-stretch">
-                                    
-                                    <span class="input-group-text bg-light border-end-0 text-muted" style="border-top-right-radius: 0; border-bottom-right-radius: 0;">
+
+                                    <span class="input-group-text bg-light border-end-0 text-muted"
+                                        style="border-top-right-radius: 0; border-bottom-right-radius: 0;">
                                         <i class="fas fa-list-ul"></i>
                                     </span>
-                                    
-                                    <input type="text" class="form-control project-input border-start-0" value="<?= trim($proj) ?>" placeholder="e.g. Website Redesign" style="box-shadow: none;">
-                                    
-                                    <?php if($index == 0): ?>
-                                        <button class="btn btn-outline-primary px-3" type="button" onclick="addProjectField()" title="Add another project" style="border-top-left-radius: 0; border-bottom-left-radius: 0;">
+
+                                    <input type="text" class="form-control project-input border-start-0"
+                                        value="<?= trim($proj) ?>" placeholder="e.g. Website Redesign"
+                                        style="box-shadow: none;">
+
+                                    <?php if ($index == 0): ?>
+                                        <button class="btn btn-outline-primary px-3" type="button" onclick="addProjectField()"
+                                            title="Add another project"
+                                            style="border-top-left-radius: 0; border-bottom-left-radius: 0;">
                                             <i class="fas fa-plus"></i>
                                         </button>
                                     <?php else: ?>
-                                        <button class="btn btn-outline-danger px-3" type="button" onclick="removeProjectField(this)" title="Remove project" style="border-top-left-radius: 0; border-bottom-left-radius: 0;">
+                                        <button class="btn btn-outline-danger px-3" type="button"
+                                            onclick="removeProjectField(this)" title="Remove project"
+                                            style="border-top-left-radius: 0; border-bottom-left-radius: 0;">
                                             <i class="fas fa-minus"></i>
                                         </button>
                                     <?php endif; ?>
                                 </div>
                             <?php endforeach; ?>
                         </div>
-                        
-                        <input type="hidden" id="finalProjectString" name="project" value="<?= isset($emp) ? htmlspecialchars($emp->seempd_project, ENT_QUOTES) : '' ?>">
+
+                        <input type="hidden" id="finalProjectString" name="project"
+                            value="<?= isset($emp) ? htmlspecialchars($emp->seempd_project, ENT_QUOTES) : '' ?>">
                     </div>
 
                     <div class="form-group">
@@ -306,10 +340,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         // Form Submission Logic
         document.getElementById('employeeForm').addEventListener('submit', function (e) {
             e.preventDefault(); // ALWAYS stop the form first for SweetAlert
-            
+
             // --- NEW: Combine all project inputs into the hidden field ---
             let allProjects = [];
-            document.querySelectorAll('.project-input').forEach(function(input) {
+            document.querySelectorAll('.project-input').forEach(function (input) {
                 if (input.value.trim() !== '') {
                     allProjects.push(input.value.trim());
                 }
@@ -422,6 +456,30 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         function removeProjectField(button) {
             button.closest('.project-input-group').remove();
         }
+        function copyAddress() {
+            const checkbox = document.getElementById('sameAddressCheck');
+            const permAddr = document.getElementById('permAddress');
+            const currAddr = document.getElementById('currentAddress');
+
+            if (checkbox.checked) {
+                // Copy value and disable manual typing to prevent inconsistencies
+                currAddr.value = permAddr.value;
+                currAddr.setAttribute('readonly', true);
+                currAddr.style.backgroundColor = "#f3f4f6"; // Visual feedback (light grey)
+            } else {
+                // Re-enable for manual entry
+                currAddr.removeAttribute('readonly');
+                currAddr.style.backgroundColor = "";
+                currAddr.value = ""; // Optional: Clear it when unchecked
+            }
+        }
+
+        // Optional: Keep current address updated if user types in permanent address while checked
+        document.getElementById('permAddress').addEventListener('input', function () {
+            if (document.getElementById('sameAddressCheck').checked) {
+                document.getElementById('currentAddress').value = this.value;
+            }
+        });
 
     </script>
 </body>
