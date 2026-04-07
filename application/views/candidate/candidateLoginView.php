@@ -13,7 +13,6 @@
         transition: transform 0.3s ease;
     }
 
-    /* Mobile adjustments */
     @media (max-width: 576px) {
         .login-wrapper {
             align-items: flex-start;
@@ -22,7 +21,6 @@
 
         .login-card {
             border-radius: 0;
-            /* Full width feel on tiny phones */
             box-shadow: none;
             background: transparent;
         }
@@ -58,8 +56,16 @@
                         <div class="input-group">
                             <span class="input-group-text bg-light border-end-0"><i
                                     class="fas fa-envelope text-muted small"></i></span>
+                            
+                            <?php 
+                                // BUG FIX: Retrieve flashdata email so user doesn't re-type it
+                                $email_val = set_value('email');
+                                if (empty($email_val) && $this->session->flashdata('old_email')) {
+                                    $email_val = $this->session->flashdata('old_email');
+                                }
+                            ?>
                             <input type="email" name="email" class="form-control bg-light border-start-0 shadow-none"
-                                id="email" placeholder="email@example.com" value="<?= set_value('email'); ?>" required>
+                                id="email" placeholder="email@example.com" value="<?= htmlspecialchars($email_val); ?>" required>
                         </div>
                     </div>
 

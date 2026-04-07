@@ -32,31 +32,28 @@
             color: #2563eb !important;
         }
 
-        /* Responsive Container Fix */
         .main-content {
             padding: 1.5rem 0.5rem;
-            /* Tight padding for mobile */
         }
 
         @media (min-width: 768px) {
             .main-content {
                 padding: 3rem 0;
-                /* Spacious for desktop */
             }
         }
 
-        /* Global Alert Styling */
         .alert {
             border: none;
             border-radius: 12px;
             font-weight: 500;
         }
 
+        /* BUG FIX: Stop body scrolling when Modal is open */
         body.modal-open {
             overflow: hidden;
+            padding-right: 0 !important; 
         }
 
-        /* Ensure the navbar doesn't overlap modal headers on small screens */
         @media (max-width: 576px) {
             .modal-dialog {
                 margin: 0.5rem;
@@ -66,14 +63,12 @@
 </head>
 
 <body>
-    <!-- in login page i dont want the navbar and footer -->
     <?php if (!isset($hide_navbar)): ?>
         <nav class="navbar navbar-expand-lg py-3 sticky-top">
             <div class="container">
                 <a class="navbar-brand fw-800 text-primary d-flex align-items-center" href="<?= base_url('Careers') ?>">
                     <i class="fas fa-building me-2"></i>
-                    <span class="d-none d-sm-inline">Suropriyo Enterprise</span>
-                    <span class="d-inline d-sm-none">Suropriyo Enterprise</span>
+                    <span class="ms-1">Suropriyo Enterprise</span>
                 </a>
 
                 <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#candidateNav">
