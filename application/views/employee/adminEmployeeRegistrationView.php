@@ -165,11 +165,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         <input type="text" class="form-control" id="pan" name="pan"
                             value="<?= isset($emp) ? $emp->seempd_pan : '' ?>">
                     </div>
-                    <div class="form-group">
+                    <!-- <div class="form-group">
                         <label class="form-label">Increment (%)</label>
-                        <input type="number" step="0.01" class="form-control" id="increment" name="increment"
+                        <input type="number" step="0.01" max="100" class="form-control" id="increment" name="increment"
                             value="<?= isset($emp) ? $emp->seempd_increment : '' ?>">
-                    </div>
+                    </div> -->
                     <div class="form-group">
                         <label class="form-label">Projects</label>
                         
@@ -339,7 +339,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             // Salary validation
             if (isNaN(salary) || salary <= 0) errors.push("Salary must be a positive number.");
             if (salary > 9999999.99) errors.push("Salary cannot exceed ₹9,999,999.99. Please enter a valid amount.");
-
+            
 
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailRegex.test(email)) errors.push("Please enter a valid email format.");

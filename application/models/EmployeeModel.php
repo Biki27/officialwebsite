@@ -456,4 +456,37 @@ class EmployeeModel extends CI_Model
     {
         return $this->db->where('slip_id', $slip_id)->delete('sesalaryslips');
     }
+    // --- Increment History Functions ---
+
+    // 1. Fetch increment history for a specific employee
+    public function get_increment_history($empid)
+    {
+        return $this->db->where('inc_empid', $empid)
+                        ->order_by('inc_effective_date', 'DESC')
+                        ->get('seemp_increments')
+                        ->result();
+    }
+
+    // 2. Add a new increment and update current salary (Using DB Transactions for safety)
+    public function add_salary_increment($data)
+    {
+        $this->db->trans_start();
+
+        // A. Insert the record into the history table
+        $this->db->insert('seemp_increments', $data);
+
+        // B. Update the main employee details table with the new salary
+        $this->db->where('seempd_empid', $data['inc_empid']);
+        $this->db->update('seempdetails', [
+            'seempd_salary' => $data['new_salary'],
+            'seempd_increment' => $data['inc_percentage'] // Keep this updated for backward compatibility if needed
+        ]);
+
+        $this->db->trans_complete();
+
+        if ($this->db->trans_status() === FALSE) {
+            return ['code' => 1, 'message' => 'Failed to apply increment.'];
+        }
+        return ['code' => 0, 'message' => 'Increment applied successfully.'];
+    }
 }
