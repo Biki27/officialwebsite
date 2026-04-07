@@ -1,5 +1,5 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
 class Candidate extends CI_Controller
 {
@@ -41,7 +41,7 @@ class Candidate extends CI_Controller
         if ($this->session->userdata('candidate_logged_in')) {
             redirect('Candidate/dashboard');
         }
-
+        $data['hide_navbar'] = true;
         // Set Strict Validation Rules
         $this->form_validation->set_rules('email', 'Email', 'required|valid_email|is_unique[secandidates.email]', array(
             'is_unique' => 'This email is already registered. Please log in.'
@@ -74,13 +74,16 @@ class Candidate extends CI_Controller
             }
         }
     }
-
+    // In the login page, I don't want to show the navbar and footer.
+    // So, I will set a variable in the controller and check it in the layout.
     public function login()
     {
         // Redirect if already logged in
         if ($this->session->userdata('candidate_logged_in')) {
             redirect('Candidate/dashboard');
         }
+
+        $data['hide_navbar'] = true;
 
         $this->form_validation->set_rules('email', 'Email', 'required|valid_email');
         $this->form_validation->set_rules('password', 'Password', 'required');
@@ -109,9 +112,41 @@ class Candidate extends CI_Controller
                 $data['content'] = $this->load->view('candidate/candidateLoginView', '', TRUE);
                 $this->load->view('candidate/layout', $data);
             }
-
         }
     }
+    // public function login()
+    // {
+    //     if ($this->session->userdata('candidate_logged_in')) {
+    //         redirect('Candidate/dashboard');
+    //     }
+
+    //     $data['hide_navbar'] = true;
+    //     $this->form_validation->set_rules('email', 'Email', 'required|valid_email');
+    //     $this->form_validation->set_rules('password', 'Password', 'required');
+
+    //     if ($this->form_validation->run() == FALSE) {
+    //         $data['title'] = "Candidate Login | Suropriyo Enterprise";
+    //         $data['content'] = $this->load->view('candidate/candidateLoginView', '', TRUE);
+    //         $this->load->view('candidate/layout', $data);
+    //     } else {
+    //         $email = $this->input->post('email');
+    //         $password = $this->input->post('password');
+    //         $user = $this->CandidateModel->login_candidate($email, $password);
+
+    //         if ($user) {
+    //             $this->set_candidate_session($user->id, $user->email);
+    //             $this->handle_redirect();
+    //         } else {
+    //             // FIX: Use redirect instead of loading view directly
+    //             $this->session->set_flashdata('error', 'Invalid Email or Password.');
+    //             // Optional: flash the email back to pre-fill the field
+    //              $data['title'] = "Candidate Login | Suropriyo Enterprise";
+    //             $data['content'] = $this->load->view('candidate/candidateLoginView', '', TRUE);
+    //             $this->session->set_flashdata('old_email', $email);
+    //             redirect('Candidate/login');
+    //         }
+    //     }
+    // }
 
     // 3. CANDIDATE LOGOUT
     public function logout()
@@ -386,4 +421,3 @@ class Candidate extends CI_Controller
         }
     }
 }
-?>

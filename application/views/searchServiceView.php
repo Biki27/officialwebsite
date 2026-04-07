@@ -23,6 +23,10 @@
         padding: 0;
         box-sizing: border-box;
     }
+    .row {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
 
     /* MODIFICATION: Added safety check to prevent overflow on the root level */
     html,
