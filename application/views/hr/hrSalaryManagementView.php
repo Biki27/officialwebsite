@@ -910,7 +910,7 @@
     // ── Flash Messages ──
     if ($this->session->flashdata('error')): ?>
         <script>
-            document.addEventListener("DOMContentLoaded", function() {
+            document.addEventListener("DOMContentLoaded", function () {
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
@@ -923,14 +923,14 @@
 
     <?php if ($this->session->flashdata('success')): ?>
         <script>
-            document.addEventListener("DOMContentLoaded", function() {
+            document.addEventListener("DOMContentLoaded", function () {
                 Swal.mixin({
-                        toast: true,
-                        position: 'top-end',
-                        showConfirmButton: false,
-                        timer: 3500,
-                        timerProgressBar: true
-                    })
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3500,
+                    timerProgressBar: true
+                })
                     .fire({
                         icon: 'success',
                         title: <?= json_encode($this->session->flashdata('success')) ?>
@@ -947,13 +947,16 @@
                 <h3 class="fw-bold mb-1" style="font-size:1.45rem;letter-spacing:-.3px;">
                     <i class="fas fa-money-check-alt me-2" style="color:#4f46e5;"></i>Payroll Processing
                 </h3>
-                <p class="text-muted mb-0" style="font-size:.85rem;">Generate and manage salary slips · <?= date('F Y', strtotime($selected_month)) ?></p>
+                <p class="text-muted mb-0" style="font-size:.85rem;">Generate and manage salary slips ·
+                    <?= date('F Y', strtotime($selected_month)) ?>
+                </p>
             </div>
 
             <form action="<?= base_url('Employee/salaryManagement') ?>" method="GET"
                 style="display:flex;align-items:center;gap:10px;background:#fff;padding:10px 18px;border-radius:12px;border:1.5px solid #e2e8f0;box-shadow:0 2px 8px rgba(0,0,0,.04);">
                 <i class="fas fa-calendar-alt" style="color:#4f46e5;"></i>
-                <label class="fw-bold text-muted" style="font-size:.7rem;text-transform:uppercase;letter-spacing:.6px;margin:0;">Payroll Month</label>
+                <label class="fw-bold text-muted"
+                    style="font-size:.7rem;text-transform:uppercase;letter-spacing:.6px;margin:0;">Payroll Month</label>
                 <input type="month" name="month" value="<?= $selected_month ?>"
                     style="border:none;background:transparent;font-family:inherit;font-weight:700;color:#4f46e5;cursor:pointer;font-size:.9rem;"
                     onchange="this.form.submit()">
@@ -985,10 +988,11 @@
                             <svg viewBox="0 0 36 36" style="transform:rotate(-90deg);">
                                 <circle cx="18" cy="18" r="15.9" fill="none" stroke="#e2e8f0" stroke-width="3" />
                                 <circle cx="18" cy="18" r="15.9" fill="none" stroke="#10b981" stroke-width="3"
-                                    stroke-dasharray="<?= round(($pct / 100) * 100) ?> 100"
-                                    stroke-dashoffset="0" stroke-linecap="round" />
+                                    stroke-dasharray="<?= round(($pct / 100) * 100) ?> 100" stroke-dashoffset="0"
+                                    stroke-linecap="round" />
                             </svg>
-                            <span style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:.6rem;font-weight:800;color:#10b981;"><?= $pct ?>%</span>
+                            <span
+                                style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:.6rem;font-weight:800;color:#10b981;"><?= $pct ?>%</span>
                         </div>
                     <?php endif; ?>
                 </div>
@@ -1029,21 +1033,24 @@
                     <tbody>
                         <?php foreach ($employees as $emp):
                             $is_processed = isset($monthly_slips[$emp->seemp_id]);
-                            $slip_data    = $is_processed ? $monthly_slips[$emp->seemp_id] : null;
-                            $has_bank     = !empty($emp->sebank_ac_no);
-                        ?>
+                            $slip_data = $is_processed ? $monthly_slips[$emp->seemp_id] : null;
+                            $has_bank = !empty($emp->sebank_ac_no);
+                            ?>
                             <tr class="<?= $is_processed ? 'processed' : '' ?>">
                                 <td class="ps-4">
                                     <span class="emp-id-badge"><?= htmlspecialchars($emp->seemp_id) ?></span>
                                 </td>
                                 <td>
-                                    <div class="fw-bold" style="color:#1e293b;"><?= htmlspecialchars($emp->seempd_name) ?></div>
+                                    <div class="fw-bold" style="color:#1e293b;"><?= htmlspecialchars($emp->seempd_name) ?>
+                                    </div>
                                     <div class="text-muted" style="font-size:.78rem;">
-                                        <?= htmlspecialchars($emp->seempd_designation) ?> &bull; <?= htmlspecialchars($emp->seemp_branch) ?>
+                                        <?= htmlspecialchars($emp->seempd_designation) ?> &bull;
+                                        <?= htmlspecialchars($emp->seemp_branch) ?>
                                     </div>
                                 </td>
                                 <td>
-                                    <span style="font-weight:700;color:#1e293b;">₹<?= number_format($emp->seempd_salary, 2) ?></span>
+                                    <span
+                                        style="font-weight:700;color:#1e293b;">₹<?= number_format($emp->seempd_salary, 2) ?></span>
                                 </td>
                                 <td>
                                     <?php if ($has_bank): ?>
@@ -1059,7 +1066,8 @@
                                         </span>
                                         <?php if ($slip_data): ?>
                                             <div style="font-size:.72rem;color:#94a3b8;margin-top:3px;">
-                                                Net: <strong style="color:#10b981;">₹<?= number_format($slip_data->net_salary, 2) ?></strong>
+                                                Net: <strong
+                                                    style="color:#10b981;">₹<?= number_format($slip_data->net_salary, 2) ?></strong>
                                             </div>
                                         <?php endif; ?>
                                     <?php else: ?>
@@ -1081,8 +1089,7 @@
                                             </button>
                                         <?php else: ?>
                                             <?php if ($has_bank): ?>
-                                                <button class="btn-process"
-                                                    onclick="openSlipModal(
+                                                <button class="btn-process" onclick="openSlipModal(
                                                         '<?= addslashes($emp->seemp_id) ?>',
                                                         '<?= addslashes($emp->seempd_name) ?>',
                                                         '<?= addslashes($emp->seempd_designation) ?>',
@@ -1097,12 +1104,15 @@
                                                 </button>
                                             <?php else: ?>
                                                 <div class="d-flex flex-column align-items-center">
-                                                    <button class="btn-process" style="background: #cbd5e1; cursor: not-allowed; opacity: 1;" disabled title="Bank details missing">
+                                                    <button class="btn-process"
+                                                        style="background: #cbd5e1; cursor: not-allowed; opacity: 1;" disabled
+                                                        title="Bank details missing">
                                                         <i class="fas fa-lock me-1"></i>Locked
                                                     </button>
-                                                    <span style="font-size: 0.7rem; color: #ef4444; margin-top: 4px; text-align: center; line-height: 1.2;">
+                                                    <span
+                                                        style="font-size: 0.7rem; color: #ef4444; margin-top: 4px; text-align: center; line-height: 1.2;">
                                                         Missing Bank Details<br>
-                                                        
+
                                                     </span>
                                                 </div>
                                             <?php endif; ?>
@@ -1113,7 +1123,8 @@
                         <?php endforeach; ?>
                         <tr id="noResultsRow" style="display:none;">
                             <td colspan="6" class="text-center py-5 text-muted">
-                                <i class="fas fa-search fa-2x mb-2 d-block opacity-25"></i>No employees match your search.
+                                <i class="fas fa-search fa-2x mb-2 d-block opacity-25"></i>No employees match your
+                                search.
                             </td>
                         </tr>
                     </tbody>
@@ -1162,8 +1173,10 @@
                     </div>
                 </div>
 
-                <form action="<?= base_url('Employee/generatePayslip') ?>" method="POST" target="_blank" id="generateForm">
-                    <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>">
+                <form action="<?= base_url('Employee/generatePayslip') ?>" method="POST" target="_blank"
+                    id="generateForm">
+                    <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>"
+                        value="<?= $this->security->get_csrf_hash(); ?>">
                     <input type="hidden" name="seemp_id" id="slip_empid">
                     <input type="hidden" name="emp_name" id="slip_empname">
                     <input type="hidden" name="designation" id="slip_designation">
@@ -1203,27 +1216,34 @@
 
                             <div class="row g-3 mt-1">
                                 <div class="col-md-3">
-                                    <label class="section-label" style="margin-bottom:6px;"><i class="fas fa-calendar me-1"></i> Salary Month</label>
-                                    <input type="month" name="slip_month" id="slip_month"
-                                        class="form-control fw-bold" style="color:#4f46e5;" readonly required>
+                                    <label class="section-label" style="margin-bottom:6px;"><i
+                                            class="fas fa-calendar me-1"></i> Salary Month</label>
+                                    <input type="month" name="slip_month" id="slip_month" class="form-control fw-bold"
+                                        style="color:#4f46e5;" readonly required>
                                 </div>
                                 <div class="col-md-2">
-                                    <label class="section-label" style="margin-bottom:6px;"><i class="fas fa-calendar-day me-1"></i> Pay Days</label>
-                                    <input type="number" name="pay_days" id="slip_paydays"
-                                        class="form-control" value="30" min="1" max="31" required>
-                                    <div style="font-size:.72rem;color:#94a3b8;margin-top:3px;">Working days this month</div>
+                                    <label class="section-label" style="margin-bottom:6px;"><i
+                                            class="fas fa-calendar-day me-1"></i> Pay Days</label>
+                                    <input type="number" name="pay_days" id="slip_paydays" class="form-control"
+                                        value="30" min="1" max="31" required>
+                                    <div style="font-size:.72rem;color:#94a3b8;margin-top:3px;">Working days this month
+                                    </div>
                                 </div>
                                 <div class="col-md-3">
-                                    <label class="section-label" style="margin-bottom:6px;"><i class="fas fa-university me-1"></i> Bank A/C</label>
-                                    <input type="text" name="bank_ac" id="slip_bankac" class="form-control" placeholder="NILL">
+                                    <label class="section-label" style="margin-bottom:6px;"><i
+                                            class="fas fa-university me-1"></i> Bank A/C</label>
+                                    <input type="text" name="bank_ac" id="slip_bankac" class="form-control"
+                                        placeholder="NILL">
                                 </div>
                                 <div class="col-md-2">
                                     <label class="section-label" style="margin-bottom:6px;">IFSC</label>
-                                    <input type="text" name="ifsc_code" id="slip_ifsc" class="form-control text-uppercase" placeholder="NILL">
+                                    <input type="text" name="ifsc_code" id="slip_ifsc"
+                                        class="form-control text-uppercase" placeholder="NILL">
                                 </div>
                                 <div class="col-md-2">
                                     <label class="section-label" style="margin-bottom:6px;">ESI No.</label>
-                                    <input type="text" name="esi_no" id="slip_esi" class="form-control" placeholder="NILL">
+                                    <input type="text" name="esi_no" id="slip_esi" class="form-control"
+                                        placeholder="NILL">
                                 </div>
                             </div>
                         </div>
@@ -1232,9 +1252,11 @@
                     <!-- ════ STEP 2: EARNINGS ════ -->
                     <div class="step-panel" id="step2">
                         <div class="modal-body">
-                            <div class="section-label"><i class="fas fa-plus-circle me-1" style="color:#10b981;"></i> Earnings &amp; Allowances</div>
+                            <div class="section-label"><i class="fas fa-plus-circle me-1" style="color:#10b981;"></i>
+                                Earnings &amp; Allowances</div>
                             <p style="font-size:.78rem;color:#94a3b8;margin-bottom:14px;">
-                                All amounts below <strong>add to</strong> the employee's total pay. Fields left at ₹0 will show as <em>NILL</em> on the salary slip.
+                                All amounts below <strong>add to</strong> the employee's total pay. Fields left at ₹0
+                                will show as <em>NILL</em> on the salary slip.
                             </p>
 
                             <!-- BASIC SALARY -->
@@ -1242,7 +1264,8 @@
                                 <div class="field-label-wrap">
                                     <div class="field-name">
                                         Basic Salary
-                                        <span class="tip-icon" title="Fixed monthly base pay as per employment contract. This is the foundation for PF/ESI calculations.">?</span>
+                                        <span class="tip-icon"
+                                            title="Fixed monthly base pay as per employment contract. This is the foundation for PF/ESI calculations.">?</span>
                                     </div>
                                     <div class="field-desc">Contractual fixed monthly remuneration</div>
                                 </div>
@@ -1258,7 +1281,8 @@
                                 <div class="field-label-wrap">
                                     <div class="field-name">
                                         Transport &amp; House Rent Allowance
-                                        <span class="tip-icon" title="Allowance paid for commuting and/or housing. Shown as a single combined allowance on the slip.">?</span>
+                                        <span class="tip-icon"
+                                            title="Allowance paid for commuting and/or housing. Shown as a single combined allowance on the slip.">?</span>
                                     </div>
                                     <div class="field-desc">Travel reimbursement + HRA (if applicable)</div>
                                 </div>
@@ -1270,10 +1294,10 @@
                             </div>
 
                             <!-- INCENTIVE -->
-                            <div class="field-row earning-row">
+                            <!-- <div class="field-row earning-row">
                                 <div class="field-label-wrap">
                                     <div class="field-name">
-                                        Performance Incentive / Bonus
+                                        Performance Incentive
                                         <span class="tip-icon" title="Additional pay for meeting or exceeding targets. Not part of the fixed salary structure.">?</span>
                                     </div>
                                     <div class="field-desc">Target-based bonus or ad-hoc incentive for this month</div>
@@ -1283,6 +1307,31 @@
                                     <input type="number" step="0.01" min="0" name="incentive"
                                         class="salary-input earning-input calc-input" value="0" placeholder="0.00">
                                 </div>
+                            </div> -->
+                            <div class="field-row earning-row">
+                                <div class="field-label-wrap">
+                                    <div class="field-name">Performance Incentive</div>
+                                    <div class="field-desc">Monthly performance-based reward</div>
+                                </div>
+                                <div class="salary-input-wrap">
+                                    <span class="currency-symbol">₹</span>
+                                    <input type="number" name="incentive" class="salary-input earning-input calc-input"
+                                        value="0">
+                                </div>
+                            </div>
+
+                            <div class="field-row earning-row" style="background: rgba(16, 185, 129, 0.04);">
+                                <div class="field-label-wrap">
+                                    <div class="field-name">Annual Bonus <i class="fas fa-lock ms-2 text-muted"
+                                            style="font-size: 10px;"></i></div>
+                                    <div class="field-desc">Automatically fetched from Bonus Management system</div>
+                                </div>
+                                <div class="salary-input-wrap">
+                                    <span class="currency-symbol">₹</span>
+                                    <input type="number" name="bonus_amt" id="calc_bonus"
+                                        class="salary-input earning-input calc-input" value="0" readonly
+                                        style="background: #f1f5f9; border-color: #cbd5e1;">
+                                </div>
                             </div>
 
                             <!-- OVERTIME PAY — was "Overtime/Half Day" (confusing) -->
@@ -1290,8 +1339,10 @@
                                 <div class="field-label-wrap">
                                     <div class="field-name">
                                         Overtime Pay
-                                        <span class="tip-icon" title="Extra pay for hours worked beyond the standard duty schedule. Half-day deductions go in the Deductions tab, NOT here.">?</span>
-                                        <span style="font-size:.68rem;background:rgba(16,185,129,.1);color:#059669;border-radius:4px;padding:1px 6px;font-weight:700;">EARNING</span>
+                                        <span class="tip-icon"
+                                            title="Extra pay for hours worked beyond the standard duty schedule. Half-day deductions go in the Deductions tab, NOT here.">?</span>
+                                        <span
+                                            style="font-size:.68rem;background:rgba(16,185,129,.1);color:#059669;border-radius:4px;padding:1px 6px;font-weight:700;">EARNING</span>
                                     </div>
                                     <div class="field-desc">
                                         Pay for extra/overtime hours worked &nbsp;
@@ -1309,9 +1360,11 @@
                                 <div class="field-label-wrap">
                                     <div class="field-name">
                                         Round-Off Adjustment
-                                        <span class="tip-icon" title="Small positive/negative amount to round the final net salary to a clean figure. E.g., if net = ₹14,999.25, add ₹0.75 here to make it ₹15,000.">?</span>
+                                        <span class="tip-icon"
+                                            title="Small positive/negative amount to round the final net salary to a clean figure. E.g., if net = ₹14,999.25, add ₹0.75 here to make it ₹15,000.">?</span>
                                     </div>
-                                    <div class="field-desc">Small adjustment to round net pay to a clean number (e.g. +₹0.75)</div>
+                                    <div class="field-desc">Small adjustment to round net pay to a clean number (e.g.
+                                        +₹0.75)</div>
                                 </div>
                                 <div class="salary-input-wrap">
                                     <span class="currency-symbol">₹</span>
@@ -1320,9 +1373,11 @@
                                 </div>
                             </div>
 
-                            <div class="mt-2 p-3 rounded-3" style="background:rgba(16,185,129,.04);border:1px solid rgba(16,185,129,.15);font-size:.78rem;color:#475569;">
+                            <div class="mt-2 p-3 rounded-3"
+                                style="background:rgba(16,185,129,.04);border:1px solid rgba(16,185,129,.15);font-size:.78rem;color:#475569;">
                                 <i class="fas fa-info-circle me-1" style="color:#10b981;"></i>
-                                <strong>Tip:</strong> All fields default to ₹0. Only fill in the amounts that apply for this month.
+                                <strong>Tip:</strong> All fields default to ₹0. Only fill in the amounts that apply for
+                                this month.
                                 Fields at ₹0 will print as <em>NILL</em> on the salary slip.
                             </div>
                         </div>
@@ -1331,9 +1386,11 @@
                     <!-- ════ STEP 3: DEDUCTIONS ════ -->
                     <div class="step-panel" id="step3">
                         <div class="modal-body">
-                            <div class="section-label"><i class="fas fa-minus-circle me-1" style="color:#ef4444;"></i> Deductions</div>
+                            <div class="section-label"><i class="fas fa-minus-circle me-1" style="color:#ef4444;"></i>
+                                Deductions</div>
                             <p style="font-size:.78rem;color:#94a3b8;margin-bottom:14px;">
-                                All amounts below are <strong>subtracted</strong> from gross earnings. Each deduction prints with its label on the slip so the employee understands exactly what was deducted.
+                                All amounts below are <strong>subtracted</strong> from gross earnings. Each deduction
+                                prints with its label on the slip so the employee understands exactly what was deducted.
                             </p>
 
                             <!-- PF -->
@@ -1341,9 +1398,11 @@
                                 <div class="field-label-wrap">
                                     <div class="field-name">
                                         Provident Fund (PF)
-                                        <span class="tip-icon" title="Employee's share: 12% of Basic Salary. Mandatory under EPF Act for eligible employees. Deposited to EPFO.">?</span>
+                                        <span class="tip-icon"
+                                            title="Employee's share: 12% of Basic Salary. Mandatory under EPF Act for eligible employees. Deposited to EPFO.">?</span>
                                     </div>
-                                    <div class="field-desc">Mandatory retirement fund contribution (12% of Basic) · Deposited to EPFO</div>
+                                    <div class="field-desc">Mandatory retirement fund contribution (12% of Basic) ·
+                                        Deposited to EPFO</div>
                                 </div>
                                 <div class="salary-input-wrap">
                                     <span class="currency-symbol" style="color:#ef4444;">₹</span>
@@ -1357,9 +1416,11 @@
                                 <div class="field-label-wrap">
                                     <div class="field-name">
                                         ESI Contribution
-                                        <span class="tip-icon" title="Employee State Insurance: 0.75% of Gross Salary. Applicable if gross ≤ ₹21,000/month. Provides medical & sickness benefits.">?</span>
+                                        <span class="tip-icon"
+                                            title="Employee State Insurance: 0.75% of Gross Salary. Applicable if gross ≤ ₹21,000/month. Provides medical & sickness benefits.">?</span>
                                     </div>
-                                    <div class="field-desc">0.75% of Gross · Employee State Insurance (medical cover) · Applicable if gross ≤ ₹21,000</div>
+                                    <div class="field-desc">0.75% of Gross · Employee State Insurance (medical cover) ·
+                                        Applicable if gross ≤ ₹21,000</div>
                                 </div>
                                 <div class="salary-input-wrap">
                                     <span class="currency-symbol" style="color:#ef4444;">₹</span>
@@ -1373,9 +1434,11 @@
                                 <div class="field-label-wrap">
                                     <div class="field-name">
                                         Professional Tax (PT)
-                                        <span class="tip-icon" title="State-mandated tax on employment income. Amount varies by state and salary slab. Max ₹2,500/year.">?</span>
+                                        <span class="tip-icon"
+                                            title="State-mandated tax on employment income. Amount varies by state and salary slab. Max ₹2,500/year.">?</span>
                                     </div>
-                                    <div class="field-desc">State government employment tax · Slab-based (max ₹2,500/year)</div>
+                                    <div class="field-desc">State government employment tax · Slab-based (max
+                                        ₹2,500/year)</div>
                                 </div>
                                 <div class="salary-input-wrap">
                                     <span class="currency-symbol" style="color:#ef4444;">₹</span>
@@ -1389,10 +1452,13 @@
                                 <div class="field-label-wrap">
                                     <div class="field-name">
                                         Late Arrival &amp; No-Pay Leave (NPL)
-                                        <span class="tip-icon" title="NPL = No Pay Leave. Deduction for habitual late arrivals beyond the grace period OR unpaid leave days taken without prior approval.">?</span>
-                                        <span style="font-size:.68rem;background:rgba(239,68,68,.1);color:#dc2626;border-radius:4px;padding:1px 6px;font-weight:700;">DEDUCTION</span>
+                                        <span class="tip-icon"
+                                            title="NPL = No Pay Leave. Deduction for habitual late arrivals beyond the grace period OR unpaid leave days taken without prior approval.">?</span>
+                                        <span
+                                            style="font-size:.68rem;background:rgba(239,68,68,.1);color:#dc2626;border-radius:4px;padding:1px 6px;font-weight:700;">DEDUCTION</span>
                                     </div>
-                                    <div class="field-desc">Habitual late arrivals + unauthorized No-Pay Leave days</div>
+                                    <div class="field-desc">Habitual late arrivals + unauthorized No-Pay Leave days
+                                    </div>
                                     <!-- Reason input — shown when value > 0 -->
                                     <!-- <div class="reason-note" id="note_late_fees">
                                         <i class="fas fa-comment-alt me-1"></i>
@@ -1413,10 +1479,13 @@
                                 <div class="field-label-wrap">
                                     <div class="field-name">
                                         Half-Day &amp; Loss of Pay (LOP)
-                                        <span class="tip-icon" title="LOP = Loss of Pay. Deducted for half-day absences OR full absent days without approved leave. This is NOT the same as Late Fees — Late fees are for partial lateness, LOP is for full/half day absence.">?</span>
-                                        <span style="font-size:.68rem;background:rgba(239,68,68,.1);color:#dc2626;border-radius:4px;padding:1px 6px;font-weight:700;">DEDUCTION</span>
+                                        <span class="tip-icon"
+                                            title="LOP = Loss of Pay. Deducted for half-day absences OR full absent days without approved leave. This is NOT the same as Late Fees — Late fees are for partial lateness, LOP is for full/half day absence.">?</span>
+                                        <span
+                                            style="font-size:.68rem;background:rgba(239,68,68,.1);color:#dc2626;border-radius:4px;padding:1px 6px;font-weight:700;">DEDUCTION</span>
                                     </div>
-                                    <div class="field-desc">Half-day absences OR full-day Loss of Pay (absent without approved leave)</div>
+                                    <div class="field-desc">Half-day absences OR full-day Loss of Pay (absent without
+                                        approved leave)</div>
                                     <!-- <div class="reason-note" id="note_loss_of_pay">
                                         <i class="fas fa-comment-alt me-1"></i>
                                         <input type="text" id="reason_lop" placeholder="Optional: e.g. 2 half-days on 5th & 18th · 1 LOP on 22nd"
@@ -1436,9 +1505,11 @@
                                 <div class="field-label-wrap">
                                     <div class="field-name">
                                         Loan Recovery (EMI)
-                                        <span class="tip-icon" title="Monthly EMI instalment recovery for salary advance or office loan taken by the employee. Should match the approved loan agreement.">?</span>
+                                        <span class="tip-icon"
+                                            title="Monthly EMI instalment recovery for salary advance or office loan taken by the employee. Should match the approved loan agreement.">?</span>
                                     </div>
-                                    <div class="field-desc">Monthly EMI recovery for salary advance or office/bank loan</div>
+                                    <div class="field-desc">Monthly EMI recovery for salary advance or office/bank loan
+                                    </div>
                                     <!-- <div class="reason-note" id="note_loan">
                                         <i class="fas fa-comment-alt me-1"></i>
                                         <input type="text" id="reason_loan" placeholder="Optional: e.g. Salary advance EMI #3 of 6"
@@ -1454,7 +1525,8 @@
                             </div>
 
                             <!-- Warning if deductions > 40% gross -->
-                            <div id="highDeductionWarning" class="mt-2 p-3 rounded-3" style="background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.2);font-size:.78rem;color:#dc2626;display:none;">
+                            <div id="highDeductionWarning" class="mt-2 p-3 rounded-3"
+                                style="background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.2);font-size:.78rem;color:#dc2626;display:none;">
                                 <i class="fas fa-exclamation-triangle me-1"></i>
                                 <strong>High Deduction Alert:</strong> Total deductions exceed 40% of gross earnings.
                                 Please double-check the values before generating the slip.
@@ -1530,14 +1602,14 @@
                             <i class="fas fa-times me-1"></i>Cancel
                         </button>
                         <div style="display:flex;gap:10px;">
-                            <button type="button" class="btn-modal btn-prev" id="prevBtn" onclick="changeStep(-1)" style="display:none;">
+                            <button type="button" class="btn-modal btn-prev" id="prevBtn" onclick="changeStep(-1)"
+                                style="display:none;">
                                 <i class="fas fa-arrow-left me-1"></i>Back
                             </button>
                             <button type="button" class="btn-modal btn-next" id="nextBtn" onclick="changeStep(1)">
                                 Next <i class="fas fa-arrow-right ms-1"></i>
                             </button>
-                            <button type="submit" class="btn-modal btn-generate" id="generateBtn"
-                                style="display:none;"
+                            <button type="submit" class="btn-modal btn-generate" id="generateBtn" style="display:none;"
                                 onclick="return confirmGenerate()">
                                 <i class="fas fa-file-invoice-dollar me-1"></i>Generate & Open Slip
                             </button>
@@ -1557,67 +1629,72 @@
    CONFIG — field definitions (keeps JS DRY)
 ═══════════════════════════════════════════════ */
         const EARNINGS = [{
-                name: 'basic',
-                label: 'Basic Salary',
-                desc: ''
-            },
-            {
-                name: 'transport',
-                label: 'Transport & HRA',
-                desc: ''
-            },
-            {
-                name: 'incentive',
-                label: 'Performance Incentive / Bonus',
-                desc: ''
-            },
-            {
-                name: 'overtime',
-                label: 'Overtime Pay',
-                desc: 'Extra hours worked beyond duty schedule'
-            },
-            {
-                name: 'round_off',
-                label: 'Round-Off Adjustment',
-                desc: ''
-            },
+            name: 'basic',
+            label: 'Basic Salary',
+            desc: ''
+        },
+        {
+            name: 'transport',
+            label: 'Transport & HRA',
+            desc: ''
+        },
+        {
+            name: 'incentive',
+            label: 'Performance Incentive',
+            desc: ''
+        },
+        {
+            name: 'bonus_amt',
+            label: 'Annual Bonus',
+            desc: 'Fetched from Bonus Management system'
+        },
+        {
+            name: 'overtime',
+            label: 'Overtime Pay',
+            desc: 'Extra hours worked beyond duty schedule'
+        },
+        {
+            name: 'round_off',
+            label: 'Round-Off Adjustment',
+            desc: ''
+        },
         ];
         const DEDUCTIONS = [{
-                name: 'pf',
-                label: 'Provident Fund (PF)',
-                desc: '12% of Basic · EPFO',
-                // reasonId: 'reason_pf'
-            },
-            {
-                name: 'esi_deduction',
-                label: 'ESI Contribution',
-                desc: '0.75% of Gross',
-                // reasonId: null
-            },
-            {
-                name: 'prof_tax',
-                label: 'Professional Tax (PT)',
-                desc: 'State slab-based',
-                // reasonId: null
-            },
-            {
-                name: 'late_fees',
-                label: 'Late Arrival & No-Pay Leave (NPL)',
-                desc: '',
-                // reasonId: 'reason_late'
-            },
-            {
-                name: 'loss_of_pay',
-                label: 'Half-Day & Loss of Pay (LOP)',
-                desc: '',
-                // reasonId: 'reason_lop'
-            },
-            {
-                name: 'loan',
-                label: 'Loan Recovery (EMI)',
-                desc: '',
-                // reasonId: 'reason_loan'
-            },
+            name: 'pf',
+            label: 'Provident Fund (PF)',
+            desc: '12% of Basic · EPFO',
+            // reasonId: 'reason_pf'
+        },
+        {
+            name: 'esi_deduction',
+            label: 'ESI Contribution',
+            desc: '0.75% of Gross',
+            // reasonId: null
+        },
+        {
+            name: 'prof_tax',
+            label: 'Professional Tax (PT)',
+            desc: 'State slab-based',
+            // reasonId: null
+        },
+        {
+            name: 'late_fees',
+            label: 'Late Arrival & No-Pay Leave (NPL)',
+            desc: '',
+            // reasonId: 'reason_late'
+        },
+        {
+            name: 'loss_of_pay',
+            label: 'Half-Day & Loss of Pay (LOP)',
+            desc: '',
+            // reasonId: 'reason_lop'
+        },
+        {
+            name: 'loan',
+            label: 'Loan Recovery (EMI)',
+            desc: '',
+            // reasonId: 'reason_loan'
+        },
         ];
 
         /* ═══════════════════════════════════════════════
@@ -1627,13 +1704,13 @@
         const salaryModal = new bootstrap.Modal(salaryModalEl);
 
         function openSlipModal(id, name, designation, branch, base_salary, bank_ac, ifsc, esi, selected_month) {
-            // Populate hidden fields
+            // 1. Populate hidden fields
             document.getElementById('slip_empid').value = id;
             document.getElementById('slip_empname').value = name;
             document.getElementById('slip_designation').value = designation;
             document.getElementById('slip_branch').value = branch;
 
-            // Populate info panel (Step 1)
+            // 2. Populate info panel (Step 1)
             document.getElementById('hdr_name').textContent = name;
             document.getElementById('hdr_id').textContent = id;
             document.getElementById('hdr_desg').textContent = designation;
@@ -1653,33 +1730,57 @@
                 bankEl.innerHTML = `<span class="bank-missing-badge"><i class="fas fa-exclamation me-1"></i>Not on file — please enter below</span>`;
             }
 
-            // Bank / month fields
+            // 3. Bank / month fields
             document.getElementById('slip_month').value = selected_month;
             document.getElementById('slip_bankac').value = bank_ac || '';
             document.getElementById('slip_ifsc').value = ifsc || '';
             document.getElementById('slip_esi').value = esi || '';
 
-            // Pre-fill basic with base salary
+            // 4. Pre-fill basic with base salary
             document.getElementById('calc_basic').value = parseFloat(base_salary).toFixed(2);
 
-            // Reset all deduction inputs to 0
+            // 5. Reset all deduction/earning inputs to 0 (Crucial to clear previous modal data)
             [...EARNINGS, ...DEDUCTIONS].forEach(f => {
                 const el = document.querySelector(`[name="${f.name}"]`);
                 if (el && f.name !== 'basic') el.value = '0';
                 if (el) el.classList.remove('has-value');
             });
 
-            // Reset reason notes
+            // 6. Reset UI states
             ['note_late_fees', 'note_loss_of_pay', 'note_loan'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.style.display = 'none';
             });
 
+            // 7. HANDLE BONUS (ASYNC FETCH)
+            // 1. Reset the bonus field to 0 and set to Read-Only
+            const bonusField = document.getElementById('calc_bonus');
+            bonusField.value = '0.00';
+            bonusField.classList.remove('has-value');
+
+            // 2. Fetch the bonus for this specific employee and this specific month
+            fetch('<?= base_url("Employee/getBonusForPayroll/") ?>' + id + '/' + selected_month)
+                .then(response => response.json())
+                .then(amount => {
+                    if (amount > 0) {
+                        bonusField.value = parseFloat(amount).toFixed(2);
+                        bonusField.classList.add('has-value');
+                    } else {
+                        bonusField.value = '0.00';
+                    }
+                    // 3. Trigger recalculation so Gross and Net are updated immediately
+                    calculateTotals();
+                })
+                .catch(error => {
+                    console.error('Error fetching bonus:', error);
+                    bonusField.value = '0.00';
+                    calculateTotals();
+                });
+
             resetSteps();
-            calculateTotals();
+            calculateTotals(); // Initial calculation
             salaryModal.show();
         }
-
         /* ═══════════════════════════════════════════════
            STEP MANAGEMENT
         ═══════════════════════════════════════════════ */
@@ -1795,9 +1896,10 @@
             const basic = getVal('basic');
             const trans = getVal('transport');
             const inc = getVal('incentive');
+            const bonus = getVal('bonus_amt');
             const ot = getVal('overtime');
             const round = getVal('round_off');
-            const gross = basic + trans + inc + ot + round;
+            const gross = basic + trans + inc + ot + round + bonus;
 
             const pf = getVal('pf');
             const esi = getVal('esi_deduction');
@@ -1848,8 +1950,8 @@
             } = calculateTotals ? {
                 net: getVal('basic') + getVal('transport') + getVal('incentive') + getVal('overtime') + getVal('round_off') - getVal('pf') - getVal('esi_deduction') - getVal('prof_tax') - getVal('late_fees') - getVal('loss_of_pay') - getVal('loan')
             } : {
-                net: 0
-            };
+                    net: 0
+                };
             btn.disabled = net < 0;
             btn.title = net < 0 ? 'Net salary is negative — reduce deductions or increase earnings.' : '';
         }
@@ -1884,7 +1986,7 @@
                 const v = getVal(f.name);
                 earnHtml += `<div class="preview-row">
             <div><div class="pv-label">${f.label}</div></div>
-            <div class="pv-amount earn ${v===0?'zero':''}">${v===0?'NILL':'+ '+fmt(v)}</div>
+            <div class="pv-amount earn ${v === 0 ? 'zero' : ''}">${v === 0 ? 'NILL' : '+ ' + fmt(v)}</div>
         </div>`;
             });
             earnHtml += `<div class="preview-row" style="background:#f8fafc;font-weight:700;">
@@ -1904,8 +2006,8 @@
                 <div class="pv-label">${f.label}</div>
                 ${reason ? `<div class="pv-reason"><i class="fas fa-comment-alt me-1"></i>${reason}</div>` : ''}
             </div>
-            <div class="pv-amount ded ${v===0?'zero':''}">
-                ${v===0?'NILL':'- '+fmt(v)}
+            <div class="pv-amount ded ${v === 0 ? 'zero' : ''}">
+                ${v === 0 ? 'NILL' : '- ' + fmt(v)}
             </div>
         </div>`;
             });
@@ -1950,7 +2052,7 @@
         ═══════════════════════════════════════════════ */
         function confirmGenerate() {
             const net = (() => {
-                const gross = ['basic', 'transport', 'incentive', 'overtime', 'round_off'].reduce((s, n) => s + getVal(n), 0);
+                const gross = ['basic', 'transport', 'incentive', 'overtime', 'round_off', 'bonus_amt'].reduce((s, n) => s + getVal(n), 0);
                 const ded = ['pf', 'esi_deduction', 'prof_tax', 'late_fees', 'loss_of_pay', 'loan'].reduce((s, n) => s + getVal(n), 0);
                 return gross - ded;
             })();
@@ -2004,7 +2106,7 @@
         /* ═══════════════════════════════════════════════
            LIVE SEARCH
         ═══════════════════════════════════════════════ */
-        document.getElementById('searchInput').addEventListener('input', function() {
+        document.getElementById('searchInput').addEventListener('input', function () {
             const filter = this.value.toLowerCase();
             const rows = document.querySelectorAll('#payrollTable tbody tr:not(#noResultsRow)');
             let visible = 0;
@@ -2042,7 +2144,7 @@
                             slip_id: slipId,
                             '<?= $this->security->get_csrf_token_name(); ?>': '<?= $this->security->get_csrf_hash(); ?>'
                         },
-                        success: function(res) {
+                        success: function (res) {
                             if (res.status === 'success') {
                                 Swal.fire({
                                     icon: 'success',
@@ -2064,7 +2166,7 @@
         /* ═══════════════════════════════════════════════
            BOOTSTRAP TOOLTIPS
         ═══════════════════════════════════════════════ */
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // Simple native title tooltips on .tip-icon via Bootstrap
             const tipEls = [].slice.call(document.querySelectorAll('.tip-icon'));
             tipEls.forEach(el => {
@@ -2076,7 +2178,7 @@
             }));
 
             // Reset modal state when hidden
-            salaryModalEl.addEventListener('hidden.bs.modal', function() {
+            salaryModalEl.addEventListener('hidden.bs.modal', function () {
                 resetSteps();
             });
         });
