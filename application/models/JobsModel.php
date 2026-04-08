@@ -6,7 +6,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class JobsModel extends CI_Model
 {
-    public function get_all_jobs() {
+   public function get_all_jobs() {
+        // Exclude deleted jobs from the HR view
+        $this->db->where('sejob_state !=', 'deleted');
         return $this->db->get('sejobs')->result();
     }
 
@@ -18,62 +20,86 @@ class JobsModel extends CI_Model
     function get_search_in_anyfield_query($mq = '')
     {
         $this->db->from('sejobs');
-        $this->db->or_like('sejob_jobtitle', $mq);
-        $this->db->or_like('sejob_experience', $mq);
-        $this->db->or_like('sejob_address', $mq);
-        $this->db->or_like('sejob_workinghours', $mq);
-        $this->db->or_like('sejob_skills', $mq);
-        $this->db->or_like('sejob_salary', $mq);
-        $this->db->or_like('sejob_desc', $mq);
-        $this->db->or_like('sejob_state', $mq);
-        $this->db->or_like('sejob_urgency', $mq);
+        
+        // Strictly enforce that we do not show deleted jobs
+        $this->db->where('sejob_state !=', 'deleted');
+
+        if (!empty(trim($mq))) {
+            // Group the OR LIKE statements so they don't override the WHERE clause above
+            $this->db->group_start();
+            $this->db->like('sejob_jobtitle', $mq);
+            $this->db->or_like('sejob_experience', $mq);
+            $this->db->or_like('sejob_address', $mq);
+            $this->db->or_like('sejob_workinghours', $mq);
+            $this->db->or_like('sejob_skills', $mq);
+            $this->db->or_like('sejob_salary', $mq);
+            $this->db->or_like('sejob_desc', $mq);
+            $this->db->or_like('sejob_state', $mq);
+            $this->db->or_like('sejob_urgency', $mq);
+            $this->db->group_end();
+        }
+        
         return $this->db->get_compiled_select();
     }
 
-    function filter_jobs_query($title = '', $location = '', $skills = '', $experience = '')
+   function filter_jobs_query($title = '', $location = '', $skills = '', $experience = '')
     {
-        $dynamic_query = array();
+        // Select everything, plus a concatenated string of skills
+        $this->db->select('sejobs.*, GROUP_CONCAT(seskills.skill_name SEPARATOR ", ") as sejob_skills');
+        $this->db->from('sejobs');
+        
+        // Join the mapping and skills tables
+        $this->db->join('sejob_skills_map', 'sejob_skills_map.job_id = sejobs.sejob_id', 'left');
+        $this->db->join('seskills', 'seskills.skill_id = sejob_skills_map.skill_id', 'left');
+
+        $this->db->where('sejob_state !=', 'deleted');
+
         if (trim($title) != '') {
-            $dynamic_query['sejob_jobtitle'] = $title;
+            $this->db->like('sejob_jobtitle', $title);
         }
         if (trim($location) != '') {
-            $dynamic_query['sejob_address'] = $location;
+            $this->db->like('sejob_address', $location);
         }
+        
+        // --- THE FIX: Subquery for exact skill matching ---
         if (trim($skills) != '') {
-            $dynamic_query['sejob_skills'] = $skills;
-        }
-
-        if (count($dynamic_query) <= 0 && empty($experience)) {
-            return $this->db->get_compiled_select("sejobs");
-        } else {
-            $this->db->from('sejobs');
+            // Escape the skill string to prevent SQL injection
+            $escaped_skill = $this->db->escape($skills);
             
-            foreach ($dynamic_query as $key => $value) {
-                $this->db->like($key, $value);
-            }
-
-            if (trim($experience) != '') {
-                switch ($experience) {
-                    case '1':
-                        $this->db->where("sejob_experience <=", 1);
-                        break;
-                    case '3':
-                        $this->db->where("sejob_experience <=", 3);
-                        break;
-                    case '7':
-                        $this->db->where("sejob_experience <=", 7);
-                        break;
-                    case '7plus':
-                        $this->db->where("sejob_experience >", 7); // FIXED: Passing Integer instead of '7plus'
-                        break;
-                    default:
-                        $this->db->where("sejob_experience", (int)$experience);
-                        break;
-                }
-            }
-
-            return $this->db->get_compiled_select();
+            // Look inside the mapping table to find matching jobs, 
+            // without stripping the other skills from the main query's GROUP_CONCAT
+            $this->db->where("sejobs.sejob_id IN (
+                SELECT map.job_id 
+                FROM sejob_skills_map map
+                JOIN seskills s ON s.skill_id = map.skill_id
+                WHERE s.skill_name = $escaped_skill
+            )", NULL, FALSE); 
         }
+        // --------------------------------------------------
+
+        if (trim($experience) != '') {
+            switch ($experience) {
+                case '1':
+                    $this->db->where("sejob_experience <=", 1);
+                    break;
+                case '3':
+                    $this->db->where("sejob_experience <=", 3);
+                    break;
+                case '7':
+                    $this->db->where("sejob_experience <=", 7);
+                    break;
+                case '7plus':
+                    $this->db->where("sejob_experience >", 7);
+                    break;
+                default:
+                    $this->db->where("sejob_experience", (int)$experience);
+                    break;
+            }
+        }
+        
+        $this->db->group_by('sejobs.sejob_id');
+
+        return $this->db->get_compiled_select();
     }
 
     function get_jobmodel_query_result($query = '')
@@ -112,10 +138,56 @@ class JobsModel extends CI_Model
         return $query;
     }
     // Fetches a single job to display on the apply page
+    // public function get_job_by_id($job_id)
+    // {
+    //     $this->db->where('sejob_id', $job_id);
+    //     return $this->db->get('sejobs')->row();
+    // }
     public function get_job_by_id($job_id)
     {
         $this->db->where('sejob_id', $job_id);
+        $this->db->where('sejob_state !=', 'deleted'); // Hide if deleted
         return $this->db->get('sejobs')->row();
+    }
+
+
+    public function save_job_skills($job_id, $skills_array)
+    {
+        // 1. Clear old skills for this job (useful for updates)
+        $this->db->where('job_id', $job_id);
+        $this->db->delete('sejob_skills_map');
+
+        if (empty($skills_array)) return;
+
+        // 2. Loop through submitted skills
+        foreach ($skills_array as $skill_name) {
+            $skill_name = trim($skill_name);
+            if (empty($skill_name)) continue;
+
+            // 3. Check if skill exists in the master table
+            $this->db->where('skill_name', $skill_name);
+            $query = $this->db->get('seskills');
+            
+            if ($query->num_rows() > 0) {
+                $skill_id = $query->row()->skill_id;
+            } else {
+                // If it's a new skill, insert it first
+                $this->db->insert('seskills', ['skill_name' => $skill_name]);
+                $skill_id = $this->db->insert_id();
+            }
+
+            // 4. Map the skill to the job
+            $this->db->insert('sejob_skills_map', [
+                'job_id' => $job_id,
+                'skill_id' => $skill_id
+            ]);
+        }
+    }
+    // Fetch all unique skills for the dropdown filter
+    public function get_all_skills()
+    {
+        $this->db->order_by('skill_name', 'ASC');
+        return $this->db->get('seskills')->result();
     }
 }
 ?>

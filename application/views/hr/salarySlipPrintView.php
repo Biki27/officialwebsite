@@ -321,7 +321,7 @@ $net_before_round = $final_net - $round_off_val;          // gross - deductions 
                     <td class="text-right"><?= fmtVal($esi_deduction) ?></td>
                 </tr>
                 <tr>
-                    <td>Incentive</td>
+                    <td>Incentive/ Bonus</td>
                     <td class="text-right" style="border-right:2px solid #000;"><?= fmtVal($incentive) ?></td>
                     <td>Profession TAX</td>
                     <td class="text-right"><?= fmtVal($prof_tax) ?></td>
@@ -382,7 +382,7 @@ $net_before_round = $final_net - $round_off_val;          // gross - deductions 
                 </tr>
                 <!-- FINAL NET PAYABLE -->
                 <tr class="final-payable-row">
-                    <th colspan="3" style="border-right:1px solid #000;">
+                    <th colspan="3" style="border-right:1px solid #000; background:#eee;">
                          FINAL NET PAYABLE
                     </th>
                     <th class="text-right">₹ <?= number_format($final_net, 2) ?></th>

@@ -1,4 +1,4 @@
-<?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
+<?php defined('BASEPATH') or exit('No direct script access allowed'); ?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -11,22 +11,30 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="<?= base_url('css/hr/hrManageJobsView.css') ?>">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css" rel="stylesheet" type="text/css" />
 </head>
 
 <body>
-    
-    <?php if ($this->session->flashdata('msg') || $this->session->flashdata('error')): 
+
+    <?php if ($this->session->flashdata('msg') || $this->session->flashdata('error')):
         $msg = $this->session->flashdata('msg') ? $this->session->flashdata('msg') : $this->session->flashdata('error');
         $isError = $this->session->flashdata('error') ? 'true' : 'false';
     ?>
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const Toast = Swal.mixin({
-                toast: true, position: 'top-end', showConfirmButton: false, timer: 4000, timerProgressBar: true
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 4000,
+                    timerProgressBar: true
+                });
+                Toast.fire({
+                    icon: <?= $isError ?> ? 'error' : 'success',
+                    title: <?= json_encode($msg) ?>
+                });
             });
-            Toast.fire({ icon: <?= $isError ?> ? 'error' : 'success', title: <?= json_encode($msg) ?> });
-        });
-    </script>
+        </script>
     <?php endif; ?>
 
     <div class="main-content">
@@ -102,7 +110,8 @@
                                             </div>
                                         </td>
                                     </tr>
-                                <?php endforeach; else: ?>
+                                <?php endforeach;
+                            else: ?>
                                 <tr>
                                     <td colspan="6" class="text-center py-5 text-muted">
                                         <i class="fas fa-briefcase fa-2x mb-3 opacity-50"></i>
@@ -117,7 +126,7 @@
 
         </div>
     </div>
-    
+
     <div class="modal fade" id="jobModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content shadow-lg">
@@ -142,14 +151,14 @@
                         <div class="col-md-6">
                             <label class="small fw-bold text-muted mb-1">Location <span
                                     class="text-danger">*</span></label>
-                                    <!-- Added the drop down -->
+                            <!-- Added the drop down -->
                             <!-- <input type="text" name="address" id="address" class="form-control"
                                 placeholder="e.g. Mumbai, MH (Hybrid)" required> -->
-                                 <select name="address" id="address" class="form-select" required>
-                                        <option value="">Select Location</option>
-                                        <option value="Howrah">Howrah </option>
-                                        <option value="Kolkata">Kolkata</option>
-                                    </select>
+                            <select name="address" id="address" class="form-select" required>
+                                <option value="">Select Location</option>
+                                <option value="Howrah">Howrah </option>
+                                <option value="Kolkata">Kolkata</option>
+                            </select>
                         </div>
                         <div class="col-md-4">
                             <label class="small fw-bold text-muted mb-1">Experience (Years) <span
@@ -208,7 +217,7 @@
             </div>
         </div>
     </div>
-    
+
     <div class="modal fade" id="viewJobModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
@@ -255,7 +264,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify"></script>
     <script>
         // SweetAlert Delete Confirmation
         function confirmDelete(event, url) {
@@ -273,7 +282,9 @@
                     Swal.fire({
                         title: 'Deleting...',
                         allowOutsideClick: false,
-                        didOpen: () => { Swal.showLoading(); }
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
                     });
                     window.location.href = url;
                 }
@@ -289,7 +300,12 @@
             document.getElementById('salary').value = job.sejob_salary;
             document.getElementById('address').value = job.sejob_address;
             document.getElementById('workingHours').value = job.sejob_workinghours;
-            document.getElementById('skills').value = job.sejob_skills;
+            // document.getElementById('skills').value = job.sejob_skills;
+            // Clear existing tags first, then load the new ones from the database
+            window.tagifySkills.removeAllTags();
+            if (job.sejob_skills) {
+                window.tagifySkills.addTags(job.sejob_skills.split(','));
+            }
             document.getElementById('urgency').value = job.sejob_urgency;
             document.getElementById('status').value = job.sejob_state;
             document.getElementById('description').value = job.sejob_desc;
@@ -299,7 +315,7 @@
         }
 
         // Reset the form back to "Add Mode" when the modal closes
-        document.getElementById('jobModal').addEventListener('hidden.bs.modal', function () {
+        document.getElementById('jobModal').addEventListener('hidden.bs.modal', function() {
             document.getElementById('modalTitle').innerText = "Post New Job Requirement";
             document.querySelector('form').reset();
             document.getElementById('job_id').value = ""; // Clear the hidden ID input
@@ -343,6 +359,32 @@
             var viewModal = new bootstrap.Modal(document.getElementById('viewJobModal'));
             viewModal.show();
         }
+
+        // Initialize Tagify when the document loads
+        document.addEventListener("DOMContentLoaded", function() {
+            var input = document.querySelector('#skills');
+
+            // Initialize Tagify
+            window.tagifySkills = new Tagify(input, {
+                // Optional: Add a whitelist so HR can select from existing skills
+                whitelist:  [
+                    <?php
+                    if (!empty($all_skills)) {
+                        foreach ($all_skills as $skill) {
+                            echo json_encode($skill->skill_name) . ",";
+                        }
+                    }
+                    ?>
+                ],
+                maxTags: 10,
+                dropdown: {
+                    maxItems: 20, // Maximum allowed rendered suggestions
+                    classname: "tags-look", // Custom class for styling
+                    enabled: 0, // Show suggestions on focus
+                    closeOnSelect: false // Don't hide the dropdown when an item is selected
+                }
+            });
+        });
     </script>
 </body>
 
