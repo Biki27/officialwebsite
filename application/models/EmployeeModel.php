@@ -5,17 +5,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
 class EmployeeModel extends CI_Model
 {
 
-    // function getallemployee_with_joins()
-    // {
-    //     $res = $this->db
-    //         ->from('seemployee')
-    //         ->join('seempdetails', 'seemployee.seemp_id = seempdetails.seempd_empid', 'left')
-    //         ->join('sejobapplicant', 'seempdetails.seempd_jobaid = sejobapplicant.sejoba_id', 'left')
-    //         ->get()
-    //         ->result();
-
-    //     return $res;
-    // }
+     
     function getallemployee_with_joins()
     {
         $res = $this->db
@@ -459,34 +449,109 @@ class EmployeeModel extends CI_Model
     // --- Increment History Functions ---
 
     // 1. Fetch increment history for a specific employee
-    public function get_increment_history($empid)
+     public function get_increment_history(string $empid): array
     {
-        return $this->db->where('inc_empid', $empid)
-                        ->order_by('inc_effective_date', 'DESC')
-                        ->get('seemp_increments')
-                        ->result();
+        return $this->db
+            ->where('inc_empid', $empid)
+            ->order_by('inc_effective_date', 'DESC')
+            ->get('seemp_increments')
+            ->result();
     }
 
     // 2. Add a new increment and update current salary (Using DB Transactions for safety)
-    public function add_salary_increment($data)
+    public function add_salary_increment(array $data): array
     {
+        $today          = date('Y-m-d');
+        $effective_date = $data['inc_effective_date'];
+        $is_immediate   = ($effective_date <= $today);
+ 
+        $data['inc_status'] = $is_immediate ? 'applied' : 'pending';
+ 
         $this->db->trans_start();
-
-        // A. Insert the record into the history table
+ 
+        // A. Always insert the history record
         $this->db->insert('seemp_increments', $data);
-
-        // B. Update the main employee details table with the new salary
-        $this->db->where('seempd_empid', $data['inc_empid']);
-        $this->db->update('seempdetails', [
-            'seempd_salary' => $data['new_salary'],
-            'seempd_increment' => $data['inc_percentage'] // Keep this updated for backward compatibility if needed
-        ]);
-
-        $this->db->trans_complete();
-
-        if ($this->db->trans_status() === FALSE) {
-            return ['code' => 1, 'message' => 'Failed to apply increment.'];
+ 
+        // B. Only update the live salary when the effective date has arrived
+        if ($is_immediate) {
+            $this->db->where('seempd_empid', $data['inc_empid']);
+            $this->db->update('seempdetails', [
+                'seempd_salary'    => $data['new_salary'],
+                'seempd_increment' => $data['inc_percentage'],
+            ]);
         }
-        return ['code' => 0, 'message' => 'Increment applied successfully.'];
+ 
+        $this->db->trans_complete();
+ 
+        if ($this->db->trans_status() === FALSE) {
+            return ['code' => 1, 'message' => 'Database transaction failed.', 'status' => $data['inc_status']];
+        }
+ 
+        $human_date = date('d M Y', strtotime($effective_date));
+        $msg = $is_immediate
+            ? 'Increment applied and salary updated immediately.'
+            : "Increment scheduled. Salary will update automatically on {$human_date}.";
+ 
+        return ['code' => 0, 'message' => $msg, 'status' => $data['inc_status']];
+    }
+
+    /**
+     * Check if an increment already exists for a given employee
+     * in the same calendar month as the supplied effective date.
+     */
+    public function increment_exists_this_month(string $empid, string $effective_date): bool
+    {
+        $ts        = strtotime($effective_date);
+        $first_day = date('Y-m-01', $ts);
+        $last_day  = date('Y-m-t',  $ts);   // last day of that month
+ 
+        $this->db->where('inc_empid', $empid);
+        $this->db->where('inc_effective_date >=', $first_day);
+        $this->db->where('inc_effective_date <=', $last_day);
+ 
+        return $this->db->count_all_results('seemp_increments') > 0;
+    }
+
+    // 3. Apply all pending increments for a specific employee
+     public function apply_pending_increments(string $empid): int
+    {
+        $today = date('Y-m-d');
+ 
+        $pending = $this->db
+            ->where('inc_empid',             $empid)
+            ->where('inc_status',            'pending')
+            ->where('inc_effective_date <=', $today)
+            ->order_by('inc_effective_date', 'ASC')   // oldest first → correct compounding
+            ->get('seemp_increments')
+            ->result();
+ 
+        if (empty($pending)) {
+            return 0;
+        }
+ 
+        $applied = 0;
+ 
+        foreach ($pending as $inc) {
+            $this->db->trans_start();
+ 
+            // Update live salary to this increment's new_salary
+            $this->db->where('seempd_empid', $empid);
+            $this->db->update('seempdetails', [
+                'seempd_salary'    => $inc->new_salary,
+                'seempd_increment' => $inc->inc_percentage,
+            ]);
+ 
+            // Mark this row as applied
+            $this->db->where('inc_id', $inc->inc_id);
+            $this->db->update('seemp_increments', ['inc_status' => 'applied']);
+ 
+            $this->db->trans_complete();
+ 
+            if ($this->db->trans_status() !== FALSE) {
+                $applied++;
+            }
+        }
+ 
+        return $applied;
     }
 }

@@ -376,7 +376,7 @@
                     }
                     ?>
                 ],
-                maxTags: 10,
+                maxTags: 20,
                 dropdown: {
                     maxItems: 20, // Maximum allowed rendered suggestions
                     classname: "tags-look", // Custom class for styling

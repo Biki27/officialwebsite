@@ -675,7 +675,7 @@ class Employee extends CI_Controller
         $this->load->library('upload');
         $this->load->model('EmployeeModel');
         $this->load->library('form_validation');
- 
+
         //  Set Validation Rules
         $this->form_validation->set_rules('empName', 'Employee Name', 'required|trim');
         $this->form_validation->set_rules('empid', 'Employee ID', 'required|trim|is_unique[seemployee.seemp_id]');
@@ -686,49 +686,53 @@ class Employee extends CI_Controller
         $this->form_validation->set_rules('branch', 'Branch', 'required');
         $this->form_validation->set_rules('status', 'Status', 'required');
         $this->form_validation->set_rules('accessLevel', 'Access Level', 'required');
-        $this->form_validation->set_rules('salary', 'Salary', 'required|numeric|greater_than[0]|less_than_equal_to[9999999.99]',
-            array('less_than_equal_to' => 'Salary cannot exceed ₹9,999,999.99.'));
- 
+        $this->form_validation->set_rules(
+            'salary',
+            'Salary',
+            'required|numeric|greater_than[0]|less_than_equal_to[9999999.99]',
+            array('less_than_equal_to' => 'Salary cannot exceed ₹9,999,999.99.')
+        );
+
         // 2. Check Validation Result
         if ($this->form_validation->run() == FALSE) {
             // Strip HTML tags and separate errors with a standard newline
             $error_msg = strip_tags(validation_errors('', "\n"));
- 
+
             $this->session->set_flashdata('msg', "Validation Failed:\n" . $error_msg);
             redirect('Employee/RegisterEmployee');
             return;
         }
- 
+
         //  Prepare Upload Configuration
         $config['upload_path'] = './uploads/';
         $config['allowed_types'] = 'gif|jpg|png|jpeg|pdf|doc|docx';
         $config['max_size'] = 5120; // 5MB
         $config['encrypt_name'] = TRUE;
         $this->upload->initialize($config);
- 
+
         // Handle Photo & CV Uploads
         $photo_name = '';
- 
+
         if (!empty($_FILES['photo']['name'])) {
             if ($_FILES['photo']['size'] > 5 * 1024 * 1024) {
- 
+
                 $this->session->set_flashdata('msg', '❌ Please upload an image smaller than 5MB.');
                 redirect('Employee/RegisterEmployee');
                 return;
             }
- 
+
             // Now upload
             if ($this->upload->do_upload('photo')) {
- 
+
                 $photo_name = $this->upload->data('file_name');
             } else {
- 
+
                 $this->session->set_flashdata('msg', 'Photo Upload Error: ' . strip_tags($this->upload->display_errors('', '')));
                 redirect('Employee/RegisterEmployee');
                 return;
             }
         }
- 
+
         $cv_name = '';
         if (empty($_FILES['cv']['name'])) {
             $this->session->set_flashdata('msg', 'Error: CV Document is required for new employees.');
@@ -741,9 +745,9 @@ class Employee extends CI_Controller
             redirect('Employee/RegisterEmployee');
             return;
         }
- 
+
         $formData = $this->input->post();
- 
+
         $employee = [
             'seemp_id' => $formData['empid'],
             'seemp_branch' => $formData['branch'],
@@ -752,7 +756,7 @@ class Employee extends CI_Controller
             'seemp_status' => strtolower($formData['status']),
             'seemp_acesslevel' => $formData['accessLevel']
         ];
- 
+
         $details = [
             'seempd_empid' => $formData['empid'],
             'seempd_name' => $formData['empName'],
@@ -772,24 +776,84 @@ class Employee extends CI_Controller
             'seempd_cv' => $cv_name,
             'seempd_jobaid' => !empty($formData['linked_applicant_id']) ? $formData['linked_applicant_id'] : NULL
         ];
- 
+
         $result = $this->EmployeeModel->register_employee($employee, $details);
- 
+
         if ($result['code'] == 0) {
- 
+
             // Auto-Remove from Applicant Section by marking as 'hired'
             $linked_app_id = $this->input->post('linked_applicant_id', TRUE);
             if (!empty($linked_app_id)) {
                 $this->db->where('sejoba_id', $linked_app_id);
                 $this->db->update('sejobapplicant', ['sejoba_state' => 'hired']);
             }
- 
+
             $this->session->set_flashdata('msg', 'Employee Added & Removed from Applicant List!');
             redirect('Employee/viewEmployee');
         } else {
             $this->session->set_flashdata('msg', 'Database Error adding employee. ID or Email may already exist.');
             redirect('Employee/RegisterEmployee');
         }
+    }
+
+    // --- AJAX Check for Duplicate Employee ID ---
+    public function checkEmployeeIdAjax()
+    {
+        // Security check
+        if ($this->session->userdata('status') != 'active') {
+            echo json_encode(['exists' => false]);
+            return;
+        }
+
+        $empid = $this->input->post('empid', TRUE);
+
+        if (empty($empid)) {
+            echo json_encode([
+                'exists' => false,
+                'csrf_hash' => $this->security->get_csrf_hash()
+            ]);
+            return;
+        }
+
+        // Check the database
+        $this->db->where('seemp_id', $empid);
+        $query = $this->db->get('seemployee');
+
+        // Return the boolean result and the newly generated CSRF hash
+        echo json_encode([
+            'exists' => ($query->num_rows() > 0),
+            'csrf_hash' => $this->security->get_csrf_hash()
+        ]);
+    }
+    // --- AJAX Check for Duplicate Email ---
+    public function checkEmployeeEmailAjax()
+    {
+        // Security check
+        if ($this->session->userdata('status') != 'active') {
+            echo json_encode(['exists' => false]);
+            return;
+        }
+
+        $email = $this->input->post('email', TRUE);
+
+        // Basic backend validation before checking DB
+        if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            echo json_encode([
+                'exists' => false,
+                'csrf_hash' => $this->security->get_csrf_hash()
+            ]);
+            return;
+        }
+
+        // Check the database
+        $this->db->where('seemp_email', $email);
+        $query = $this->db->get('seemployee');
+
+        // Return the boolean result and the newly generated CSRF hash
+        echo json_encode([
+            'exists' => ($query->num_rows() > 0),
+            'csrf_hash' => $this->security->get_csrf_hash()
+        ]);
     }
     // updateEmployee function with improved validation, file handling, and error management
     public function updateEmployee($empid)
@@ -802,14 +866,18 @@ class Employee extends CI_Controller
         if (empty($current)) {
             show_error('Employee not found');
         }
-        
+
         // Set Standard Validation Rules
         $this->form_validation->set_rules('empName', 'Employee Name', 'required|trim');
         $this->form_validation->set_rules('phone', 'Phone', 'required|numeric|exact_length[10]');
         $this->form_validation->set_rules('aadhar', 'Aadhar', 'required|numeric|exact_length[12]');
-        $this->form_validation->set_rules('salary', 'Salary', 'required|numeric|greater_than[0]|less_than_equal_to[9999999.99]',
-            array('less_than_equal_to' => 'Salary cannot exceed ₹9,999,999.99.'));
- 
+        $this->form_validation->set_rules(
+            'salary',
+            'Salary',
+            'required|numeric|greater_than[0]|less_than_equal_to[9999999.99]',
+            array('less_than_equal_to' => 'Salary cannot exceed ₹9,999,999.99.')
+        );
+
         // Email Uniqueness Check
         $posted_email = $this->input->post('email');
         if (trim($posted_email) !== $current[0]->seemp_email) {
@@ -824,7 +892,7 @@ class Employee extends CI_Controller
             // They kept their current email, just validate the format
             $this->form_validation->set_rules('email', 'Email', 'required|trim|valid_email');
         }
- 
+
         //  Employee ID Uniqueness Check (In case they bypassed the readonly HTML)
         $posted_empid = $this->input->post('empid');
         if (trim($posted_empid) !== $current[0]->seemp_id) {
@@ -835,41 +903,41 @@ class Employee extends CI_Controller
                 array('is_unique' => 'This Employee ID is already taken.')
             );
         }
- 
+
         // Password Validation (Only if they typed something)
         if (!empty($this->input->post('password'))) {
             $this->form_validation->set_rules('password', 'Password', 'min_length[6]');
         }
- 
+
         // Run Validation
         if ($this->form_validation->run() == FALSE) {
             $error_msg = strip_tags(validation_errors('', "\n"));
- 
+
             $this->session->set_flashdata('msg', "Validation Failed:\n" . $error_msg);
             redirect('Employee/RegisterEmployee');
             return;
         }
- 
+
         // File Upload Config
         $photo_name = $current[0]->seempd_img;
         $cv_name = $current[0]->seempd_cv;
- 
+
         $config['upload_path'] = './uploads/';
         $config['allowed_types'] = 'gif|jpg|png|jpeg|pdf|doc|docx';
         $config['max_size'] = 5120;
         $config['encrypt_name'] = TRUE;
         $this->upload->initialize($config);
- 
+
         // Process Uploads (Only overwrite if new file exists)
         if (!empty($_FILES['photo']['name'])) {
- 
+
             if ($_FILES['photo']['size'] > 5 * 1024 * 1024) {
- 
+
                 $this->session->set_flashdata('msg', '❌ Please upload an image smaller than 5MB.');
                 redirect('Employee/RegisterEmployee');
                 return;
             }
- 
+
             if ($this->upload->do_upload('photo')) {
                 $photo_name = $this->upload->data('file_name');
             } else {
@@ -881,7 +949,7 @@ class Employee extends CI_Controller
         if (!empty($_FILES['cv']['name']) && $this->upload->do_upload('cv')) {
             $cv_name = $this->upload->data('file_name');
         }
- 
+
         // Update Data
         $updateData = [
             'new_empid' => $this->input->post('empid'), // New Employee ID
@@ -905,9 +973,9 @@ class Employee extends CI_Controller
             'photo' => $photo_name,
             'cv' => $cv_name
         ];
- 
+
         $result = $this->EmployeeModel->update_employee($empid, $updateData);
- 
+
         if ($result['code'] == 0) {
             $this->session->set_flashdata('msg', 'Employee Updated Successfully');
         } else {
@@ -1006,7 +1074,7 @@ class Employee extends CI_Controller
             $this->session->sess_destroy();
             redirect('Employee/Login');
         }
-        
+
         $empid = $this->session->userdata('empid');
         $this->load->model('EmployeeModel');
 
@@ -1499,7 +1567,7 @@ class Employee extends CI_Controller
     // admin add new product for his website.
     public function addProduct()
     {
-        
+
         $name = $this->input->post('productName');
         $info = $this->input->post('productInfo');
         $link = $this->input->post('productLink');
@@ -1607,7 +1675,7 @@ class Employee extends CI_Controller
         }
     }
 
-   public function saveJob()
+    public function saveJob()
     {
         $this->load->model('JobsModel');
 
@@ -1673,7 +1741,7 @@ class Employee extends CI_Controller
         // SOFT DELETE: We update the state instead of dropping the row
         $this->db->where('sejob_id', $id);
         $this->db->update('sejobs', ['sejob_state' => 'deleted']);
-        
+
         $this->session->set_flashdata('msg', 'Job posting removed');
         redirect('Employee/viewJobs');
     }
@@ -1771,82 +1839,82 @@ class Employee extends CI_Controller
     }
 
     public function generatePayslip()
-{
-    // Authorization Check: Ensure only HR or ADMIN can access
-    if ($this->session->userdata('accesslevel') == 'HR' || $this->session->userdata('accesslevel') == 'ADMIN') {
-        $post = $this->input->post();
+    {
+        // Authorization Check: Ensure only HR or ADMIN can access
+        if ($this->session->userdata('accesslevel') == 'HR' || $this->session->userdata('accesslevel') == 'ADMIN') {
+            $post = $this->input->post();
 
-        if ($post) {
-            $this->load->model('EmployeeModel');
-            
-            // Clean the data for security
-            $data = $this->security->xss_clean($post);
+            if ($post) {
+                $this->load->model('EmployeeModel');
 
-            /** * 1. CAST TO FLOAT: This is the critical fix for the "non-numeric" error.
-             * Even if a field is empty, (float) will convert it to 0.00.
-             */
-            $basic      = (float)$this->input->post('basic');
-            $transport  = (float)$this->input->post('transport');
-            $incentive  = (float)$this->input->post('incentive');
-            $overtime   = (float)$this->input->post('overtime');
-            $round_off  = (float)$this->input->post('round_off');
+                // Clean the data for security
+                $data = $this->security->xss_clean($post);
 
-            $pf             = (float)$this->input->post('pf');
-            $esi_deduction  = (float)$this->input->post('esi_deduction');
-            $prof_tax       = (float)$this->input->post('prof_tax');
-            $late_fees      = (float)$this->input->post('late_fees');
-            $loss_of_pay    = (float)$this->input->post('loss_of_pay');
-            $loan           = (float)$this->input->post('loan');
+                /** * 1. CAST TO FLOAT: This is the critical fix for the "non-numeric" error.
+                 * Even if a field is empty, (float) will convert it to 0.00.
+                 */
+                $basic      = (float)$this->input->post('basic');
+                $transport  = (float)$this->input->post('transport');
+                $incentive  = (float)$this->input->post('incentive');
+                $overtime   = (float)$this->input->post('overtime');
+                $round_off  = (float)$this->input->post('round_off');
 
-            /**
-             * 2. PERFORM CALCULATIONS SECURELY
-             * Logic follows your required structure from the salary slips table.
-             */
-            $data['gross_earnings']   = $basic + $transport + $incentive + $overtime + $round_off;
-            $data['total_deductions'] = $pf + $esi_deduction + $prof_tax + $late_fees + $loss_of_pay + $loan;
-            $data['net_salary']       = $data['gross_earnings'] - $data['total_deductions'];
+                $pf             = (float)$this->input->post('pf');
+                $esi_deduction  = (float)$this->input->post('esi_deduction');
+                $prof_tax       = (float)$this->input->post('prof_tax');
+                $late_fees      = (float)$this->input->post('late_fees');
+                $loss_of_pay    = (float)$this->input->post('loss_of_pay');
+                $loan           = (float)$this->input->post('loan');
 
-            /**
-             * 3. SAFETY GUARD: Prevent negative salary generation
-             */
-            if ($data['net_salary'] < 0) {
-                $this->session->set_flashdata('error', 'Error: Deductions exceed Gross Earnings. Net Salary cannot be negative.');
-                redirect('Employee/salaryManagement');
-                return;
+                /**
+                 * 2. PERFORM CALCULATIONS SECURELY
+                 * Logic follows your required structure from the salary slips table.
+                 */
+                $data['gross_earnings']   = $basic + $transport + $incentive + $overtime + $round_off;
+                $data['total_deductions'] = $pf + $esi_deduction + $prof_tax + $late_fees + $loss_of_pay + $loan;
+                $data['net_salary']       = $data['gross_earnings'] - $data['total_deductions'];
+
+                /**
+                 * 3. SAFETY GUARD: Prevent negative salary generation
+                 */
+                if ($data['net_salary'] < 0) {
+                    $this->session->set_flashdata('error', 'Error: Deductions exceed Gross Earnings. Net Salary cannot be negative.');
+                    redirect('Employee/salaryManagement');
+                    return;
+                }
+
+                /**
+                 * 4. DUPLICATE CHECK: Prevent generating two slips for the same month
+                 */
+                if ($this->EmployeeModel->slip_already_exists($data['seemp_id'], $data['slip_month'])) {
+                    $this->session->set_flashdata('error', 'Slip for this month already exists for this employee.');
+                    redirect('Employee/salaryManagement');
+                    return;
+                }
+
+                /**
+                 * 5. DATABASE PERSISTENCE
+                 * Prepare data for DB insertion by removing non-table fields
+                 */
+                $db_data = $data;
+                unset($db_data['emp_name'], $db_data['designation'], $db_data['branch']);
+
+                $this->db->insert('sesalaryslips', $db_data);
+
+                // Capture the new ID to pass to the print view
+                $data['slip_id'] = $this->db->insert_id();
+
+                /**
+                 * 6. LOAD PRINT VIEW
+                 * Pass the fully calculated $data array to the print view
+                 */
+                $this->load->view('hr/salarySlipPrintView', $data);
             }
-
-            /**
-             * 4. DUPLICATE CHECK: Prevent generating two slips for the same month
-             */
-            if ($this->EmployeeModel->slip_already_exists($data['seemp_id'], $data['slip_month'])) {
-                $this->session->set_flashdata('error', 'Slip for this month already exists for this employee.');
-                redirect('Employee/salaryManagement');
-                return;
-            }
-
-            /**
-             * 5. DATABASE PERSISTENCE
-             * Prepare data for DB insertion by removing non-table fields
-             */
-            $db_data = $data;
-            unset($db_data['emp_name'], $db_data['designation'], $db_data['branch']);
-
-            $this->db->insert('sesalaryslips', $db_data);
-            
-            // Capture the new ID to pass to the print view
-            $data['slip_id'] = $this->db->insert_id();
-
-            /**
-             * 6. LOAD PRINT VIEW
-             * Pass the fully calculated $data array to the print view
-             */
-            $this->load->view('hr/salarySlipPrintView', $data);
+        } else {
+            // Redirect unauthorized users
+            redirect('Employee/Login');
         }
-    } else {
-        // Redirect unauthorized users
-        redirect('Employee/Login');
     }
-}
     public function deleteSlipAjax()
     {
         if ($this->session->userdata('accesslevel') == 'HR' || $this->session->userdata('accesslevel') == 'ADMIN') {
@@ -1913,51 +1981,137 @@ class Employee extends CI_Controller
     }
     // --- Employee Increment Routes ---
 
-    // Fetch history via AJAX to show in a modal
+    
+    // AJAX – fetch increment history + auto-apply any pending increments
+    // whose effective date has now arrived
+ 
     public function getIncrementHistoryAjax($empid)
     {
-        if ($this->session->userdata('accesslevel') != 'ADMIN' && $this->session->userdata('accesslevel') != 'HR') {
+        if ($this->session->userdata('accesslevel') != 'ADMIN' &&
+            $this->session->userdata('accesslevel') != 'HR') {
             echo json_encode(['error' => 'Unauthorized']);
             return;
         }
 
+        $empid = trim($this->security->xss_clean($empid));
+        if (empty($empid)) {
+            echo json_encode(['error' => 'Invalid employee ID']);
+            return;
+        }
+
         $this->load->model('EmployeeModel');
+
+        // ── KEY: auto-apply any pending increments whose date has arrived ──
+        // This is the "cron-less trigger": whenever HR opens the modal the
+        // salary becomes current with no background job needed.
+        $this->EmployeeModel->apply_pending_increments($empid);
+
         $history = $this->EmployeeModel->get_increment_history($empid);
         echo json_encode($history);
     }
-
-    // Handle the submission of a new increment
+ 
+    // POST – validate and record a new increment
+    
     public function applyIncrement()
     {
-        if ($this->session->userdata('accesslevel') != 'ADMIN' && $this->session->userdata('accesslevel') != 'HR') {
+        if ($this->session->userdata('accesslevel') != 'ADMIN' &&
+            $this->session->userdata('accesslevel') != 'HR') {
             show_error('Unauthorized', 403);
         }
 
         $post = $this->security->xss_clean($this->input->post());
 
-        if ($post) {
-            $this->load->model('EmployeeModel');
-
-            $increment_data = [
-                'inc_empid' => $post['inc_empid'],
-                'inc_effective_date' => $post['inc_date'],
-                'inc_percentage' => (float)$post['inc_percentage'],
-                'inc_amount' => (float)$post['inc_amount'],
-                'old_salary' => (float)$post['old_salary'],
-                'new_salary' => (float)$post['new_salary'],
-                'inc_reason' => $post['inc_reason']
-            ];
-
-            $result = $this->EmployeeModel->add_salary_increment($increment_data);
-
-            if ($result['code'] == 0) {
-                $this->session->set_flashdata('msg', 'Increment recorded and salary updated successfully!');
-            } else {
-                $this->session->set_flashdata('error', 'Failed to record increment.');
-            }
-
-            // Redirect back to the employee view page
+        if (!$post) {
             redirect('Employee/viewEmployee');
+            return;
         }
+
+        // ── 1. Required fields ────────────────────────────────────────────────
+        foreach (['inc_empid', 'inc_date', 'inc_percentage'] as $field) {
+            if (empty(trim($post[$field] ?? ''))) {
+                $this->session->set_flashdata('msg', "Failed: Missing required field — {$field}.");
+                redirect('Employee/viewEmployee');
+                return;
+            }
+        }
+
+        $emp_id         = trim($post['inc_empid']);
+        $effective_date = trim($post['inc_date']);
+        $inc_percentage = (float) $post['inc_percentage'];
+
+        $this->load->model('EmployeeModel');
+
+        // ── 2. Percentage range (min=1 on the input is bypassable via curl) ──
+        if ($inc_percentage <= 0 || $inc_percentage > 100) {
+            $this->session->set_flashdata('msg', 'Failed: Increment percentage must be between 1 and 100.');
+            redirect('Employee/viewEmployee');
+            return;
+        }
+
+        // ── 3. PAST-MONTH GUARD ───────────────────────────────────────────────
+        // effective_date must be in the current month or a future month.
+        // Days in the current month that have already passed are still allowed
+        // (e.g. setting 01-Apr when today is 08-Apr is fine).
+        $today_ym     = date('Y-m');
+        $effective_ym = substr($effective_date, 0, 7); // 'Y-m' portion
+
+        if ($effective_ym < $today_ym) {
+            $human = date('F Y', strtotime($effective_date));
+            $this->session->set_flashdata(
+                'msg',
+                "Failed: Effective date cannot be in a past month ({$human}). "
+                . 'Use the current month (' . date('F Y') . ') or a future date.'
+            );
+            redirect('Employee/viewEmployee');
+            return;
+        }
+
+        // ── 4. DUPLICATE MONTH GUARD ──────────────────────────────────────────
+        if ($this->EmployeeModel->increment_exists_this_month($emp_id, $effective_date)) {
+            $human = date('F Y', strtotime($effective_date));
+            $this->session->set_flashdata(
+                'msg',
+                "Failed: An increment already exists for {$emp_id} in {$human}."
+            );
+            redirect('Employee/viewEmployee');
+            return;
+        }
+
+        // ── 5. Fetch salary from DB — never trust hidden form fields ──────────
+        // Also apply any pending increments first so we compute against the
+        // most up-to-date salary.
+        $this->EmployeeModel->apply_pending_increments($emp_id);
+
+        $current_emp = $this->EmployeeModel->get_employee_with_id($emp_id);
+        if (empty($current_emp)) {
+            $this->session->set_flashdata('msg', 'Failed: Employee not found.');
+            redirect('Employee/viewEmployee');
+            return;
+        }
+
+        // get_employee_with_id returns ->row() (single object)
+        $verified_old_salary = (float) $current_emp[0]->seempd_salary;
+        $computed_inc_amount = round($verified_old_salary * ($inc_percentage / 100), 2);
+        $computed_new_salary = round($verified_old_salary + $computed_inc_amount, 2);
+
+        // ── 6. Persist — the model decides 'applied' vs 'pending' ─────────────
+        $increment_data = [
+            'inc_empid'          => $emp_id,
+            'inc_effective_date' => $effective_date,
+            'inc_percentage'     => $inc_percentage,
+            'inc_amount'         => $computed_inc_amount,   // server-computed
+            'old_salary'         => $verified_old_salary,   // DB-verified
+            'new_salary'         => $computed_new_salary,   // server-computed
+            'inc_reason'         => $post['inc_reason'] ?? '',
+        ];
+
+        $result = $this->EmployeeModel->add_salary_increment($increment_data);
+
+        $this->session->set_flashdata(
+            'msg',
+            ($result['code'] == 0 ? 'Success: ' : 'Failed: ') . $result['message']
+        );
+
+        redirect('Employee/viewEmployee');
     }
 }

@@ -75,7 +75,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     <div class="form-group">
                         <label class="form-label">Employee ID <span class="required">*</span></label>
                         <input type="text" class="form-control" id="empid" name="empid" placeholder="SE26KOL01"
-                            value="<?= isset($emp) ? $emp->seemp_id : '' ?>" <?= isset($emp) ? ' style="background-color: #f3f4f6;"' : '' ?> required>
+                            value="<?= isset($emp) ? $emp->seemp_id : '' ?>" <?= isset($emp) ? ' style="background-color: #f3f4f6;"' : '' ?> required autocomplete="off">
+                        <small id="empidFeedback" class="mt-1 d-block" style="min-height: 20px;"></small>
                     </div>
 
                     <div class="form-group">
@@ -107,7 +108,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         <label class="form-label">Email <span class="required">*</span></label>
                         <input type="email" class="form-control" id="email" name="email"
                             value="<?= isset($emp) ? $emp->seemp_email : (isset($prefill_applicant) ? htmlspecialchars($prefill_applicant->sejoba_email, ENT_QUOTES) : '') ?>"
-                            required>
+                            required autocomplete="off">
+                        <small id="emailFeedback" class="mt-1 d-block" style="min-height: 20px;"></small>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Phone <span class="required">*</span></label>
@@ -115,11 +117,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                             value="<?= isset($emp) ? $emp->seempd_phone : (isset($prefill_applicant) ? htmlspecialchars($prefill_applicant->sejoba_phone, ENT_QUOTES) : '') ?>"
                             required>
                     </div>
+                    <!-- salary -->
+                     <!-- if the employee is already registered the read only -->
                     <div class="form-group">
                         <label class="form-label">Salary (₹) <span class="required">*</span></label>
                         <input type="number" class="form-control" id="salary" name="salary"
                             value="<?= isset($emp) ? $emp->seempd_salary : (isset($prefill_applicant) ? htmlspecialchars($prefill_applicant->sejoba_exp_salary, ENT_QUOTES) : '') ?>"
-                            step="0.01" min="0" required>
+                            step="0.01"  required>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Experience (Years) <span class="required">*</span></label>
@@ -285,6 +289,163 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 
     <script>
+        // --- LIVE EMPLOYEE ID VALIDATION ---
+        const empidInput = document.getElementById('empid');
+        const empidFeedback = document.getElementById('empidFeedback');
+        const submitBtn = document.querySelector('button[type="submit"]');
+        const isUpdateMode = <?= isset($emp) ? 'true' : 'false' ?>;
+        const originalEmpId = "<?= isset($emp) ? $emp->seemp_id : '' ?>";
+        
+        // Optional: debounce timer to prevent spamming the database on every single keystroke
+        let typingTimer;
+        const doneTypingInterval = 500; // Wait 0.5 seconds after typing stops
+
+        empidInput.addEventListener('input', function () {
+            clearTimeout(typingTimer);
+            let currentVal = this.value.trim();
+
+            // Clear feedback if input is empty or too short
+            if (currentVal.length === 0) {
+                empidFeedback.innerHTML = '';
+                this.style.borderColor = '';
+                submitBtn.disabled = false;
+                return;
+            }
+
+            // If updating and they haven't changed their own ID, it's valid
+            if (isUpdateMode && currentVal === originalEmpId) {
+                empidFeedback.innerHTML = '<span class="text-success small fw-bold"><i class="fas fa-check-circle"></i> Original ID (Valid)</span>';
+                this.style.borderColor = '#10b981'; // Green
+                submitBtn.disabled = false;
+                return;
+            }
+
+            empidFeedback.innerHTML = '<span class="text-muted small"><i class="fas fa-spinner fa-spin"></i> Checking availability...</span>';
+
+            typingTimer = setTimeout(() => {
+                checkEmployeeId(currentVal);
+            }, doneTypingInterval);
+        });
+
+        function checkEmployeeId(empid) {
+            let formData = new FormData();
+            formData.append('empid', empid);
+            
+            // Grab the current CSRF token from the hidden input
+            let csrfInput = document.querySelector('input[name="<?= $this->security->get_csrf_token_name(); ?>"]');
+            formData.append('<?= $this->security->get_csrf_token_name(); ?>', csrfInput.value);
+
+            fetch('<?= base_url("Employee/checkEmployeeIdAjax") ?>', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                // IMPORTANT: Update the CSRF token on the page so the final form submission works!
+                if(data.csrf_hash) {
+                    csrfInput.value = data.csrf_hash;
+                }
+
+                if (data.exists) {
+                    // ID exists -> Show Error & Disable Submit Button
+                    empidFeedback.innerHTML = '<span class="text-danger small fw-bold"><i class="fas fa-times-circle"></i> This Employee ID is already taken!</span>';
+                    empidInput.style.borderColor = '#ef4444'; 
+                    submitBtn.disabled = true;
+                }
+                // Employee ID: Required, min 5 chars and max 10 chars, alphanumeric
+                else if (!/^[a-zA-Z0-9]{5,10}$/.test(empid)) {
+                    empidFeedback.innerHTML = '<span class="text-danger small fw-bold"><i class="fas fa-times-circle"></i> ID must be 5-10 alphanumeric characters.</span>';
+                    empidInput.style.borderColor = '#ef4444'; 
+                    submitBtn.disabled = true;
+                }
+                else {
+                    // ID is free -> Show Success & Enable Submit Button
+                    empidFeedback.innerHTML = '<span class="text-success small fw-bold"><i class="fas fa-check-circle"></i> Employee ID is available!</span>';
+                    empidInput.style.borderColor = '#10b981'; 
+                    submitBtn.disabled = false;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                empidFeedback.innerHTML = '<span class="text-warning small"><i class="fas fa-exclamation-triangle"></i> Error checking ID.</span>';
+            });
+        }
+        // --- LIVE EMAIL VALIDATION ---
+        const emailInput = document.getElementById('email');
+        const emailFeedback = document.getElementById('emailFeedback');
+        const originalEmail = "<?= isset($emp) ? $emp->seemp_email : '' ?>";
+        let emailTypingTimer;
+
+        emailInput.addEventListener('input', function () {
+            clearTimeout(emailTypingTimer);
+            let currentVal = this.value.trim();
+
+            // Clear feedback if empty
+            if (currentVal.length === 0) {
+                emailFeedback.innerHTML = '';
+                this.style.borderColor = '';
+                return;
+            }
+
+            // Client-side regex check: don't hit the database unless it looks like a real email
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(currentVal)) {
+                emailFeedback.innerHTML = '<span class="text-muted small">Keep typing a valid email...</span>';
+                this.style.borderColor = '';
+                return;
+            }
+
+            // If updating and they haven't changed their own Email, it's valid
+            if (isUpdateMode && currentVal === originalEmail) {
+                emailFeedback.innerHTML = '<span class="text-success small fw-bold"><i class="fas fa-check-circle"></i> Original Email (Valid)</span>';
+                this.style.borderColor = '#10b981'; // Green
+                submitBtn.disabled = false;
+                return;
+            }
+
+            emailFeedback.innerHTML = '<span class="text-muted small"><i class="fas fa-spinner fa-spin"></i> Checking availability...</span>';
+
+            emailTypingTimer = setTimeout(() => {
+                checkEmployeeEmail(currentVal);
+            }, doneTypingInterval); // Reuses the 500ms timer variable from the ID script
+        });
+
+        function checkEmployeeEmail(email) {
+            let formData = new FormData();
+            formData.append('email', email);
+            
+            // Grab the current CSRF token from the hidden input
+            let csrfInput = document.querySelector('input[name="<?= $this->security->get_csrf_token_name(); ?>"]');
+            formData.append('<?= $this->security->get_csrf_token_name(); ?>', csrfInput.value);
+
+            fetch('<?= base_url("Employee/checkEmployeeEmailAjax") ?>', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                // IMPORTANT: Update the CSRF token on the page
+                if(data.csrf_hash) {
+                    csrfInput.value = data.csrf_hash;
+                }
+
+                if (data.exists) {
+                    // Email exists -> Show Error & Disable Submit Button
+                    emailFeedback.innerHTML = '<span class="text-danger small fw-bold"><i class="fas fa-times-circle"></i> This Email is already registered!</span>';
+                    emailInput.style.borderColor = '#ef4444'; 
+                    submitBtn.disabled = true;
+                } else {
+                    // Email is free -> Show Success & Enable Submit Button
+                    emailFeedback.innerHTML = '<span class="text-success small fw-bold"><i class="fas fa-check-circle"></i> Email is available!</span>';
+                    emailInput.style.borderColor = '#10b981'; // Green
+                    submitBtn.disabled = false;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                emailFeedback.innerHTML = '<span class="text-warning small"><i class="fas fa-exclamation-triangle"></i> Error checking email.</span>';
+            });
+        }
 
         let hasCustomPhoto = <?= (isset($emp) && !empty($emp->seempd_img)) ? 'true' : 'false' ?>;
 
@@ -371,8 +532,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             if (empName.length < 2) errors.push("Employee name is required and must be at least 2 characters.");
 
             // Salary validation
+            if(salary==0) errors.push("Salary must be greater than zero.");
             if (isNaN(salary) || salary <= 0) errors.push("Salary must be a positive number.");
             if (salary > 9999999.99) errors.push("Salary cannot exceed ₹9,999,999.99. Please enter a valid amount.");
+            
             
 
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
