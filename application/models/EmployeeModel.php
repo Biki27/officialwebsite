@@ -554,4 +554,40 @@ class EmployeeModel extends CI_Model
  
         return $applied;
     }
+   public function get_yearly_increment_report($year)
+    {
+        $sql = "
+            SELECT 
+                e.seemp_id, 
+                d.seempd_name, 
+                d.seempd_designation, 
+                d.seempd_salary, 
+                d.seempd_joiningdate,
+                
+                -- Get the date of their latest increment this year
+                (SELECT MAX(inc_effective_date) FROM seemp_increments 
+                 WHERE inc_empid = e.seemp_id AND YEAR(inc_effective_date) = ?) as last_inc_date,
+                 
+                -- NEW: Count exactly HOW MANY increments they got this year
+                (SELECT COUNT(inc_id) FROM seemp_increments 
+                 WHERE inc_empid = e.seemp_id AND YEAR(inc_effective_date) = ?) as inc_count,
+                 
+                -- Sum of all money added this year
+                (SELECT SUM(inc_amount) FROM seemp_increments 
+                 WHERE inc_empid = e.seemp_id AND YEAR(inc_effective_date) = ?) as total_inc_amount,
+                 
+                -- The percentage of their most recent increment
+                (SELECT inc_percentage FROM seemp_increments 
+                 WHERE inc_empid = e.seemp_id AND YEAR(inc_effective_date) = ? 
+                 ORDER BY inc_effective_date DESC LIMIT 1) as latest_percentage
+                 
+            FROM seemployee e
+            JOIN seempdetails d ON e.seemp_id = d.seempd_empid
+            WHERE e.seemp_status = 'active' 
+            AND e.seemp_acesslevel = 'EMPL'
+            ORDER BY d.seempd_name ASC
+        ";
+
+        return $this->db->query($sql, array($year, $year, $year, $year))->result();
+    }
 }

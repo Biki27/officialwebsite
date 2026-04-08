@@ -1,0 +1,162 @@
+/* ============================================================
+   SUROPRIYO ENTERPRISE — HR INCREMENT REPORT VIEW
+   Uses the global design tokens from hrHeaderView.css
+   ============================================================ */
+
+/* ══ LAYOUT ══ */
+body { 
+    background: var(--page-bg) !important; 
+    font-family: 'Plus Jakarta Sans', sans-serif !important; 
+}
+
+.main-content {
+    margin-left: 260px !important;
+    padding: 32px 36px !important;
+    min-height: 100vh;
+    animation: pageIn .4s ease both;
+}
+@keyframes pageIn { 
+    from { opacity: 0; transform: translateY(10px); } 
+    to { opacity: 1; transform: translateY(0); } 
+}
+
+/* ══ PAGE HEADER ══ */
+.page-title h3 {
+    font-size: 1.55rem !important; 
+    font-weight: 800 !important;
+    color: var(--text-primary) !important; 
+    letter-spacing: -.4px;
+}
+.page-title p {
+    font-size: .85rem; 
+    color: var(--text-muted); 
+    margin: 0;
+}
+.page-title i { 
+    color: var(--brand-600) !important; 
+}
+
+/* ══ FILTERS ══ */
+.filter-select {
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--brand-600);
+    font-weight: 700;
+    border-radius: var(--r-md);
+    padding: 10px 36px 10px 16px;
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition);
+}
+.filter-select:focus {
+    border-color: var(--brand-400);
+    box-shadow: 0 0 0 3px rgba(70, 27, 185, 0.1);
+}
+
+/* ══ STAT CARDS ══ */
+.stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition);
+}
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--brand-200);
+}
+.stat-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: var(--r-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+.stat-icon.primary { background: rgba(70, 27, 185, 0.1); color: var(--brand-600); }
+.stat-icon.success { background: rgba(5, 150, 105, 0.1); color: var(--success); }
+.stat-icon.warning { background: rgba(217, 119, 6, 0.1); color: var(--warning); }
+.stat-icon.danger { background: rgba(220, 38, 38, 0.1); color: var(--danger); }
+
+.stat-details h6 {
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+.stat-details h2 {
+    color: var(--text-primary);
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin: 0;
+}
+
+/* ══ TABLE CARD ══ */
+.table-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}
+.table-card .table { margin-bottom: 0; }
+.table-card thead th {
+    background: var(--surface-2);
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    padding: 16px 24px;
+    border-bottom: 2px solid var(--border);
+    border-top: none;
+}
+.table-card tbody td {
+    padding: 16px 24px;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-primary);
+    font-weight: 500;
+}
+.table-card tbody tr:hover { background: var(--surface-2); }
+
+/* ══ BADGES & BUTTONS ══ */
+.badge-soft {
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    letter-spacing: 0.3px;
+}
+.btn-primary.btn-manage {
+    background: linear-gradient(135deg, var(--brand-600), var(--brand-500)) !important;
+    border: none !important;
+    border-radius: var(--r-md) !important;
+    font-weight: 600 !important;
+    box-shadow: 0 4px 14px rgba(70, 27, 185, 0.25) !important;
+    transition: all .25s ease !important;
+    color: #fff !important;
+}
+.btn-primary.btn-manage:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(70, 27, 185, 0.35) !important;
+}
+
+/* ══ MODAL FIXES ══ */
+.modal-content {
+    border: none;
+    border-radius: var(--r-xl);
+    box-shadow: var(--shadow-lg);
+}
+.modal-header {
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--border);
+    border-radius: var(--r-xl) var(--r-xl) 0 0;
+}

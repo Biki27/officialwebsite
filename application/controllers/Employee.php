@@ -2022,7 +2022,7 @@ class Employee extends CI_Controller
         $post = $this->security->xss_clean($this->input->post());
 
         if (!$post) {
-            redirect('Employee/viewEmployee');
+            redirect('Employee/incrementReport');
             return;
         }
 
@@ -2030,7 +2030,7 @@ class Employee extends CI_Controller
         foreach (['inc_empid', 'inc_date', 'inc_percentage'] as $field) {
             if (empty(trim($post[$field] ?? ''))) {
                 $this->session->set_flashdata('msg', "Failed: Missing required field — {$field}.");
-                redirect('Employee/viewEmployee');
+                redirect('Employee/incrementReport');
                 return;
             }
         }
@@ -2044,7 +2044,7 @@ class Employee extends CI_Controller
         // ── 2. Percentage range (min=1 on the input is bypassable via curl) ──
         if ($inc_percentage <= 0 || $inc_percentage > 100) {
             $this->session->set_flashdata('msg', 'Failed: Increment percentage must be between 1 and 100.');
-            redirect('Employee/viewEmployee');
+            redirect('Employee/incrementReport');
             return;
         }
 
@@ -2062,7 +2062,7 @@ class Employee extends CI_Controller
                 "Failed: Effective date cannot be in a past month ({$human}). "
                 . 'Use the current month (' . date('F Y') . ') or a future date.'
             );
-            redirect('Employee/viewEmployee');
+            redirect('Employee/incrementReport');
             return;
         }
 
@@ -2073,7 +2073,7 @@ class Employee extends CI_Controller
                 'msg',
                 "Failed: An increment already exists for {$emp_id} in {$human}."
             );
-            redirect('Employee/viewEmployee');
+            redirect('Employee/incrementReport');
             return;
         }
 
@@ -2085,7 +2085,7 @@ class Employee extends CI_Controller
         $current_emp = $this->EmployeeModel->get_employee_with_id($emp_id);
         if (empty($current_emp)) {
             $this->session->set_flashdata('msg', 'Failed: Employee not found.');
-            redirect('Employee/viewEmployee');
+            redirect('Employee/incrementReport');
             return;
         }
 
@@ -2112,6 +2112,47 @@ class Employee extends CI_Controller
             ($result['code'] == 0 ? 'Success: ' : 'Failed: ') . $result['message']
         );
 
-        redirect('Employee/viewEmployee');
+        redirect('Employee/incrementReport');
+    }
+    // --- Increment Management Report ---
+    public function incrementReport()
+    {
+        // Security Check
+        if ($this->session->userdata('accesslevel') != 'HR' && $this->session->userdata('accesslevel') != 'ADMIN') {
+            redirect('Employee/Login');
+        }
+
+        $this->load->model('EmployeeModel');
+
+        // Check if HR selected a specific year from the dropdown. Default to current year.
+        $selected_year = $this->input->get('year') ? $this->input->get('year') : date('Y');
+        
+        // Fetch the report data
+        $report_data = $this->EmployeeModel->get_yearly_increment_report($selected_year);
+
+        // Calculate Dashboard Statistics
+        $total_emps = count($report_data);
+        $incremented_count = 0;
+        
+        foreach ($report_data as $emp) {
+            if (!empty($emp->last_inc_date)) {
+                $incremented_count++;
+            }
+        }
+        
+        $pending_count = $total_emps - $incremented_count;
+
+        // Package data for the View
+        $data = [
+            'selected_year' => $selected_year,
+            'report' => $report_data,
+            'total_emps' => $total_emps,
+            'incremented_count' => $incremented_count,
+            'pending_count' => $pending_count
+        ];
+
+        $header = ($this->session->userdata('accesslevel') == 'HR') ? 'hr/hrHeaderView' : 'employee/adminHeaderView';
+        $this->load->view($header);
+        $this->load->view('hr/hrIncrementReportView', $data); // We will create this view next
     }
 }
