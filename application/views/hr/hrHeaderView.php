@@ -53,6 +53,9 @@
                 href="<?= base_url('Employee/viewJobs') ?>">
                 <i class="fas fa-list-alt me-2"></i> Manage Jobs
             </a>
+            <a href="<?= base_url('Employee/incrementReport') ?>" class="nav-link <?= ($this->uri->segment(2) == 'incrementReport') ? 'active' : '' ?>">
+              <i class="fas fa-chart-pie me-2"></i>Increment Report
+           </a>
             <a class="nav-link <?= ($this->uri->segment(2) == 'salaryManagement') ? 'active' : '' ?>"
                 href="<?= base_url('Employee/salaryManagement') ?>">
                 <i class="fas fa-file-invoice-dollar me-2"></i> Salary Setup

@@ -171,7 +171,10 @@ $net_before_round = $final_net - $round_off_val;          // gross - deductions 
         .final-payable-row th {
             font-size: 16px; text-align: right;
             padding: 11px 10px;
-            background: #1e1b4b; color: #fff;
+            color: black; 
+            background-color: #eee;
+            /* background: #1e1b4b; color: #fff; */
+
         }
 
         .words-row {
@@ -382,7 +385,7 @@ $net_before_round = $final_net - $round_off_val;          // gross - deductions 
                 </tr>
                 <!-- FINAL NET PAYABLE -->
                 <tr class="final-payable-row">
-                    <th colspan="3" style="border-right:1px solid #000; background:#eee;">
+                    <th colspan="3" >
                          FINAL NET PAYABLE
                     </th>
                     <th class="text-right">₹ <?= number_format($final_net, 2) ?></th>

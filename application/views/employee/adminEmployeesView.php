@@ -49,6 +49,7 @@ $csrf_hash = $this->security->get_csrf_hash();
   <div class="main-content">
     <div id="employees" class="section active">
       <h2 class="text-white mb-4">Employee Management</h2>
+       
 
       <!-- Search Box -->
       <?= form_open('Employee/viewEmployee') ?>
@@ -116,10 +117,10 @@ $csrf_hash = $this->security->get_csrf_hash();
                   <button type="submit" class="btn btn-edit btn-action btn-sm"><i class="fas fa-edit"></i></button>
                   <?= form_close() ?>
 
-                  <button class="btn btn-sm btn-outline-success"
+                  <!-- <button class="btn btn-sm btn-outline-success"
                     onclick='openIncrementModal("<?= $emp->seemp_id ?>", <?= htmlspecialchars(json_encode($emp->seempd_name), ENT_QUOTES, "UTF-8") ?>, <?= (float)$emp->seempd_salary ?>)'>
                     <i class="fas fa-chart-line"></i> Increments
-                  </button>
+                  </button> -->
                 </td>
               </tr>
             <?php endforeach; ?>
@@ -188,118 +189,6 @@ $csrf_hash = $this->security->get_csrf_hash();
     </div>
   </div>
 
-  <!-- ═══════════════════════════════════════════════════════════════════════
-       INCREMENT MODAL
-  ════════════════════════════════════════════════════════════════════════ -->
-  <div class="modal fade" id="incrementModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">
-            Increment History: <span id="inc_emp_name" class="fw-bold"></span>
-          </h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body">
-
-          <!-- Apply new increment card -->
-          <div class="card bg-light mb-4">
-            <div class="card-body">
-              <h6 class="card-title mb-3">
-                <i class="fas fa-plus-circle text-primary"></i> Apply New Increment
-              </h6>
-
-              <!-- Warning: increment already exists this month -->
-              <div id="inc_month_warning" class="alert alert-warning d-none mb-3" role="alert">
-                <i class="fas fa-exclamation-triangle me-2"></i>
-                <strong>Warning:</strong> An increment already exists for this month.
-                The server will reject a second one.
-              </div>
-
-              <!-- Warning: date selected is in a past month (shown by JS) -->
-              <div id="inc_pastmonth_warning" class="alert alert-danger d-none mb-3" role="alert">
-                <i class="fas fa-ban me-2"></i>
-                <strong>Not Allowed:</strong> The effective date is in a past month.
-                Please select a date in <strong><?= date('F Y') ?></strong> or later.
-              </div>
-
-              <form action="<?= base_url('Employee/applyIncrement') ?>" method="POST"
-                id="incrementForm">
-                <input type="hidden" name="<?= $csrf_name ?>" value="<?= $csrf_hash ?>">
-                <input type="hidden" name="inc_empid" id="inc_empid">
-                <input type="hidden" name="old_salary" id="old_salary">
-
-                <div class="row g-3">
-                  <div class="col-md-3">
-                    <label class="form-label">Current Salary</label>
-                    <input type="text" class="form-control" id="display_old_salary" readonly>
-                  </div>
-                  <div class="col-md-3">
-                    <label class="form-label">Increment (%)</label>
-                    <input type="number" step="0.01" min="1" max="100"
-                      class="form-control" name="inc_percentage" id="inc_percentage"
-                      oninput="calculateIncrement()" required>
-                  </div>
-                  <div class="col-md-3">
-                    <label class="form-label">Increment Amount (₹)</label>
-                    <input type="number" step="0.01"
-                      class="form-control" name="inc_amount" id="inc_amount"
-                      oninput="calculateIncrementFromAmount()">
-                  </div>
-                  <div class="col-md-3">
-                    <label class="form-label">New Salary (₹)</label>
-                    <input type="number" step="0.01"
-                      class="form-control" name="new_salary" id="new_salary" readonly>
-                  </div>
-
-                  <div class="col-md-4">
-                    <label class="form-label">Effective Date</label>
-                    <!-- min = first day of current month — past months are unselectable -->
-                    <input type="date" class="form-control" name="inc_date" id="inc_date"
-                      min="<?= $min_inc_date ?>" required>
-                    <small id="inc_date_hint" class="text-muted">
-                      Earliest allowed: <?= date('d M Y', strtotime($min_inc_date)) ?>
-                    </small>
-                  </div>
-                  <div class="col-md-8">
-                    <label class="form-label">Reason / Note</label>
-                    <input type="text" class="form-control" name="inc_reason"
-                      placeholder="e.g. Annual Appraisal 2026">
-                  </div>
-
-                  <div class="col-12 text-end">
-                    <button type="submit" class="btn btn-success" id="applyIncrementBtn">
-                      Apply Increment
-                    </button>
-                  </div>
-                </div>
-              </form>
-            </div>
-          </div><!-- /card -->
-
-          <!-- Past increments table — now includes Status column -->
-          <h6 class="mb-3"><i class="fas fa-history text-secondary"></i> Past Increments</h6>
-          <div class="table-responsive">
-            <table class="table table-bordered table-striped text-sm">
-              <thead class="table-dark">
-                <tr>
-                  <th>Effective Date</th>
-                  <th>Old Salary</th>
-                  <th>Increment</th>
-                  <th>New Salary</th>
-                  <th>Reason</th>
-                  <th>Status</th> <!-- NEW column -->
-                </tr>
-              </thead>
-              <tbody id="incrementHistoryBody"></tbody>
-            </table>
-          </div>
-
-        </div><!-- /modal-body -->
-      </div>
-    </div>
-  </div>
-
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
@@ -308,14 +197,15 @@ $csrf_hash = $this->security->get_csrf_hash();
     const statusFilter = document.getElementById('statusFilter');
     const noDataRow = document.getElementById('noDataRow');
     const tableRows = document.querySelectorAll('#employeesTableBody tr:not(#noDataRow)');
-    const incMonthWarning = document.getElementById('inc_month_warning');
-    const incPastWarning = document.getElementById('inc_pastmonth_warning');
-    const applyIncrementBtn = document.getElementById('applyIncrementBtn');
-    const incDateInput = document.getElementById('inc_date');
+
+    // const incMonthWarning = document.getElementById('inc_month_warning');
+    // const incPastWarning = document.getElementById('inc_pastmonth_warning');
+    // const applyIncrementBtn = document.getElementById('applyIncrementBtn');
+    // const incDateInput = document.getElementById('inc_date');
 
     // First day of current month as a comparable string "YYYY-MM"
     // Passed from PHP so there is never a client/server clock mismatch.
-    const MIN_INC_YM = '<?= $current_ym_str ?>'; // e.g. "2026-04"
+    // const MIN_INC_YM = '<?= $current_ym_str ?>'; // e.g. "2026-04"
 
     // ── Client-side employee table filter ────────────────────────────────────
     document.addEventListener('DOMContentLoaded', function() {
@@ -388,117 +278,7 @@ $csrf_hash = $this->security->get_csrf_hash();
         });
     }
 
-    // ── Increment Modal ───────────────────────────────────────────────────────
-    function openIncrementModal(empid, name, currentSalary) {
-      // Populate basic fields
-      document.getElementById('inc_emp_name').textContent = name;
-      document.getElementById('inc_empid').value = empid;
-      document.getElementById('old_salary').value = currentSalary;
-      document.getElementById('display_old_salary').value = '₹ ' + currentSalary;
-      document.getElementById('inc_percentage').value = '';
-      document.getElementById('inc_amount').value = '';
-      document.getElementById('new_salary').value = currentSalary;
-      document.getElementById('inc_date').value = '';
-
-      // Reset warning banners and submit button
-      incMonthWarning.classList.add('d-none');
-      incPastWarning.classList.add('d-none');
-      applyIncrementBtn.disabled = false;
-
-      // Fetch history (controller also auto-applies pending increments inside)
-      fetch('<?= base_url("Employee/getIncrementHistoryAjax/") ?>' + empid)
-        .then(r => r.json())
-        .then(data => {
-          const tbody = document.getElementById('incrementHistoryBody');
-          tbody.innerHTML = '';
-
-          const now = new Date();
-          let hasThisMonth = false;
-
-          if (!Array.isArray(data) || data.length === 0) {
-            tbody.innerHTML =
-              '<tr><td colspan="6" class="text-center text-muted">No past increments found.</td></tr>';
-          } else {
-            data.forEach(inc => {
-              // inc_effective_date is "YYYY-MM-DD" — parse the YYYY-MM part only
-              // to avoid timezone-shift issues that Date() has with ISO strings
-              const [incYear, incMonth] = inc.inc_effective_date.split('-').map(Number);
-              const isThisMonth = (incYear === now.getFullYear() && incMonth === now.getMonth() + 1);
-
-              if (isThisMonth) hasThisMonth = true;
-
-              // Status badge
-              const isPending = (inc.inc_status === 'pending');
-              const statusBadge = isPending ?
-                '<span class="badge bg-warning text-dark">Pending</span>' :
-                '<span class="badge bg-success">Applied</span>';
-
-              // Highlight current-month rows
-              const rowClass = isThisMonth ? 'class="table-warning"' : '';
-
-              tbody.innerHTML += `
-                <tr ${rowClass}>
-                  <td>${inc.inc_effective_date}${isPending ? ' <i class="fas fa-clock text-warning" title="Salary updates on this date"></i>' : ''}</td>
-                  <td>₹${parseFloat(inc.old_salary).toFixed(2)}</td>
-                  <td class="text-success">+₹${parseFloat(inc.inc_amount).toFixed(2)} (${parseFloat(inc.inc_percentage).toFixed(2)}%)</td>
-                  <td><strong>₹${parseFloat(inc.new_salary).toFixed(2)}</strong></td>
-                  <td>${inc.inc_reason || '-'}</td>
-                  <td>${statusBadge}</td>
-                </tr>`;
-            });
-          }
-
-          // Show banner if this month already has an increment (applied or pending)
-          if (hasThisMonth) {
-            incMonthWarning.classList.remove('d-none');
-            applyIncrementBtn.disabled = true; // prevent accidental double-submit
-          }
-        })
-        .catch(() => {
-          document.getElementById('incrementHistoryBody').innerHTML =
-            '<tr><td colspan="6" class="text-center text-danger">Error loading history.</td></tr>';
-        });
-
-      bootstrap.Modal.getOrCreateInstance(document.getElementById('incrementModal')).show();
-    }
-
-    // ── Date validation: block past months on date change ─────────────────────
-    incDateInput.addEventListener('change', function() {
-      const val = this.value; // "YYYY-MM-DD"
-      if (!val) return;
-
-      const selectedYM = val.substring(0, 7); // "YYYY-MM"
-
-      if (selectedYM < MIN_INC_YM) {
-        // Past month selected — show error, disable submit
-        incPastWarning.classList.remove('d-none');
-        applyIncrementBtn.disabled = true;
-        this.value = ''; // clear the invalid date
-      } else {
-        incPastWarning.classList.add('d-none');
-        // Re-enable only if there's no "already this month" block
-        if (incMonthWarning.classList.contains('d-none')) {
-          applyIncrementBtn.disabled = false;
-        }
-      }
-    });
-
-    // ── Salary calculators ────────────────────────────────────────────────────
-    function calculateIncrement() {
-      const old = parseFloat(document.getElementById('old_salary').value) || 0;
-      const pct = parseFloat(document.getElementById('inc_percentage').value) || 0;
-      const amount = old * (pct / 100);
-      document.getElementById('inc_amount').value = amount.toFixed(2);
-      document.getElementById('new_salary').value = (old + amount).toFixed(2);
-    }
-
-    function calculateIncrementFromAmount() {
-      const old = parseFloat(document.getElementById('old_salary').value) || 0;
-      const amount = parseFloat(document.getElementById('inc_amount').value) || 0;
-      const pct = old > 0 ? (amount / old) * 100 : 0;
-      document.getElementById('inc_percentage').value = pct.toFixed(2);
-      document.getElementById('new_salary').value = (old + amount).toFixed(2);
-    }
+    
   </script>
 </body>
 
