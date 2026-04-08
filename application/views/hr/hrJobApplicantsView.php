@@ -15,18 +15,18 @@
 
 <body>
 
-    <?php if ($this->session->flashdata('msg') || $this->session->flashdata('error')): 
+    <?php if ($this->session->flashdata('msg') || $this->session->flashdata('error')):
         $msg = $this->session->flashdata('msg') ? $this->session->flashdata('msg') : $this->session->flashdata('error');
         $isError = $this->session->flashdata('error') ? 'true' : 'false';
-    ?>
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const Toast = Swal.mixin({
-                toast: true, position: 'top-end', showConfirmButton: false, timer: 4000, timerProgressBar: true
+        ?>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const Toast = Swal.mixin({
+                    toast: true, position: 'top-end', showConfirmButton: false, timer: 4000, timerProgressBar: true
+                });
+                Toast.fire({ icon: <?= $isError ?> ? 'error' : 'success', title: <?= json_encode($msg) ?> });
             });
-            Toast.fire({ icon: <?= $isError ?> ? 'error' : 'success', title: <?= json_encode($msg) ?> });
-        });
-    </script>
+        </script>
     <?php endif; ?>
 
     <div class="main-content">
@@ -79,11 +79,16 @@
                                 $statusClass = 'bg-pending';
                                 $state = strtolower($app->sejoba_state);
 
-                                if ($state == 'selected') $statusClass = 'bg-selected';
-                                if ($state == 'rejected') $statusClass = 'bg-rejected';
-                                if ($state == 'technical interview') $statusClass = 'bg-primary text-white';
-                                if ($state == 'communication and document verification') $statusClass = 'bg-info text-dark';
-                                if ($state == 'interviewing') $statusClass = 'bg-info text-dark';
+                                if ($state == 'selected')
+                                    $statusClass = 'bg-selected';
+                                if ($state == 'rejected')
+                                    $statusClass = 'bg-rejected';
+                                if ($state == 'technical interview')
+                                    $statusClass = 'bg-primary text-white';
+                                if ($state == 'communication and document verification')
+                                    $statusClass = 'bg-info text-dark';
+                                if ($state == 'interviewing')
+                                    $statusClass = 'bg-info text-dark';
                                 ?>
                                 <tr>
                                     <td class="ps-4 fw-bold text-muted">
@@ -174,19 +179,24 @@
                         <div class="col-md-7 ps-4">
                             <ul class="nav nav-pills mb-4" id="pills-tab" role="tablist">
                                 <li class="nav-item" role="presentation">
-                                    <button class="nav-link active rounded-pill px-4 py-2" id="pills-review-tab"
-                                        data-bs-toggle="pill" data-bs-target="#pills-review" type="button" role="tab"><i
-                                            class="fas fa-clipboard-check me-2"></i>Review Decision</button>
+                                    <button class="nav-link active rounded-pill px-4 py-2" id="pills-interview-tab"
+                                        data-bs-toggle="pill" data-bs-target="#pills-interview" type="button" role="tab"
+                                        aria-selected="true">
+                                        <i class="fas fa-calendar-alt me-2"></i>Schedule Interview
+                                    </button>
                                 </li>
+
                                 <li class="nav-item" role="presentation">
-                                    <button class="nav-link rounded-pill px-4 py-2" id="pills-interview-tab"
-                                        data-bs-toggle="pill" data-bs-target="#pills-interview" type="button"
-                                        role="tab"><i class="fas fa-calendar-alt me-2"></i>Schedule Interview</button>
+                                    <button class="nav-link rounded-pill px-4 py-2" id="pills-review-tab"
+                                        data-bs-toggle="pill" data-bs-target="#pills-review" type="button" role="tab"
+                                        aria-selected="false">
+                                        <i class="fas fa-clipboard-check me-2"></i>Review Final Decision
+                                    </button>
                                 </li>
                             </ul>
 
                             <div class="tab-content" id="pills-tabContent">
-                                <div class="tab-pane fade show active" id="pills-review" role="tabpanel">
+                                <div class="tab-pane fade show " id="pills-review" role="tabpanel">
                                     <?= form_open('Employee/viewJobApplicants') ?>
                                     <input type="hidden" name="applicant_id" id="review_applicant_id">
 
@@ -194,11 +204,11 @@
                                         <label class="info-label">Update Status</label>
                                         <select name="status" id="form_status" class="form-select bg-light" required>
                                             <option value="" disabled>Select Decision...</option>
-                                            <option value="applied">Applied</option>
+                                            <!-- <option value="applied">Applied</option> -->
                                             <option value="pending">Pending</option>
-                                            <option value="technical interview">Technical Interview</option>
-                                            <option value="communication and document verification">Communication and
-                                                Document Verification</option>
+                                            <!-- <option value="technical interview">Technical Interview</option>
+                                            <option value="communication and document verification">Communication and 
+                                                Document Verification</option> -->
                                             <option value="selected">Selected</option>
                                             <option value="rejected">Rejected</option>
                                         </select>
@@ -217,7 +227,7 @@
                                     <?= form_close() ?>
                                 </div>
 
-                                <div class="tab-pane fade" id="pills-interview" role="tabpanel">
+                                <div class="tab-pane fade show active" id="pills-interview" role="tabpanel">
                                     <div class="bg-light p-4 rounded-4 border">
                                         <?= form_open('Employee/sendInterviewInvite', ['id' => 'interviewForm']) ?>
                                         <input type="hidden" name="applicant_id" id="invite_applicant_id">
@@ -282,7 +292,6 @@
             </div>
         </div>
     </div>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
@@ -349,7 +358,7 @@
                                     break;
                                 }
                             }
-                            if (!matchFound) statusDropdown.value = ""; 
+                            if (!matchFound) statusDropdown.value = "";
 
                             document.getElementById("invite_applicant_id").value = data.id;
                             document.getElementById("invite_email").value = data.email;
@@ -372,7 +381,7 @@
                                 resumeBox.innerHTML = '<span class="text-danger small fst-italic">No Resume Uploaded</span>';
                             }
 
-                            const firstTab = document.querySelector('#pills-review-tab');
+                            const firstTab = document.querySelector('#pills-interview-tab');
                             if (firstTab) {
                                 const tabTrigger = new bootstrap.Tab(firstTab);
                                 tabTrigger.show();
@@ -408,7 +417,7 @@
                     if (this.value && selectedDate < today) {
                         dateError.style.display = 'block';
                         this.classList.add('is-invalid');
-                        this.value = ""; 
+                        this.value = "";
                     } else {
                         dateError.style.display = 'none';
                         this.classList.remove('is-invalid');
@@ -421,7 +430,7 @@
             if (interviewForm) {
                 interviewForm.addEventListener('submit', function (e) {
                     e.preventDefault(); // Stop standard submission
-                    
+
                     const applicantName = document.getElementById("invite_name").value;
                     const interviewRound = document.getElementById("interview_round").value;
                     const interviewDate = document.querySelector('input[name="interview_date"]').value;
@@ -464,4 +473,5 @@
         });
     </script>
 </body>
+
 </html>
