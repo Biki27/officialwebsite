@@ -52,7 +52,7 @@ class Jobs extends CI_Controller
     // Update FilterJob method
     public function FilterJob()
     {
-        // Use $this->input->get() instead of $this->input->post()
+        
         $filter_query = $this->input->get();
 
         $title = $filter_query['jtitle'] ?? '';
@@ -66,7 +66,8 @@ class Jobs extends CI_Controller
         $viewData = array(
             'res' => $result,
             'filter_vals' => $filter_query,
-            'scrollToResults' => true
+            'scrollToResults' => true,
+            // 'db_skills' => $this->JobsModel->get_all_skills() // <--- NEW: Fetching the skills
         );
 
         $this->load->view('jobsView', $viewData);

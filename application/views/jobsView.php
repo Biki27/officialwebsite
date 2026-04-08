@@ -26,26 +26,10 @@
                 </div>
             </div>
 
-            <?= form_open("Jobs/SearchJob") ?>
-            <!-- <div class="row justify-content-center mb-5">
-                <div class="col-lg-10 col-xl-8">
-                    <div class="premium-search-bar">
-                        <div class="input-group input-group-lg">
-                            <span class="input-group-text bg-transparent border-0 ps-4 pe-2">
-                                <i class="fas fa-search text-muted"></i>
-                            </span>
-                            <input type="text" class="form-control border-0 shadow-none search-main"
-                                placeholder="Search by Job Title, Keywords..." name="search" id="search"
-                                value="<?= isset($search_val) ? htmlspecialchars($search_val) : '' ?>">
-                            <button class="btn btn-primary search-btn-main" type="submit">Search Jobs</button>
-                        </div>
-                    </div>
-                </div>
-            </div> -->
-            <?= form_close() ?>
+           
 
-            <!-- <?= form_open("Jobs/FilterJob") ?> -->
-             <?= form_open("Jobs/FilterJob", ['method' => 'get']) ?>
+         
+            <?= form_open("Jobs/FilterJob", ['method' => 'get']) ?>
             <div class="row g-3 justify-content-center">
                 <div class="col-lg col-md-4 col-sm-6">
                     <div class="premium-filter-group">
@@ -80,9 +64,11 @@
                             <span class="input-group-text"><i class="fas fa-layer-group"></i></span>
                             <select id="jskills" name="jskills" class="form-select filter-input">
                                 <option value="">All Skills</option>
-                                <?php $skills = ['python', 'java', 'html', 'php', 'react'];
+                                <?php
+                                // Match the exact casing from your database / Tagify whitelist
+                                $skills = ['PHP', 'JavaScript', 'Laravel', 'Java', 'Cakephp', 'CodeIgniter', 'SQL', 'HTML/CSS', 'React', 'Node.js', 'Marketing', 'Sales', 'Communication', 'Project Management'];
                                 foreach ($skills as $s): ?>
-                                    <option value="<?= $s ?>" <?= (isset($filter_vals['jskills']) && $filter_vals['jskills'] == $s) ? 'selected' : '' ?>><?= ucfirst($s) ?></option>
+                                    <option value="<?= $s ?>" <?= (isset($filter_vals['jskills']) && $filter_vals['jskills'] == $s) ? 'selected' : '' ?>><?= $s ?></option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
@@ -146,13 +132,13 @@
                                             </div>
                                         </div>
                                         <span class="badge rounded-pill <?php
-                                        if ($job->sejob_urgency == 'new')
-                                            echo "bg-success";
-                                        elseif ($job->sejob_urgency == 'hot')
-                                            echo "bg-warning text-dark";
-                                        elseif ($job->sejob_urgency == 'urgent')
-                                            echo "bg-danger";
-                                        ?>"><?= ucfirst($job->sejob_urgency) ?></span>
+                                                                        if ($job->sejob_urgency == 'new')
+                                                                            echo "bg-success";
+                                                                        elseif ($job->sejob_urgency == 'hot')
+                                                                            echo "bg-warning text-dark";
+                                                                        elseif ($job->sejob_urgency == 'urgent')
+                                                                            echo "bg-danger";
+                                                                        ?>"><?= ucfirst($job->sejob_urgency) ?></span>
                                     </div>
                                 </div>
 
@@ -181,7 +167,7 @@
                                         $uid = $job->sejob_id;
                                         if (strlen($desc) > 120):
                                             $short_desc = substr($desc, 0, 115);
-                                            ?>
+                                        ?>
                                             <div class="collapse show multi-collapse-<?= $uid ?>" id="shortDesc<?= $uid ?>">
                                                 <span><?= $short_desc ?>...</span>
                                                 <a data-bs-toggle="collapse" data-bs-target=".multi-collapse-<?= $uid ?>"
@@ -241,7 +227,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <?php if (isset($scrollToResults) && $scrollToResults): ?>
         <script>
-            document.addEventListener("DOMContentLoaded", function () {
+            document.addEventListener("DOMContentLoaded", function() {
                 const resultsSection = document.getElementById('results-section');
                 if (resultsSection) {
                     resultsSection.scrollIntoView({

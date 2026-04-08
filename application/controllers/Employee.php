@@ -1589,6 +1589,7 @@ class Employee extends CI_Controller
 
         redirect('Employee/products');
     }
+    // job management by 
     public function viewJobs()
     {
         $access = $this->session->userdata('accesslevel');
@@ -1596,7 +1597,7 @@ class Employee extends CI_Controller
 
             $this->load->model('JobsModel');
             $data['jobs'] = $this->JobsModel->get_all_jobs();
-
+            $data['all_skills'] = $this->JobsModel->get_all_skills();
             $header = ($access == 'HR') ? 'hr/hrHeaderView' : 'employee/adminHeaderView';
             $this->load->view($header);
             $this->load->view('hr/hrManageJobsView', $data);
@@ -1606,16 +1607,38 @@ class Employee extends CI_Controller
         }
     }
 
-    public function saveJob()
+   public function saveJob()
     {
         $this->load->model('JobsModel');
+
+        // --- TAGIFY DATA HANDLING ---
+        $skills_input = $this->input->post('skills', TRUE);
+        $final_skills = '';
+        $skill_values = []; // Initialize an empty array to hold the skills
+
+        // Tagify sends data as a JSON array of objects: [{"value":"PHP"},{"value":"React"}]
+        $skills_array = json_decode($skills_input, true);
+
+        // Check if it successfully decoded into an array
+        if (json_last_error() === JSON_ERROR_NONE && is_array($skills_array)) {
+            // Extract just the 'value' strings
+            $skill_values = array_column($skills_array, 'value');
+            $final_skills = implode(', ', $skill_values);
+        } else {
+            // Fallback just in case Tagify didn't load and it sent plain text
+            $final_skills = $skills_input;
+            if (!empty($final_skills)) {
+                $skill_values = explode(',', $final_skills);
+            }
+        }
+        // ----------------------------
 
         $jobData = [
             'sejob_jobtitle' => $this->input->post('jobTitle', TRUE),
             'sejob_experience' => $this->input->post('experience', TRUE),
             'sejob_address' => $this->input->post('address', TRUE),
             'sejob_workinghours' => $this->input->post('workingHours', TRUE),
-            'sejob_skills' => $this->input->post('skills', TRUE),
+            'sejob_skills' => $final_skills, // Still saving the flat string as a backup
             'sejob_salary' => $this->input->post('salary', TRUE),
             'sejob_desc' => $this->input->post('description', TRUE),
             'sejob_urgency' => $this->input->post('urgency', TRUE),
@@ -1626,23 +1649,35 @@ class Employee extends CI_Controller
         $job_id = $this->input->post('job_id', TRUE);
 
         if (!empty($job_id)) {
+            // UPDATE EXISTING JOB
             $this->db->where('sejob_id', $job_id);
             $this->db->update('sejobs', $jobData);
             $this->session->set_flashdata('msg', 'Job updated successfully');
         } else {
+            // INSERT NEW JOB
             $this->db->insert('sejobs', $jobData);
+            $job_id = $this->db->insert_id(); // <--- CRITICAL: Get the new ID!
             $this->session->set_flashdata('msg', 'New job posted successfully');
         }
+
+        // <--- CRITICAL FIX: Save the skills to the relational mapping tables! --->
+        if (!empty($skill_values)) {
+            $this->JobsModel->save_job_skills($job_id, $skill_values);
+        }
+
         redirect('Employee/viewJobs');
     }
 
     public function deleteJob($id)
     {
+        // SOFT DELETE: We update the state instead of dropping the row
         $this->db->where('sejob_id', $id);
-        $this->db->delete('sejobs');
+        $this->db->update('sejobs', ['sejob_state' => 'deleted']);
+        
         $this->session->set_flashdata('msg', 'Job posting removed');
         redirect('Employee/viewJobs');
     }
+    // --- END OF JOB MANAGEMENT ---
 
     // --- AJAX ATTENDANCE & GEOFENCING ROUTE ---
     public function SubmitAttendanceAjax()
