@@ -18,6 +18,7 @@ class Employee extends CI_Controller
     {
         $this->Login();
     }
+    // Login
     function Login()
     {
 
@@ -75,6 +76,7 @@ class Employee extends CI_Controller
             }
         }
     }
+    // Dashboard
     function Dashboard()
     {
         if (
@@ -166,7 +168,6 @@ class Employee extends CI_Controller
             $this->load->view('errors/invalidAccessView');
         }
     }
-
     // AdminEmployee
     public function viewEmployee()
     {
@@ -355,6 +356,7 @@ class Employee extends CI_Controller
             $this->load->view('errors/invalidAccessView');
         }
     }
+    // add coded for view details of employee total leave and history details
     public function viewAttendanceAjax()
     {
         // 1. Authorization check similar to your existing viewAttendance method
@@ -411,7 +413,6 @@ class Employee extends CI_Controller
             echo json_encode(['success' => false, 'message' => 'Applicant not found or not in "Selected" state.']);
         }
     }
-
 
     // AdminviewProjects
     function viewProjects()
@@ -484,24 +485,25 @@ class Employee extends CI_Controller
             $this->load->view('errors/invalidAccessView');
         }
     }
+    //
+    // function addProjectPage()
+    // {
+    //     if (
+    //         $this->session->has_userdata('empid') &&
+    //         $this->session->has_userdata('email') &&
+    //         $this->session->has_userdata('accesslevel') &&
+    //         $this->session->userdata('status') == 'active' &&
+    //         $this->session->userdata('accesslevel') == 'ADMIN'
+    //     ) {
+    //         $this->load->view('employee/adminHeaderView');
+    //         $this->load->view('employee/addNewProjectView');
+    //     } else {
+    //         $this->session->sess_destroy();
+    //         $this->load->view('errors/invalidAccessView');
+    //     }
+    // }
 
-    function addProjectPage()
-    {
-        if (
-            $this->session->has_userdata('empid') &&
-            $this->session->has_userdata('email') &&
-            $this->session->has_userdata('accesslevel') &&
-            $this->session->userdata('status') == 'active' &&
-            $this->session->userdata('accesslevel') == 'ADMIN'
-        ) {
-            $this->load->view('employee/adminHeaderView');
-            $this->load->view('employee/addNewProjectView');
-        } else {
-            $this->session->sess_destroy();
-            $this->load->view('errors/invalidAccessView');
-        }
-    }
-
+    // Fetch Project Details by ID for Editing (AJAX)
     function fetchProject()
     {
         $id = $this->input->post('id');
@@ -512,7 +514,7 @@ class Employee extends CI_Controller
 
         echo json_encode($project);
     }
-
+    // Update Project
     function updateProject()
     {
         if (
@@ -556,11 +558,7 @@ class Employee extends CI_Controller
         }
     }
 
-    /**
-     * AJAX — Delete a project by ID.
-     * POST params: id (integer)
-     * Returns JSON: { success, message, csrf_hash }
-     */
+    // AJAX — Delete a project by ID
     public function deleteProject()
     {
         // Auth guard
@@ -598,11 +596,7 @@ class Employee extends CI_Controller
         }
     }
 
-    /**
-     * AJAX — Check whether a project with the given name already exists.
-     * POST params: name (string)
-     * Returns JSON: full project row object, or null if no match.
-     */
+    // AJAX — Check for duplicate project name
     public function checkDuplicateProject()
     {
         // Auth guard
@@ -669,7 +663,7 @@ class Employee extends CI_Controller
             $this->load->view('errors/invalidAccessView');
         }
     }
-    //
+    // Add Employee
     public function addEmployee()
     {
         $this->load->library('upload');
@@ -983,6 +977,7 @@ class Employee extends CI_Controller
         }
         redirect('Employee/viewEmployee');
     }
+
     // Employee Overview
     function EmployeeOverview()
     {
@@ -1063,6 +1058,7 @@ class Employee extends CI_Controller
             redirect('Employee/EmployeeOverview');
         }
     }
+    // 
     // --- Employee Portal: View Salary Slips Page ---
     public function mySalarySlips()
     {
@@ -1084,7 +1080,6 @@ class Employee extends CI_Controller
         $this->load->view('employee/employeeHeaderView');
         $this->load->view('employee/employeeSalarySlipsView', $data);
     }
-
 
     // --- Download/View Specific Slip (Handles both Employee and HR/Admin) ---
     public function viewMySlip($slip_id)
@@ -1129,6 +1124,7 @@ class Employee extends CI_Controller
             show_404(); // Slip doesn't exist or employee is trying to view someone else's slip
         }
     }
+    // Employee Attendence
     function EmployeeAttendence()
     {
         if (
@@ -1154,7 +1150,7 @@ class Employee extends CI_Controller
             $this->load->view('errors/invalidAccessView');
         }
     }
-
+    // Employee Attendence
     function EmployeeRequest()
     {
         if (
@@ -1228,6 +1224,7 @@ class Employee extends CI_Controller
             $this->load->view('errors/invalidAccessView');
         }
     }
+
     // CUSTOM VALIDATION CALLBACK
     public function check_end_date($enddate)
     {
@@ -1256,6 +1253,7 @@ class Employee extends CI_Controller
         $success = $this->RequestsModel->set_reminder($reqId);
         echo json_encode(['status' => $success ? 'success' : 'error']);
     }
+    // Employee Change Password
     function ChangePassword()
     {
         if (
@@ -1366,9 +1364,7 @@ class Employee extends CI_Controller
             $this->load->view('errors/invalidAccessView');
         }
     }
-    /**
-     * Process Leave Decisions from Dashboard
-     */
+    // Process Leave Approval/Rejection from Dashboard
     public function updateLeaveStatus($id, $status)
     {
         // Authorization Check
@@ -1388,7 +1384,7 @@ class Employee extends CI_Controller
         // Redirect back to the dashboard to refresh the table
         redirect('Employee/Dashboard');
     }
-
+    // View All Employee Leave Requests (For HR/Admin)
     public function viewEmployeeLeaveRequests()
     {
         if (
@@ -1488,6 +1484,7 @@ class Employee extends CI_Controller
         }
     }
 
+    // Send Interview Invite with Round Selection
     public function sendInterviewInvite()
     {
         $this->load->model('InterviewModel');
@@ -1540,6 +1537,7 @@ class Employee extends CI_Controller
         redirect('Employee/viewJobApplicants');
     }
 
+    // View Scheduled Interviews
     public function viewScheduledInterviews()
     {
         if (!$this->session->has_userdata('empid') || $this->session->userdata('accesslevel') != 'HR') {
@@ -1657,6 +1655,7 @@ class Employee extends CI_Controller
 
         redirect('Employee/products');
     }
+    
     // job management by 
     public function viewJobs()
     {
@@ -1674,7 +1673,7 @@ class Employee extends CI_Controller
             $this->load->view('errors/invalidAccessView');
         }
     }
-
+    // save job (handles both create and update)
     public function saveJob()
     {
         $this->load->model('JobsModel');
@@ -1850,9 +1849,7 @@ class Employee extends CI_Controller
                 // Clean the data for security
                 $data = $this->security->xss_clean($post);
 
-                /** * 1. CAST TO FLOAT: This is the critical fix for the "non-numeric" error.
-                 * Even if a field is empty, (float) will convert it to 0.00.
-                 */
+                // 1. Get the values from the form
                 $basic      = (float)$this->input->post('basic');
                 $transport  = (float)$this->input->post('transport');
                 $incentive  = (float)$this->input->post('incentive');
@@ -1867,36 +1864,26 @@ class Employee extends CI_Controller
                 $loss_of_pay    = (float)$this->input->post('loss_of_pay');
                 $loan           = (float)$this->input->post('loan');
 
-                /**
-                 * 2. PERFORM CALCULATIONS SECURELY
-                 * Logic follows your required structure from the salary slips table.
-                 */
+                // 2. Calculate Gross Earnings, Total Deductions, and Net Salary
                 $data['gross_earnings']   = $basic + $transport + $incentive + $overtime + $round_off + $bonus_amt;
                 $data['total_deductions'] = $pf + $esi_deduction + $prof_tax + $late_fees + $loss_of_pay + $loan;
                 $data['net_salary']       = $data['gross_earnings'] - $data['total_deductions'];
 
-                /**
-                 * 3. SAFETY GUARD: Prevent negative salary generation
-                 */
+                // 3. VALIDATION CHECK: Net Salary should not be negative
                 if ($data['net_salary'] < 0) {
                     $this->session->set_flashdata('error', 'Error: Deductions exceed Gross Earnings. Net Salary cannot be negative.');
                     redirect('Employee/salaryManagement');
                     return;
                 }
 
-                /**
-                 * 4. DUPLICATE CHECK: Prevent generating two slips for the same month
-                 */
+                // 4. VALIDATION CHECK: Slip for this month already exists
                 if ($this->EmployeeModel->slip_already_exists($data['seemp_id'], $data['slip_month'])) {
                     $this->session->set_flashdata('error', 'Slip for this month already exists for this employee.');
                     redirect('Employee/salaryManagement');
                     return;
                 }
 
-                /**
-                 * 5. DATABASE PERSISTENCE
-                 * Prepare data for DB insertion by removing non-table fields
-                 */
+                // 5. Save the slip data to the database
                 $db_data = $data;
                 unset($db_data['emp_name'], $db_data['designation'], $db_data['branch']);
 
@@ -1905,10 +1892,7 @@ class Employee extends CI_Controller
                 // Capture the new ID to pass to the print view
                 $data['slip_id'] = $this->db->insert_id();
 
-                /**
-                 * 6. LOAD PRINT VIEW
-                 * Pass the fully calculated $data array to the print view
-                 */
+                // 6. Load the print view
                 $this->load->view('hr/salarySlipPrintView', $data);
             }
         } else {
@@ -1916,6 +1900,7 @@ class Employee extends CI_Controller
             redirect('Employee/Login');
         }
     }
+    // Delete Slip - AJAX Route
     public function deleteSlipAjax()
     {
         if ($this->session->userdata('accesslevel') == 'HR' || $this->session->userdata('accesslevel') == 'ADMIN') {
@@ -1929,7 +1914,7 @@ class Employee extends CI_Controller
             }
         }
     }
-
+    // Google Login Route
     public function google_login()
     {
         // 1. Initialize Google Client (Requires composer require google/apiclient)
@@ -1982,14 +1967,13 @@ class Employee extends CI_Controller
     }
     // --- Employee Increment Routes ---
 
-    
-    // AJAX – fetch increment history + auto-apply any pending increments
-    // whose effective date has now arrived
- 
+    // GET – fetch increment history for an employee (for the modal)
     public function getIncrementHistoryAjax($empid)
     {
-        if ($this->session->userdata('accesslevel') != 'ADMIN' &&
-            $this->session->userdata('accesslevel') != 'HR') {
+        if (
+            $this->session->userdata('accesslevel') != 'ADMIN' &&
+            $this->session->userdata('accesslevel') != 'HR'
+        ) {
             echo json_encode(['error' => 'Unauthorized']);
             return;
         }
@@ -2010,13 +1994,15 @@ class Employee extends CI_Controller
         $history = $this->EmployeeModel->get_increment_history($empid);
         echo json_encode($history);
     }
- 
+
     // POST – validate and record a new increment
-    
+
     public function applyIncrement()
     {
-        if ($this->session->userdata('accesslevel') != 'ADMIN' &&
-            $this->session->userdata('accesslevel') != 'HR') {
+        if (
+            $this->session->userdata('accesslevel') != 'ADMIN' &&
+            $this->session->userdata('accesslevel') != 'HR'
+        ) {
             show_error('Unauthorized', 403);
         }
 
@@ -2061,7 +2047,7 @@ class Employee extends CI_Controller
             $this->session->set_flashdata(
                 'msg',
                 "Failed: Effective date cannot be in a past month ({$human}). "
-                . 'Use the current month (' . date('F Y') . ') or a future date.'
+                    . 'Use the current month (' . date('F Y') . ') or a future date.'
             );
             redirect('Employee/incrementReport');
             return;
@@ -2115,7 +2101,8 @@ class Employee extends CI_Controller
 
         redirect('Employee/incrementReport');
     }
-    // --- Increment Management Report ---
+
+    // Increment Management Report
     public function incrementReport()
     {
         // Security Check
@@ -2127,20 +2114,20 @@ class Employee extends CI_Controller
 
         // Check if HR selected a specific year from the dropdown. Default to current year.
         $selected_year = $this->input->get('year') ? $this->input->get('year') : date('Y');
-        
+
         // Fetch the report data
         $report_data = $this->EmployeeModel->get_yearly_increment_report($selected_year);
 
         // Calculate Dashboard Statistics
         $total_emps = count($report_data);
         $incremented_count = 0;
-        
+
         foreach ($report_data as $emp) {
             if (!empty($emp->last_inc_date)) {
                 $incremented_count++;
             }
         }
-        
+
         $pending_count = $total_emps - $incremented_count;
 
         // Package data for the View
@@ -2156,72 +2143,77 @@ class Employee extends CI_Controller
         $this->load->view($header);
         $this->load->view('hr/hrIncrementReportView', $data); // We will create this view next
     }
-    
+
     // bouns management system 
-    public function hrBonusReportView() {
-    if ($this->session->userdata('accesslevel') != 'HR' && $this->session->userdata('accesslevel') != 'ADMIN') {
-        redirect('Employee/Login');
+    public function hrBonusReportView()
+    {
+        if ($this->session->userdata('accesslevel') != 'HR' && $this->session->userdata('accesslevel') != 'ADMIN') {
+            redirect('Employee/Login');
+        }
+
+        $this->load->model('EmployeeModel');
+
+        // 1. Capture the year from the GET request, default to current year
+        $year = $this->input->get('year');
+        if (!$year) {
+            $year = date('Y');
+        }
+
+        // 2. Fetch the report data
+        $data = [
+            'selected_year' => $year,
+            'report' => $this->EmployeeModel->get_yearly_bonus_report($year),
+            'total_emps' => $this->EmployeeModel->get_total_staff_count()
+        ];
+
+        $this->load->view('hr/hrHeaderView');
+        $this->load->view('hr/hrBonusReportView', $data);
     }
-    
-    $this->load->model('EmployeeModel');
-    
-    // 1. Capture the year from the GET request, default to current year
-    $year = $this->input->get('year');
-    if (!$year) {
-        $year = date('Y');
+    // AJAX route to fetch bonus history and eligibility for an employee
+    public function getBonusHistoryAjax($empid)
+    {
+        $this->load->model('EmployeeModel');
+        $history = $this->EmployeeModel->get_bonus_history($empid);
+        $eligibility = $this->EmployeeModel->check_bonus_eligibility($empid);
+        echo json_encode(['history' => $history, 'eligibility' => $eligibility]);
     }
+    // POST route to apply a bonus to an employee after validating eligibility
+    public function applyBonus()
+    {
+        $post = $this->security->xss_clean($this->input->post());
+        $this->load->model('EmployeeModel');
 
-    $data = [
-        'selected_year' => $year,
-        // 2. Pass that specific year to the model
-        'report' => $this->EmployeeModel->get_yearly_bonus_report($year),
-        'total_emps' => $this->EmployeeModel->get_total_staff_count()
-    ];
+        $check = $this->EmployeeModel->check_bonus_eligibility($post['bonus_empid']);
+        if (!$check['eligible']) {
+            $this->session->set_flashdata('error', 'Employee not eligible until ' . $check['next_date']);
+            redirect('Employee/hrBonusReportView');
+        }
 
-    $this->load->view('hr/hrHeaderView');
-    $this->load->view('hr/hrBonusReportView', $data);
-}
+        $data = [
+            'bonus_empid' => $post['bonus_empid'],
+            'bonus_amount' => $post['bonus_amount'],
+            'bonus_date' => $post['bonus_date'],
+            'bonus_reason' => $post['bonus_reason'],
+            'bonus_status' => 'completed'
+        ];
 
-public function getBonusHistoryAjax($empid) {
-    $this->load->model('EmployeeModel');
-    $history = $this->EmployeeModel->get_bonus_history($empid);
-    $eligibility = $this->EmployeeModel->check_bonus_eligibility($empid);
-    echo json_encode(['history' => $history, 'eligibility' => $eligibility]);
-}
-
-public function applyBonus() {
-    $post = $this->security->xss_clean($this->input->post());
-    $this->load->model('EmployeeModel');
-    
-    $check = $this->EmployeeModel->check_bonus_eligibility($post['bonus_empid']);
-    if (!$check['eligible']) {
-        $this->session->set_flashdata('error', 'Employee not eligible until ' . $check['next_date']);
+        $this->EmployeeModel->add_bonus($data);
+        $this->session->set_flashdata('success', 'Bonus recorded successfully');
         redirect('Employee/hrBonusReportView');
     }
 
-    $data = [
-        'bonus_empid' => $post['bonus_empid'],
-        'bonus_amount' => $post['bonus_amount'],
-        'bonus_date' => $post['bonus_date'],
-        'bonus_reason' => $post['bonus_reason'],
-        'bonus_status' => 'completed'
-    ];
-    
-    $this->EmployeeModel->add_bonus($data);
-    $this->session->set_flashdata('success', 'Bonus recorded successfully');
-    redirect('Employee/hrBonusReportView');
-}
+    // AJAX route to fetch the bonus amount for payroll processing
+    public function getBonusForPayroll($empid, $month_year)
+    {
+        if (!$this->session->userdata('empid')) {
+            echo json_encode(0);
+            return;
+        }
 
-public function getBonusForPayroll($empid, $month_year) {
-    if (!$this->session->userdata('empid')) {
-        echo json_encode(0);
-        return;
+        $this->load->model('EmployeeModel');
+        $amount = $this->EmployeeModel->get_bonus_for_payroll($empid, $month_year);
+
+        // Return the numeric amount as JSON
+        echo json_encode($amount);
     }
-
-    $this->load->model('EmployeeModel');
-    $amount = $this->EmployeeModel->get_bonus_for_payroll($empid, $month_year);
-    
-    // Return the numeric amount as JSON
-    echo json_encode($amount);
-}
 }

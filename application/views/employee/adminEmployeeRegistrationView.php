@@ -5,7 +5,6 @@ defined('BASEPATH') or exit('No direct script access allowed');
 <link rel="stylesheet" href="<?= base_url('css/admin/adminEmployeeRegistrationView.css') ?>">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-
 <body>
     <?php if ($this->session->flashdata('msg')):
         $msg = $this->session->flashdata('msg');
@@ -385,12 +384,13 @@ defined('BASEPATH') or exit('No direct script access allowed');
                     empidFeedback.innerHTML = '<span class="text-warning small"><i class="fas fa-exclamation-triangle"></i> Error checking ID.</span>';
                 });
         }
+
         // --- LIVE EMAIL VALIDATION ---
         const emailInput = document.getElementById('email');
         const emailFeedback = document.getElementById('emailFeedback');
         const originalEmail = "<?= isset($emp) ? $emp->seemp_email : '' ?>";
         let emailTypingTimer;
-
+     
         emailInput.addEventListener('input', function() {
             clearTimeout(emailTypingTimer);
             let currentVal = this.value.trim();
@@ -424,7 +424,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
                 checkEmployeeEmail(currentVal);
             }, doneTypingInterval); // Reuses the 500ms timer variable from the ID script
         });
-
+        // Check if email already exists in the database via AJAX
         function checkEmployeeEmail(email) {
             let formData = new FormData();
             formData.append('email', email);
@@ -461,7 +461,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
                     emailFeedback.innerHTML = '<span class="text-warning small"><i class="fas fa-exclamation-triangle"></i> Error checking email.</span>';
                 });
         }
-
+        
         let hasCustomPhoto = <?= (isset($emp) && !empty($emp->seempd_img)) ? 'true' : 'false' ?>;
 
         // Dynamic Avatar live update when typing name
@@ -516,8 +516,6 @@ defined('BASEPATH') or exit('No direct script access allowed');
         // Form Submission Logic
         document.getElementById('employeeForm').addEventListener('submit', function(e) {
             e.preventDefault(); // ALWAYS stop the form first for SweetAlert
-
-            // --- NEW: Combine all project inputs into the hidden field ---
             let allProjects = [];
             document.querySelectorAll('.project-input').forEach(function(input) {
                 if (input.value.trim() !== '') {
@@ -636,22 +634,20 @@ defined('BASEPATH') or exit('No direct script access allowed');
         function removeProjectField(button) {
             button.closest('.project-input-group').remove();
         }
-
+        // Function to copy permanent address to current address when checkbox is checked
         function copyAddress() {
             const checkbox = document.getElementById('sameAddressCheck');
             const permAddr = document.getElementById('permAddress');
             const currAddr = document.getElementById('currentAddress');
 
             if (checkbox.checked) {
-                // Copy value and disable manual typing to prevent inconsistencies
                 currAddr.value = permAddr.value;
                 currAddr.setAttribute('readonly', true);
                 currAddr.style.backgroundColor = "#f3f4f6"; // Visual feedback (light grey)
             } else {
-                // Re-enable for manual entry
                 currAddr.removeAttribute('readonly');
                 currAddr.style.backgroundColor = "";
-                currAddr.value = ""; // Optional: Clear it when unchecked
+                currAddr.value = "";  
             }
         }
 
@@ -661,6 +657,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
                 document.getElementById('currentAddress').value = this.value;
             }
         });
+        
     </script>
 </body>
 
