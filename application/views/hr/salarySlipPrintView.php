@@ -493,14 +493,7 @@ $net_before_round = $final_net - $round_off_val;          // gross - deductions 
                     <td>Profession TAX</td>
                     <td class="text-right"><?= fmtVal($prof_tax) ?></td>
                 </tr>
-                <tr>
-                    <td style="font-weight:bold;">Annual Bonus</td>
-                    <td class="text-right" style="border-right:2px solid #000; font-weight:bold;">
-                        <?= fmtVal($bonus_amt) ?>
-                    </td>
-                    <td>&nbsp;</td>
-                    <td class="text-right">&nbsp;</td>
-                </tr>
+
                 <tr>
                     <td>Overtime </td>
                     <td class="text-right" style="border-right:2px solid #000;"><?= fmtVal($overtime) ?></td>
@@ -508,20 +501,32 @@ $net_before_round = $final_net - $round_off_val;          // gross - deductions 
                     <td class="text-right"><?= fmtVal($late_fees) ?></td>
                 </tr>
                 <tr>
-                    <td>Gross</td>
-                    <td class="text-right" style="border-right:2px solid #000;"><?= fmtVal($gross_earnings) ?></td>
+                    <?php if (empty($bonus_amt) || $bonus_amt > 0): ?>
+                        <td style="color:#d00;font-weight:bold;">Annual Bonus</td>
+                        <td class="text-right" style="color:#d00;font-weight:bold; border-right:2px solid #000;">
+                            <?= fmtVal($bonus_amt) ?></td>
+                    <?php else: ?>
+                        <td>&nbsp;</td>
+                        <td class="text-right">&nbsp;</td>
+                    <?php endif; ?>
+
                     <td>Loss of Pay / Other</td>
                     <td class="text-right"><?= fmtVal($loss_of_pay) ?></td>
                 </tr>
+
+
                 <tr>
+
                     <td>&nbsp;</td>
-                    <td style="border-right:2px solid #000;">&nbsp;</td>
+                    <td class="text-right">&nbsp;</td>
+
+
                     <td>Loan (Office / Bank)</td>
                     <td class="text-right"><?= fmtVal($loan) ?></td>
                 </tr>
                 <!-- Totals -->
                 <tr class="totals-row">
-                    <td>Total Addition</td>
+                    <td>Total Earning</td>
                     <td class="text-right" style="border-right:2px solid #000;"><?= fmtVal($gross_earnings) ?></td>
                     <td>Total Deduction</td>
                     <td class="text-right"><?= fmtVal($total_deductions) ?></td>
