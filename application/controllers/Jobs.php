@@ -20,10 +20,18 @@ class Jobs extends CI_Controller
 
     public function index()
     {
+        // Capture any post data (though usually empty on first load)
         $search_query = $this->input->post();
         $ques = isset($search_query['search']) ? $search_query['search'] : '';
 
-        $query = $this->JobsModel->get_search_in_anyfield_query($ques);
+        // If there is no search query, use the filter_jobs_query to get the 
+        // default view with the correct sorting logic you implemented.
+        if (empty(trim($ques))) {
+            $query = $this->JobsModel->filter_jobs_query();
+        } else {
+            $query = $this->JobsModel->get_search_in_anyfield_query($ques);
+        }
+
         $result = $this->JobsModel->get_jobmodel_query_result($query);
 
         $viewData = array('res' => $result);
@@ -52,7 +60,7 @@ class Jobs extends CI_Controller
     // Update FilterJob method
     public function FilterJob()
     {
-        
+
         $filter_query = $this->input->get();
 
         $title = $filter_query['jtitle'] ?? '';
