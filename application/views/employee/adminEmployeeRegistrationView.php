@@ -1,5 +1,5 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 ?>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="<?= base_url('css/admin/adminEmployeeRegistrationView.css') ?>">
@@ -10,9 +10,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
     <?php if ($this->session->flashdata('msg')):
         $msg = $this->session->flashdata('msg');
         $isError = (stripos($msg, 'Failed') !== false || stripos($msg, 'Error') !== false);
-        ?>
+    ?>
         <script>
-            document.addEventListener("DOMContentLoaded", function () {
+            document.addEventListener("DOMContentLoaded", function() {
                 Swal.fire({
                     title: '<?= $isError ? "Oops!" : "Success!" ?>',
                     text: <?= json_encode($msg) ?>,
@@ -81,27 +81,44 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
                     <div class="form-group">
                         <label class="form-label">Branch <span class="required">*</span></label>
+                        <?php
+                        $branches = array(
+                            'KOLKATA' => 'Kolkata',
+                            'HOWRAH' => 'Howrah'
+                        );
+                        $current_branch = isset($emp) ? $emp->seemp_branch : '';
+                        ?>
                         <select class="form-select" id="branch" name="branch" required>
-                            <option value="KOLKATA" <?= (isset($emp) && $emp->seemp_branch == 'KOLKATA') ? 'selected' : '' ?>>Kolkata</option>
-                            <option value="HOWRAH" <?= (isset($emp) && $emp->seemp_branch == 'HOWRAH') ? 'selected' : '' ?>>Howrah</option>
+                            <option value="">Select Branch</option>
+                            <?php foreach ($branches as $branch_value => $branch_label): ?>
+                                <option value="<?= htmlspecialchars($branch_value, ENT_QUOTES) ?>" <?= ($current_branch == $branch_value) ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($branch_label, ENT_QUOTES) ?>
+                                </option>
+                            <?php endforeach; ?>
                         </select>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Designation <span class="required">*</span></label>
-                        <!-- <input type="text" class="form-control" id="designation" name="designation"
-                            value="<?= isset($emp) ? $emp->seempd_designation : (isset($prefill_applicant) ? htmlspecialchars($prefill_applicant->sejoba_position, ENT_QUOTES) : '') ?>"
-                            required> -->
-                        <!-- add drop down for designations -->
+                        <?php
+                        $designations = array(
+                            'Jr. Php developer',
+                            'Sr. Php developer',
+                            'Html designer',
+                            'Bidder',
+                            'Sr. Video editor',
+                            'Jr. Video editor',
+                            'HR',
+                            'Branch Manager'
+                        );
+                        $current_designation = isset($emp) ? $emp->seempd_designation : (isset($prefill_applicant) ? htmlspecialchars($prefill_applicant->sejoba_position, ENT_QUOTES) : '');
+                        ?>
                         <select class="form-select" id="designation" name="designation" required>
                             <option value="">Select Designation</option>
-                            <option value="Jr. Php developer" <?= (isset($emp) && $emp->seempd_designation == 'Jr. Php developer') ? 'selected' : '' ?>>Jr. Php developer</option>
-                            <option value="Sr. Php developer" <?= (isset($emp) && $emp->seempd_designation == 'Sr. Php developer') ? 'selected' : '' ?>>Sr. Php developer</option>
-                            <option value="Html designer" <?= (isset($emp) && $emp->seempd_designation == 'Html designer') ? 'selected' : '' ?>>Html designer</option>
-                            <option value="Bidder" <?= (isset($emp) && $emp->seempd_designation == 'Bidder') ? 'selected' : '' ?>>Bidder</option>
-                            <option value="Sr. Video editor" <?= (isset($emp) && $emp->seempd_designation == 'Sr. Video editor') ? 'selected' : '' ?>> Sr. Video editor</option>
-                            <option value="Jr. Video editor" <?= (isset($emp) && $emp->seempd_designation == 'Jr. Video editor') ? 'selected' : '' ?>> Jr. Video editor</option>
-                            <option value="HR" <?= (isset($emp) && $emp->seempd_designation == 'HR') ? 'selected' : '' ?>>HR</option>
-                            <option value="Branch Manager" <?= (isset($emp) && $emp->seempd_designation == 'Branch Manager') ? 'selected' : '' ?>>Branch Manager</option>
+                            <?php foreach ($designations as $designation): ?>
+                                <option value="<?= htmlspecialchars($designation, ENT_QUOTES) ?>" <?= ($current_designation == $designation) ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($designation, ENT_QUOTES) ?>
+                                </option>
+                            <?php endforeach; ?>
                         </select>
                     </div>
                     <div class="form-group">
@@ -118,12 +135,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                             required>
                     </div>
                     <!-- salary -->
-                     <!-- if the employee is already registered the read only -->
-                    <div class="form-group">
+                     <div class="form-group">
                         <label class="form-label">Salary (₹) <span class="required">*</span></label>
                         <input type="number" class="form-control" id="salary" name="salary"
                             value="<?= isset($emp) ? $emp->seempd_salary : (isset($prefill_applicant) ? htmlspecialchars($prefill_applicant->sejoba_exp_salary, ENT_QUOTES) : '') ?>"
-                            step="0.01"  required>
+                            step="0.01" required>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Experience (Years) <span class="required">*</span></label>
@@ -295,12 +311,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         const submitBtn = document.querySelector('button[type="submit"]');
         const isUpdateMode = <?= isset($emp) ? 'true' : 'false' ?>;
         const originalEmpId = "<?= isset($emp) ? $emp->seemp_id : '' ?>";
-        
+
         // Optional: debounce timer to prevent spamming the database on every single keystroke
         let typingTimer;
         const doneTypingInterval = 500; // Wait 0.5 seconds after typing stops
 
-        empidInput.addEventListener('input', function () {
+        empidInput.addEventListener('input', function() {
             clearTimeout(typingTimer);
             let currentVal = this.value.trim();
 
@@ -315,7 +331,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             // If updating and they haven't changed their own ID, it's valid
             if (isUpdateMode && currentVal === originalEmpId) {
                 empidFeedback.innerHTML = '<span class="text-success small fw-bold"><i class="fas fa-check-circle"></i> Original ID (Valid)</span>';
-                this.style.borderColor = '#10b981'; // Green
+                this.style.borderColor = '#10b981';
                 submitBtn.disabled = false;
                 return;
             }
@@ -330,45 +346,44 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         function checkEmployeeId(empid) {
             let formData = new FormData();
             formData.append('empid', empid);
-            
+
             // Grab the current CSRF token from the hidden input
             let csrfInput = document.querySelector('input[name="<?= $this->security->get_csrf_token_name(); ?>"]');
             formData.append('<?= $this->security->get_csrf_token_name(); ?>', csrfInput.value);
 
             fetch('<?= base_url("Employee/checkEmployeeIdAjax") ?>', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                // IMPORTANT: Update the CSRF token on the page so the final form submission works!
-                if(data.csrf_hash) {
-                    csrfInput.value = data.csrf_hash;
-                }
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // IMPORTANT: Update the CSRF token on the page so the final form submission works!
+                    if (data.csrf_hash) {
+                        csrfInput.value = data.csrf_hash;
+                    }
 
-                if (data.exists) {
-                    // ID exists -> Show Error & Disable Submit Button
-                    empidFeedback.innerHTML = '<span class="text-danger small fw-bold"><i class="fas fa-times-circle"></i> This Employee ID is already taken!</span>';
-                    empidInput.style.borderColor = '#ef4444'; 
-                    submitBtn.disabled = true;
-                }
-                // Employee ID: Required, min 5 chars and max 10 chars, alphanumeric
-                else if (!/^[a-zA-Z0-9]{5,10}$/.test(empid)) {
-                    empidFeedback.innerHTML = '<span class="text-danger small fw-bold"><i class="fas fa-times-circle"></i> ID must be 5-10 alphanumeric characters.</span>';
-                    empidInput.style.borderColor = '#ef4444'; 
-                    submitBtn.disabled = true;
-                }
-                else {
-                    // ID is free -> Show Success & Enable Submit Button
-                    empidFeedback.innerHTML = '<span class="text-success small fw-bold"><i class="fas fa-check-circle"></i> Employee ID is available!</span>';
-                    empidInput.style.borderColor = '#10b981'; 
-                    submitBtn.disabled = false;
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                empidFeedback.innerHTML = '<span class="text-warning small"><i class="fas fa-exclamation-triangle"></i> Error checking ID.</span>';
-            });
+                    if (data.exists) {
+                        // ID exists -> Show Error & Disable Submit Button
+                        empidFeedback.innerHTML = '<span class="text-danger small fw-bold"><i class="fas fa-times-circle"></i> This Employee ID is already taken!</span>';
+                        empidInput.style.borderColor = '#ef4444';
+                        submitBtn.disabled = true;
+                    }
+                    // Employee ID: Required, min 5 chars and max 10 chars, alphanumeric
+                    else if (!/^[a-zA-Z0-9]{5,10}$/.test(empid)) {
+                        empidFeedback.innerHTML = '<span class="text-danger small fw-bold"><i class="fas fa-times-circle"></i> ID must be 5-10 alphanumeric characters.</span>';
+                        empidInput.style.borderColor = '#ef4444';
+                        submitBtn.disabled = true;
+                    } else {
+                        // ID is free -> Show Success & Enable Submit Button
+                        empidFeedback.innerHTML = '<span class="text-success small fw-bold"><i class="fas fa-check-circle"></i> Employee ID is available!</span>';
+                        empidInput.style.borderColor = '#10b981';
+                        submitBtn.disabled = false;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    empidFeedback.innerHTML = '<span class="text-warning small"><i class="fas fa-exclamation-triangle"></i> Error checking ID.</span>';
+                });
         }
         // --- LIVE EMAIL VALIDATION ---
         const emailInput = document.getElementById('email');
@@ -376,7 +391,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         const originalEmail = "<?= isset($emp) ? $emp->seemp_email : '' ?>";
         let emailTypingTimer;
 
-        emailInput.addEventListener('input', function () {
+        emailInput.addEventListener('input', function() {
             clearTimeout(emailTypingTimer);
             let currentVal = this.value.trim();
 
@@ -413,38 +428,38 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         function checkEmployeeEmail(email) {
             let formData = new FormData();
             formData.append('email', email);
-            
+
             // Grab the current CSRF token from the hidden input
             let csrfInput = document.querySelector('input[name="<?= $this->security->get_csrf_token_name(); ?>"]');
             formData.append('<?= $this->security->get_csrf_token_name(); ?>', csrfInput.value);
 
             fetch('<?= base_url("Employee/checkEmployeeEmailAjax") ?>', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                // IMPORTANT: Update the CSRF token on the page
-                if(data.csrf_hash) {
-                    csrfInput.value = data.csrf_hash;
-                }
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // IMPORTANT: Update the CSRF token on the page
+                    if (data.csrf_hash) {
+                        csrfInput.value = data.csrf_hash;
+                    }
 
-                if (data.exists) {
-                    // Email exists -> Show Error & Disable Submit Button
-                    emailFeedback.innerHTML = '<span class="text-danger small fw-bold"><i class="fas fa-times-circle"></i> This Email is already registered!</span>';
-                    emailInput.style.borderColor = '#ef4444'; 
-                    submitBtn.disabled = true;
-                } else {
-                    // Email is free -> Show Success & Enable Submit Button
-                    emailFeedback.innerHTML = '<span class="text-success small fw-bold"><i class="fas fa-check-circle"></i> Email is available!</span>';
-                    emailInput.style.borderColor = '#10b981'; // Green
-                    submitBtn.disabled = false;
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                emailFeedback.innerHTML = '<span class="text-warning small"><i class="fas fa-exclamation-triangle"></i> Error checking email.</span>';
-            });
+                    if (data.exists) {
+                        // Email exists -> Show Error & Disable Submit Button
+                        emailFeedback.innerHTML = '<span class="text-danger small fw-bold"><i class="fas fa-times-circle"></i> This Email is already registered!</span>';
+                        emailInput.style.borderColor = '#ef4444';
+                        submitBtn.disabled = true;
+                    } else {
+                        // Email is free -> Show Success & Enable Submit Button
+                        emailFeedback.innerHTML = '<span class="text-success small fw-bold"><i class="fas fa-check-circle"></i> Email is available!</span>';
+                        emailInput.style.borderColor = '#10b981'; // Green
+                        submitBtn.disabled = false;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    emailFeedback.innerHTML = '<span class="text-warning small"><i class="fas fa-exclamation-triangle"></i> Error checking email.</span>';
+                });
         }
 
         let hasCustomPhoto = <?= (isset($emp) && !empty($emp->seempd_img)) ? 'true' : 'false' ?>;
@@ -459,7 +474,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         }
 
         // Photo preview logic with size validation
-        document.getElementById('photoInput').addEventListener('change', function (e) {
+        document.getElementById('photoInput').addEventListener('change', function(e) {
             const file = e.target.files[0];
 
             if (file) {
@@ -474,7 +489,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     return;
                 }
                 const reader = new FileReader();
-                reader.onload = function (e) {
+                reader.onload = function(e) {
                     document.getElementById('photoPreview').src = e.target.result;
                     hasCustomPhoto = true; // Stop the live text from overwriting the uploaded image
                 };
@@ -483,7 +498,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         });
 
         // CV Status logic
-        document.getElementById('cvInput').addEventListener('change', function (e) {
+        document.getElementById('cvInput').addEventListener('change', function(e) {
             const fileName = e.target.files[0].name;
             document.getElementById('cvStatusText').innerText = "Selected: " + fileName;
         });
@@ -499,12 +514,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         }
 
         // Form Submission Logic
-        document.getElementById('employeeForm').addEventListener('submit', function (e) {
+        document.getElementById('employeeForm').addEventListener('submit', function(e) {
             e.preventDefault(); // ALWAYS stop the form first for SweetAlert
 
             // --- NEW: Combine all project inputs into the hidden field ---
             let allProjects = [];
-            document.querySelectorAll('.project-input').forEach(function (input) {
+            document.querySelectorAll('.project-input').forEach(function(input) {
                 if (input.value.trim() !== '') {
                     allProjects.push(input.value.trim());
                 }
@@ -532,11 +547,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             if (empName.length < 2) errors.push("Employee name is required and must be at least 2 characters.");
 
             // Salary validation
-            if(salary==0) errors.push("Salary must be greater than zero.");
+            if (salary == 0) errors.push("Salary must be greater than zero.");
             if (isNaN(salary) || salary <= 0) errors.push("Salary must be a positive number.");
             if (salary > 9999999.99) errors.push("Salary cannot exceed ₹9,999,999.99. Please enter a valid amount.");
-            
-            
+
+
 
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailRegex.test(email)) errors.push("Please enter a valid email format.");
@@ -573,7 +588,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                             title: 'Saving...',
                             text: 'Please wait',
                             allowOutsideClick: false,
-                            didOpen: () => { Swal.showLoading(); }
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
                         });
                         // Submit natively to CodeIgniter
                         HTMLFormElement.prototype.submit.call(document.getElementById('employeeForm'));
@@ -619,6 +636,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         function removeProjectField(button) {
             button.closest('.project-input-group').remove();
         }
+
         function copyAddress() {
             const checkbox = document.getElementById('sameAddressCheck');
             const permAddr = document.getElementById('permAddress');
@@ -638,12 +656,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         }
 
         // Optional: Keep current address updated if user types in permanent address while checked
-        document.getElementById('permAddress').addEventListener('input', function () {
+        document.getElementById('permAddress').addEventListener('input', function() {
             if (document.getElementById('sameAddressCheck').checked) {
                 document.getElementById('currentAddress').value = this.value;
             }
         });
-
     </script>
 </body>
 
