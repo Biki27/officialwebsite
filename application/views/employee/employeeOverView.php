@@ -101,7 +101,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
                             <i class="fas fa-eye" id="salaryEyeIcon"></i>
                         </button>
                     </div>
-                    <div class="stat-sub">Gross monthly compensation</div>
+                    <div class="stat-sub">Gross monthly salary</div>
                     <div class="stat-bar">
                         <div class="stat-bar-fill green" style="width:100%"></div>
                     </div>

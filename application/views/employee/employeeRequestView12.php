@@ -150,7 +150,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                     <td class="text-muted">
                                         <!-- 1. The truncated container -->
                                         <div class="summary-text"
-                                            style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; max-width: 200px; pointer-events: none;">
+                                            style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-clamp: 2; overflow: hidden; text-overflow: ellipsis; max-width: 200px; pointer-events: none;">
                                             <?= $req->seemrq_summary ?>
                                         </div>
 

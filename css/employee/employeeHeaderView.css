@@ -167,7 +167,7 @@ html, body {
     text-decoration: none;
     transition: all .2s;
 }
-.btn-logout:hover { background: rgba(239,68,68,0.25); color: #fecaca; }
+.btn-logout:hover { background: rgba(239, 68, 68, 0.63); color: #fecaca; }
 
 /* Mobile menu toggle */
 .mobile-menu-toggle {

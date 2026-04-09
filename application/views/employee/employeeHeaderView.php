@@ -26,7 +26,10 @@ defined('BASEPATH') or exit('No direct script access allowed');
     <div class="container-xl nav-inner">
         <!-- Brand -->
         <a class="nav-brand" href="<?= base_url('Employee/EmployeeOverview') ?>">
-            <span class="brand-icon"><i class="fas fa-building"></i></span>
+            <span class="icon">
+                <!-- <i class="fas fa-building"></i> -->
+                 <img src="<?= base_url('imgs/logo-without-bg.png') ?>" alt="Logo" style="height:32px;filter:drop-shadow(0 0 2px rgba(0,0,0,0.3));">
+            </span>
             <div class="brand-text">
                 <span class="brand-name">Suropriyo</span>
                 <span class="brand-tag">Enterprise</span>
