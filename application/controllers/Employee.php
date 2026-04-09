@@ -1856,6 +1856,7 @@ class Employee extends CI_Controller
                 $basic      = (float)$this->input->post('basic');
                 $transport  = (float)$this->input->post('transport');
                 $incentive  = (float)$this->input->post('incentive');
+                $bonus_amt  = (float)$this->input->post('bonus_amt');
                 $overtime   = (float)$this->input->post('overtime');
                 $round_off  = (float)$this->input->post('round_off');
 
@@ -1870,7 +1871,7 @@ class Employee extends CI_Controller
                  * 2. PERFORM CALCULATIONS SECURELY
                  * Logic follows your required structure from the salary slips table.
                  */
-                $data['gross_earnings']   = $basic + $transport + $incentive + $overtime + $round_off;
+                $data['gross_earnings']   = $basic + $transport + $incentive + $overtime + $round_off + $bonus_amt;
                 $data['total_deductions'] = $pf + $esi_deduction + $prof_tax + $late_fees + $loss_of_pay + $loan;
                 $data['net_salary']       = $data['gross_earnings'] - $data['total_deductions'];
 
@@ -2155,4 +2156,72 @@ class Employee extends CI_Controller
         $this->load->view($header);
         $this->load->view('hr/hrIncrementReportView', $data); // We will create this view next
     }
+    
+    // bouns management system 
+    public function hrBonusReportView() {
+    if ($this->session->userdata('accesslevel') != 'HR' && $this->session->userdata('accesslevel') != 'ADMIN') {
+        redirect('Employee/Login');
+    }
+    
+    $this->load->model('EmployeeModel');
+    
+    // 1. Capture the year from the GET request, default to current year
+    $year = $this->input->get('year');
+    if (!$year) {
+        $year = date('Y');
+    }
+
+    $data = [
+        'selected_year' => $year,
+        // 2. Pass that specific year to the model
+        'report' => $this->EmployeeModel->get_yearly_bonus_report($year),
+        'total_emps' => $this->EmployeeModel->get_total_staff_count()
+    ];
+
+    $this->load->view('hr/hrHeaderView');
+    $this->load->view('hr/hrBonusReportView', $data);
+}
+
+public function getBonusHistoryAjax($empid) {
+    $this->load->model('EmployeeModel');
+    $history = $this->EmployeeModel->get_bonus_history($empid);
+    $eligibility = $this->EmployeeModel->check_bonus_eligibility($empid);
+    echo json_encode(['history' => $history, 'eligibility' => $eligibility]);
+}
+
+public function applyBonus() {
+    $post = $this->security->xss_clean($this->input->post());
+    $this->load->model('EmployeeModel');
+    
+    $check = $this->EmployeeModel->check_bonus_eligibility($post['bonus_empid']);
+    if (!$check['eligible']) {
+        $this->session->set_flashdata('error', 'Employee not eligible until ' . $check['next_date']);
+        redirect('Employee/hrBonusReportView');
+    }
+
+    $data = [
+        'bonus_empid' => $post['bonus_empid'],
+        'bonus_amount' => $post['bonus_amount'],
+        'bonus_date' => $post['bonus_date'],
+        'bonus_reason' => $post['bonus_reason'],
+        'bonus_status' => 'completed'
+    ];
+    
+    $this->EmployeeModel->add_bonus($data);
+    $this->session->set_flashdata('success', 'Bonus recorded successfully');
+    redirect('Employee/hrBonusReportView');
+}
+
+public function getBonusForPayroll($empid, $month_year) {
+    if (!$this->session->userdata('empid')) {
+        echo json_encode(0);
+        return;
+    }
+
+    $this->load->model('EmployeeModel');
+    $amount = $this->EmployeeModel->get_bonus_for_payroll($empid, $month_year);
+    
+    // Return the numeric amount as JSON
+    echo json_encode($amount);
+}
 }

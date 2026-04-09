@@ -1,0 +1,155 @@
+.main-content {
+    margin-left: 260px !important;
+    padding: 32px 36px !important;
+    min-height: 100vh;
+    animation: pageIn .4s ease both;
+}
+
+@keyframes pageIn { 
+    from { opacity: 0; transform: translateY(10px); } 
+    to { opacity: 1; transform: translateY(0); } 
+}
+
+/* ── PAGE HEADER & FILTERS ── */
+.page-title h3 {
+    font-size: 1.55rem !important; 
+    font-weight: 800 !important;
+    color: var(--text-primary) !important; 
+    letter-spacing: -.4px;
+}
+
+.page-title i { 
+    color: var(--brand-600) !important; 
+}
+
+.filter-select {
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--brand-600);
+    font-weight: 700;
+    border-radius: var(--r-md);
+    padding: 10px 36px 10px 16px;
+    box-shadow: var(--shadow-sm);
+}
+
+/* ── STAT CARDS ── */
+.stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--brand-200);
+}
+
+.stat-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: var(--r-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+.stat-icon.primary { background: rgba(70, 27, 185, 0.1); color: var(--brand-600); }
+.stat-icon.success { background: rgba(5, 150, 105, 0.1); color: var(--success); }
+
+/* ── TABLE STYLING ── */
+.table-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}
+
+.table-card thead th {
+    background: var(--surface-2);
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    padding: 16px 24px;
+    border-bottom: 2px solid var(--border);
+}
+
+/* ── ELIGIBILITY BADGES (The Fix for Empty Boxes) ── */
+/* .badge-soft {
+    display: inline-flex;
+    align-items: center;
+    font-weight: 700 !important;
+    font-size: 0.75rem !important;
+    padding: 6px 12px;
+    border-radius: 6px;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+} */
+ .badge-soft {
+    display: inline-flex;
+    align-items: center;
+    font-weight: 700 !important;
+    font-size: 0.7rem !important;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-radius: 6px;
+    white-space: nowrap;
+}
+
+/* Eligible Now - Success Style */
+.bg-success.bg-opacity-10 {
+    background-color: rgba(5, 150, 105, 0.1) !important; /* Light Green Tint */
+    color: #059669 !important; /* Dark Green Text */
+}
+.border-success {
+    border-color: rgba(5, 150, 105, 0.2) !important;
+}
+/* Locked - Danger Style */
+.bg-danger.bg-opacity-10 {
+    background-color: rgba(220, 38, 38, 0.1) !important;
+    color: #dc2626 !important; /* Matches --danger token */
+}
+
+/* ── BUTTONS ── */
+.btn-primary.btn-manage {
+    background: linear-gradient(135deg, var(--brand-600), var(--brand-500)) !important;
+    border: none !important;
+    border-radius: var(--r-md) !important;
+    font-weight: 600 !important;
+    box-shadow: 0 4px 14px rgba(70, 27, 185, 0.25) !important;
+    transition: all .25s ease !important;
+    color: #fff !important;
+}
+
+.btn-primary.btn-manage:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(70, 27, 185, 0.35) !important;
+}
+
+/* ── MODAL SPECIFICS ── */
+.modal-content {
+    border: none;
+    border-radius: var(--r-xl);
+    box-shadow: var(--shadow-lg);
+}
+
+.modal-header {
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--border);
+}
+
+.alert-danger {
+    background-color: rgba(220, 38, 38, 0.05);
+    color: #dc2626;
+    border-left: 4px solid #dc2626;
+}

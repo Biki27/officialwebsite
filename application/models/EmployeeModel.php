@@ -5,7 +5,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
 class EmployeeModel extends CI_Model
 {
 
-     
+
     function getallemployee_with_joins()
     {
         $res = $this->db
@@ -449,7 +449,7 @@ class EmployeeModel extends CI_Model
     // --- Increment History Functions ---
 
     // 1. Fetch increment history for a specific employee
-     public function get_increment_history(string $empid): array
+    public function get_increment_history(string $empid): array
     {
         return $this->db
             ->where('inc_empid', $empid)
@@ -461,37 +461,37 @@ class EmployeeModel extends CI_Model
     // 2. Add a new increment and update current salary (Using DB Transactions for safety)
     public function add_salary_increment(array $data): array
     {
-        $today          = date('Y-m-d');
+        $today = date('Y-m-d');
         $effective_date = $data['inc_effective_date'];
-        $is_immediate   = ($effective_date <= $today);
- 
+        $is_immediate = ($effective_date <= $today);
+
         $data['inc_status'] = $is_immediate ? 'applied' : 'pending';
- 
+
         $this->db->trans_start();
- 
+
         // A. Always insert the history record
         $this->db->insert('seemp_increments', $data);
- 
+
         // B. Only update the live salary when the effective date has arrived
         if ($is_immediate) {
             $this->db->where('seempd_empid', $data['inc_empid']);
             $this->db->update('seempdetails', [
-                'seempd_salary'    => $data['new_salary'],
+                'seempd_salary' => $data['new_salary'],
                 'seempd_increment' => $data['inc_percentage'],
             ]);
         }
- 
+
         $this->db->trans_complete();
- 
+
         if ($this->db->trans_status() === FALSE) {
             return ['code' => 1, 'message' => 'Database transaction failed.', 'status' => $data['inc_status']];
         }
- 
+
         $human_date = date('d M Y', strtotime($effective_date));
         $msg = $is_immediate
             ? 'Increment applied and salary updated immediately.'
             : "Increment scheduled. Salary will update automatically on {$human_date}.";
- 
+
         return ['code' => 0, 'message' => $msg, 'status' => $data['inc_status']];
     }
 
@@ -501,60 +501,60 @@ class EmployeeModel extends CI_Model
      */
     public function increment_exists_this_month(string $empid, string $effective_date): bool
     {
-        $ts        = strtotime($effective_date);
+        $ts = strtotime($effective_date);
         $first_day = date('Y-m-01', $ts);
-        $last_day  = date('Y-m-t',  $ts);   // last day of that month
- 
+        $last_day = date('Y-m-t', $ts);   // last day of that month
+
         $this->db->where('inc_empid', $empid);
         $this->db->where('inc_effective_date >=', $first_day);
         $this->db->where('inc_effective_date <=', $last_day);
- 
+
         return $this->db->count_all_results('seemp_increments') > 0;
     }
 
     // 3. Apply all pending increments for a specific employee
-     public function apply_pending_increments(string $empid): int
+    public function apply_pending_increments(string $empid): int
     {
         $today = date('Y-m-d');
- 
+
         $pending = $this->db
-            ->where('inc_empid',             $empid)
-            ->where('inc_status',            'pending')
+            ->where('inc_empid', $empid)
+            ->where('inc_status', 'pending')
             ->where('inc_effective_date <=', $today)
             ->order_by('inc_effective_date', 'ASC')   // oldest first → correct compounding
             ->get('seemp_increments')
             ->result();
- 
+
         if (empty($pending)) {
             return 0;
         }
- 
+
         $applied = 0;
- 
+
         foreach ($pending as $inc) {
             $this->db->trans_start();
- 
+
             // Update live salary to this increment's new_salary
             $this->db->where('seempd_empid', $empid);
             $this->db->update('seempdetails', [
-                'seempd_salary'    => $inc->new_salary,
+                'seempd_salary' => $inc->new_salary,
                 'seempd_increment' => $inc->inc_percentage,
             ]);
- 
+
             // Mark this row as applied
             $this->db->where('inc_id', $inc->inc_id);
             $this->db->update('seemp_increments', ['inc_status' => 'applied']);
- 
+
             $this->db->trans_complete();
- 
+
             if ($this->db->trans_status() !== FALSE) {
                 $applied++;
             }
         }
- 
+
         return $applied;
     }
-   public function get_yearly_increment_report($year)
+    public function get_yearly_increment_report($year)
     {
         $sql = "
             SELECT 
@@ -589,5 +589,95 @@ class EmployeeModel extends CI_Model
         ";
 
         return $this->db->query($sql, array($year, $year, $year, $year))->result();
+    }
+
+    // --- Bonus Management Functions ---
+    public function get_yearly_bonus_report($year)
+    {
+        $sql = "
+        SELECT 
+            e.seemp_id, 
+            d.seempd_name, 
+            d.seempd_salary,
+            b.bonus_amount, 
+            b.bonus_date, 
+            b.next_eligible_date, 
+            b.bonus_reason, 
+            b.bonus_status
+        FROM seemployee e
+        JOIN seempdetails d ON e.seemp_id = d.seempd_empid
+        LEFT JOIN seemp_bonuses b ON e.seemp_id = b.bonus_empid 
+            AND b.bonus_id = (
+                SELECT MAX(bonus_id) 
+                FROM seemp_bonuses 
+                WHERE bonus_empid = e.seemp_id 
+                AND YEAR(bonus_date) = ? -- This ensures the bonus belongs to the selected year
+            )
+        WHERE e.seemp_status = 'active' 
+        AND e.seemp_acesslevel = 'EMPL'
+        ORDER BY d.seempd_name ASC";
+
+        // Pass the $year variable into the query
+        return $this->db->query($sql, array($year))->result();
+    }
+
+    public function get_bonus_history($empid)
+    {
+        return $this->db->where('bonus_empid', $empid)->order_by('bonus_date', 'DESC')->get('seemp_bonuses')->result();
+    }
+
+    public function check_bonus_eligibility($empid)
+    {
+        $last_bonus = $this->db->where('bonus_empid', $empid)->order_by('bonus_date', 'DESC')->limit(1)->get('seemp_bonuses')->row();
+        if (!$last_bonus)
+            return ['eligible' => true];
+
+        $today = date('Y-m-d');
+        if ($today < $last_bonus->next_eligible_date) {
+            return ['eligible' => false, 'next_date' => $last_bonus->next_eligible_date];
+        }
+        return ['eligible' => true];
+    }
+
+    public function add_bonus($data)
+    {
+        // Force Next Eligible Date to be +365 days
+        $data['next_eligible_date'] = date('Y-m-d', strtotime($data['bonus_date'] . ' + 365 days'));
+        return $this->db->insert('seemp_bonuses', $data);
+    }
+
+    // Fetch current month's approved bonus for the Payroll screen
+    public function get_pending_bonus_for_payroll($empid, $month_year)
+    {
+        $start = $month_year . "-01";
+        $end = date("Y-m-t", strtotime($start));
+
+        $res = $this->db->where('bonus_empid', $empid)
+            ->where('bonus_date >=', $start)
+            ->where('bonus_date <=', $end)
+            ->get('seemp_bonuses')->row();
+        return $res ? $res->bonus_amount : 0;
+    }
+    /**
+     * Fetches the bonus amount for a specific employee if it matches the payroll month.
+     */
+    public function get_bonus_for_payroll($empid, $month_year)
+    {
+        // month_year comes in as "YYYY-MM"
+        $target_month = date('m', strtotime($month_year));
+        $target_year = date('Y', strtotime($month_year));
+
+        $this->db->select('bonus_amount');
+        $this->db->from('seemp_bonuses');
+        $this->db->where('bonus_empid', $empid);
+        $this->db->where('MONTH(bonus_date)', $target_month);
+        $this->db->where('YEAR(bonus_date)', $target_year);
+        $this->db->where('bonus_status', 'completed');
+        $this->db->limit(1);
+
+        $query = $this->db->get();
+        $result = $query->row();
+
+        return $result ? (float) $result->bonus_amount : 0.00;
     }
 }

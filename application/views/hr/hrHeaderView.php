@@ -53,9 +53,14 @@
                 href="<?= base_url('Employee/viewJobs') ?>">
                 <i class="fas fa-list-alt me-2"></i> Manage Jobs
             </a>
-            <a href="<?= base_url('Employee/incrementReport') ?>" class="nav-link <?= ($this->uri->segment(2) == 'incrementReport') ? 'active' : '' ?>">
-              <i class="fas fa-chart-pie me-2"></i>Increment Report
-           </a>
+            <a href="<?= base_url('Employee/incrementReport') ?>"
+                class="nav-link <?= ($this->uri->segment(2) == 'incrementReport') ? 'active' : '' ?>">
+                <i class="fas fa-chart-pie me-2"></i>Increment Report
+            </a>
+            <a href="<?= base_url('Employee/hrBonusReportView') ?>"
+                class="nav-link <?= ($this->uri->segment(2) == 'hrBonusReportView') ? 'active' : '' ?>">
+                <i class="fas fa-gift me-2"></i> Bonus Management
+            </a>
             <a class="nav-link <?= ($this->uri->segment(2) == 'salaryManagement') ? 'active' : '' ?>"
                 href="<?= base_url('Employee/salaryManagement') ?>">
                 <i class="fas fa-file-invoice-dollar me-2"></i> Salary Setup
@@ -67,26 +72,26 @@
 
     </div>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const btn = document.getElementById('mobileToggle');
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('sidebarOverlay');
 
             if (btn && sidebar && overlay) {
-                btn.onclick = function() {
+                btn.onclick = function () {
                     sidebar.classList.add('active');
                     overlay.classList.add('active');
                     btn.style.display = 'none'; // Hide button when sidebar opens
                 };
 
-                overlay.onclick = function() {
+                overlay.onclick = function () {
                     sidebar.classList.remove('active');
                     overlay.classList.remove('active');
                     btn.style.display = 'flex'; // Show button when sidebar closes
                 };
             }
         });
-        window.logout = function() {
+        window.logout = function () {
             Swal.fire({
                 title: 'Ready to leave?',
                 text: "You will be logged out of the Admin Dashboard.",
