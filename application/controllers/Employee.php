@@ -2225,3 +2225,5 @@ public function getBonusForPayroll($empid, $month_year) {
     echo json_encode($amount);
 }
 }
+
+// I want to add a new filed into the job application form  which is Gender and i want to add this field into the database(sejobapplicant) and also i want to show this field in the HR job application model section when the hr view the job applicants list.  

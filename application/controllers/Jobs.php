@@ -147,6 +147,7 @@ class Jobs extends CI_Controller
                 $phone = $this->input->post('phone');
                 $experience = $this->input->post('experience');
                 $expected_salary = $this->input->post('expected_salary');
+                $gender = $this->input->post('gender', TRUE); 
 
                 // If they provided a name (because they didn't have one), update their candidate profile
                 $full_name = $this->input->post('full_name');
@@ -164,6 +165,7 @@ class Jobs extends CI_Controller
                     $phone,
                     $experience,
                     $expected_salary
+                    ,$gender
                 );
 
                 if ($is_success) {

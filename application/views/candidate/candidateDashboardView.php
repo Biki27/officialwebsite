@@ -312,6 +312,22 @@
                             </div>
                         </div>
                     </div>
+                    <!-- gender -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="fw-bold text-muted small text-uppercase">Gender <span
+                                    class="text-danger">*</span></label>
+                            <select name="gender" id="af_gender" class="form-control <?= ae('gender', $apply_errors); ?>">
+                                <option value="" disabled selected>Select Gender</option>
+                                <option value="Male" <?= ao('gender', $apply_old) == 'Male' ? 'selected' : ''; ?>>Male</option>
+                                <option value="Female" <?= ao('gender', $apply_old) == 'Female' ? 'selected' : ''; ?>>Female
+                                </option>
+                                <option value="Other" <?= ao('gender', $apply_old) == 'Other' ? 'selected' : ''; ?>>Other
+                                </option>
+                            </select>
+                            <div class="invalid-feedback">Please select your gender.</div>
+                        </div>
+                    </div>
 
                     <!--  Resume  -->
                     <div class="mb-4">
@@ -370,6 +386,7 @@
             var fPhone = document.getElementById('af_phone');
             var fExp = document.getElementById('af_experience');
             var fSalary = document.getElementById('af_expected_salary');
+            var fGender = document.getElementById('af_gender');
             var fResume = document.getElementById('af_resume');
             var fCL = document.getElementById('af_coverletter');
             var clCount = document.getElementById('af_cl_count');
@@ -425,8 +442,16 @@
                 }
                 markValid(fSalary); return true;
             }
+            // Gender: required
+            function validateGender() {
+                var v = fGender.value;
+                if (!v) {
+                    markInvalid(fGender); return false;
+                }
+                markValid(fGender); return true;
+            }   
 
-            // Resume: required, must be PDF, ≤ 2 MB
+            // Resume: required, must be PDF, ≤ 5 MB
             function validateResume() {
                 var files = fResume.files;
                 if (!files || files.length === 0) {
@@ -476,6 +501,10 @@
             fSalary.addEventListener('blur', validateSalary);
             fSalary.addEventListener('input', function () { if (fSalary.classList.contains('is-invalid')) validateSalary(); });
 
+            fGender.addEventListener('blur', validateGender);
+            fGender.addEventListener('input', function () { if (fGender.classList.contains('is-invalid')) validateGender(); });
+
+
             fResume.addEventListener('change', validateResume);
 
             fCL.addEventListener('input', function () {
@@ -489,6 +518,7 @@
                 if (!validatePhone()) ok = false;
                 if (!validateExp()) ok = false;
                 if (!validateSalary()) ok = false;
+                if (!validateGender()) ok = false;
                 if (!validateResume()) ok = false;
                 if (!validateCL()) ok = false;
 
@@ -514,6 +544,7 @@
                     'phone': fPhone,
                     'experience': fExp,
                     'expected_salary': fSalary,
+                    'gender': fGender,
                     'resume': fResume,
                     'coverletter': fCL
                 };

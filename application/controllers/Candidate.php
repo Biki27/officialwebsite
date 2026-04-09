@@ -166,6 +166,8 @@ class Candidate extends CI_Controller
         $this->form_validation->set_rules(
             'expected_salary', 'Expected Salary', 'required|integer|greater_than_equal_to[1000]'
         );
+        $this->form_validation->set_rules('gender', 'Gender', 'required|in_list[Male,Female,Other]');
+
         $this->form_validation->set_rules(
             'coverletter', 'Cover Letter', 'required|trim|min_length[50]|max_length[2000]'
         );
@@ -174,7 +176,7 @@ class Candidate extends CI_Controller
         $active_job_id = $job_id ? $job_id : $this->uri->segment(3);
 
         if ($this->form_validation->run() == FALSE) {
-            $fields = array('full_name', 'phone', 'experience', 'expected_salary', 'coverletter');
+            $fields = array('full_name', 'phone', 'experience', 'expected_salary', 'gender', 'coverletter');
             $error_map = array();
             foreach ($fields as $f) {
                 $err = $this->form_validation->error($f);
