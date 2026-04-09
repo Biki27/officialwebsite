@@ -112,7 +112,9 @@
                                                 data-salary="<?= htmlspecialchars($app->sejoba_exp_salary ?? '', ENT_QUOTES) ?>"
                                                 data-status="<?= htmlspecialchars($app->sejoba_state ?? '', ENT_QUOTES) ?>"
                                                 data-exp="<?= htmlspecialchars($app->sejoba_experience ?? '', ENT_QUOTES) ?>"
-                                                data-resume="<?= htmlspecialchars($app->sejoba_resume ?? '', ENT_QUOTES) ?>">
+                                                data-resume="<?= htmlspecialchars($app->sejoba_resume ?? '', ENT_QUOTES) ?>"
+                                                data-gender="<?= htmlspecialchars($app->sejoba_gender ?? 'Not Specified', ENT_QUOTES) ?>">
+
                                                 View
                                             </button>
 
@@ -171,8 +173,16 @@
                                 </div>
                             </div>
 
-                            <div class="info-label">Resume / CV</div>
-                            <div class="info-value mt-1" id="modal_resume">
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="info-label">Resume / CV</div>
+                                    <div class="info-value mt-1" id="modal_resume"></div>
+
+                                </div>
+                                <div class="col-6">
+                                    <div class="info-label mt-3">Gender</div>
+                                    <div class="info-value text-dark fw-medium" id="modal_gender"></div>
+                                </div>
                             </div>
                         </div>
 
@@ -344,6 +354,7 @@
                             document.getElementById('modal_phone').innerText = data.phone || 'N/A';
                             document.getElementById('modal_exp').innerText = data.exp ? data.exp + " Years" : "Not specified";
                             document.getElementById('modal_salary').innerText = data.salary ? "₹" + data.salary : "Not specified";
+                            document.getElementById('modal_gender').innerText = data.gender || 'Not specified';
 
                             document.getElementById('review_applicant_id').value = data.id;
 

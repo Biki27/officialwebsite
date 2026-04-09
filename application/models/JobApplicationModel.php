@@ -179,7 +179,7 @@ class JobApplicationModel extends CI_Model
         return $this->db->get()->result_array();
     }
     // Submits the finalized application into the bridging table
-    public function submit_application($candidate_id, $job_id, $resume_path, $cover_letter, $phone, $experience, $expected_salary)
+    public function submit_application($candidate_id, $job_id, $resume_path, $cover_letter, $phone, $experience, $expected_salary,$gender)
     {
         $data = array(
             'candidate_id' => $candidate_id,
@@ -187,6 +187,7 @@ class JobApplicationModel extends CI_Model
             'sejoba_phone' => $phone,
             'sejoba_experience' => $experience,
             'sejoba_exp_salary' => $expected_salary,
+            'sejoba_gender'     => $gender,
             'sejoba_resume' => $resume_path,
             'sejoba_coverletter' => $cover_letter,
             'sejoba_state' => 'applied',
