@@ -1,0 +1,61 @@
+/* --- Global Layout Stability --- */
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    /* Master Fix: Stops the whole page from sliding left/right */
+    overflow-x: hidden; 
+    background: linear-gradient(135deg, #eef2ff, #f8fafc);
+    font-family: "Inter", sans-serif;
+}
+
+/* --- Card: Remove the 'Jumping' move --- */
+.card {
+    transition: box-shadow 0.3s ease;
+    border: none;
+    border-radius: 15px;
+    background: #fff;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+}
+
+.card:hover {
+    /* STOPS THE UP/DOWN JUMP */
+    transform: none !important; 
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08) !important;
+}
+
+/* --- Table Scrolling (Left/Right Only for Table) --- */
+.table-responsive {
+    display: block;
+    width: 100%;
+    overflow-x: auto; /* Enables horizontal scroll for table only */
+    -webkit-overflow-scrolling: touch;
+    border-radius: 0 0 15px 15px;
+}
+
+/* Row Hover: Color change only, no scaling */
+.table tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.table tbody tr:hover {
+    transform: none !important;
+    background-color: #f8fafc !important;
+}
+
+/* Force text to stay in one line to trigger internal scrollbar */
+.table td, .table th {
+    white-space: nowrap; 
+    vertical-align: middle;
+    padding: 15px;
+}
+
+/* Header Text styling */
+.table thead th {
+    background-color: #f8fafc;
+    color: #6b7280;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid #eef2ff;
+}

@@ -1,0 +1,87 @@
+body {
+    background: linear-gradient(135deg, #eef2ff, #f8fafc);
+    font-family: "Inter", sans-serif;
+    /* Master fix: Prevent the whole page from moving left/right */
+    overflow-x: hidden;
+}
+
+.card {
+    transition: box-shadow 0.3s ease;
+    /* Only animate shadow, not movement */
+    border: none;
+    border-radius: 15px;
+}
+
+.card:hover {
+    transform: none !important;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+}
+
+.table-responsive {
+    overflow-x: auto;
+    /* Allow ONLY the table area to scroll left/right */
+    -webkit-overflow-scrolling: touch;
+    border-radius: 0 0 15px 15px;
+    display: block;
+    width: 100%;
+}
+
+.table {
+    margin-bottom: 0;
+}
+
+.table th {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    color: #6b7280;
+    white-space: nowrap;
+    padding: 12px 15px;
+}
+
+.table td {
+    font-size: 0.95rem;
+    white-space: nowrap;
+    vertical-align: middle;
+    padding: 12px 15px;
+}
+
+/* --- Row Hover: Static Version --- */
+.table tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.table tbody tr:hover {
+    transform: none !important;
+    background-color: #f8fafc !important;
+}
+
+.summary-text {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: normal !important;
+    min-width: 220px;
+    max-width: 300px;
+    font-size: 0.85rem;
+    margin-bottom: 4px;
+    pointer-events: none;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    border: none;
+    border-radius: 50px;
+}
+
+.btn-primary:hover {
+    opacity: 0.9;
+    transform: none !important;
+}
+
+.badge {
+    border-radius: 20px;
+    padding: 6px 12px;
+}
