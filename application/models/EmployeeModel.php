@@ -394,7 +394,7 @@ class EmployeeModel extends CI_Model
     public function get_employee_salary_slips($empid)
     {
         return $this->db->where('seemp_id', $empid)
-            ->order_by('slip_id', 'DESC') // Newest first
+            ->order_by('slip_id', 'ASC') // Newest first
             ->get('sesalaryslips')
             ->result();
     }
