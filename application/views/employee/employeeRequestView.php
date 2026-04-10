@@ -14,11 +14,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="<?= base_url('css/employee/employeeRequestView.css') ?>">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body>
 
-    <!-- New Request Modal -->
     <div class="modal fade" id="timeOffModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content rounded-4 border-0 shadow-lg overflow-hidden"
@@ -34,7 +34,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-4">
-                    <?= form_open('Employee/EmployeeRequest') ?>
+                    <?= form_open('Employee/EmployeeRequest', ['id' => 'leaveRequestForm']) ?>
                     <div class="row g-3">
                         <div class="col-6">
                             <label class="req-label">Start Date</label>
@@ -72,7 +72,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         </div>
     </div>
 
-    <!-- Summary Modal -->
     <div class="modal fade" id="summaryModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 shadow-lg rounded-4"
@@ -96,27 +95,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
     <div class="container-xl px-3 px-md-4 pb-5">
 
-        <!-- Section Banner -->
         <div class="ent-section-banner">
             <h4><i class="fas fa-paper-plane me-2"></i>Request Dashboard</h4>
             <small>Manage your leave and absence requests</small>
         </div>
 
-        <!-- Alerts -->
-        <?php if ($this->session->flashdata('success')): ?>
-        <div class="ent-alert-success mb-3">
-            <i class="fas fa-check-circle me-2"></i>
-            <?= $this->session->flashdata('success'); ?>
-        </div>
-        <?php endif; ?>
-        <?php if (validation_errors() && trim(validation_errors()) != ''): ?>
-        <div class="ent-alert-error mb-3">
-            <i class="fas fa-exclamation-circle me-2"></i>
-            <?= validation_errors(); ?>
-        </div>
-        <?php endif; ?>
-
-        <!-- Desktop Table -->
         <div class="ent-card req-desktop">
             <div class="ent-card-header">
                 <div class="card-title-group">
@@ -193,22 +176,31 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                 </span>
                                 <?php if ($req->seemrq_status == 'pending'): ?>
                                 <div class="mt-1">
-                                    <button onclick="sendHRReminder(<?= $req->seemrq_id ?>)"
+                                    <button onclick="sendHRReminder(<?= $req->seemrq_id ?>, this)"
                                             id="remindBtn_<?= $req->seemrq_id ?>"
                                             class="remind-btn">
                                         <i class="fas fa-bell me-1"></i>Remind HR
                                     </button>
                                 </div>
                                 <?php endif; ?>
+
                             </td>
                         </tr>
                         <?php endforeach; ?>
+                        <?php if (empty($requests)): ?>
+                        <tr>
+                            <td colspan="7" style="text-align:center;color:#64748b;padding:2rem 0;">
+                                <i class="fas fa-inbox fa-2x mb-2"></i><br>
+                                No requests found.<br>
+                                Click "New Request" to submit your first leave or absence request.
+                            </td>
+                        </tr>
+                        <?php endif; ?>
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <!-- Mobile Cards -->
         <div class="req-mobile">
             <div style="display:flex;justify-content:flex-end;margin-bottom:0.75rem;">
                 <button class="btn-ent-primary" data-bs-toggle="modal" data-bs-target="#timeOffModal">
@@ -254,7 +246,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         <i class="fas fa-eye me-1"></i>View full summary
                     </a>
                     <?php if ($req->seemrq_status == 'pending'): ?>
-                    <button onclick="sendHRReminder(<?= $req->seemrq_id ?>)"
+                    <button onclick="sendHRReminder(<?= $req->seemrq_id ?>, this)"
                             id="remindBtn_m_<?= $req->seemrq_id ?>"
                             class="remind-btn">
                         <i class="fas fa-bell me-1"></i>Remind HR
@@ -263,44 +255,145 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 </div>
             </div>
             <?php endforeach; ?>
+            <?php if (empty($requests)): ?>
+            <div style="text-align:center;color:#64748b;padding:2rem 0;">
+                <i class="fas fa-inbox fa-2x mb-2"></i><br>
+                No requests found.<br>
+                 Click "New Request" to submit your first leave or absence request.
+            </div>
+            <?php endif; ?>
         </div>
 
     </div>
 
-    <?php if (validation_errors() && trim(validation_errors()) != ''): ?>
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            new bootstrap.Modal(document.getElementById('timeOffModal')).show();
-        });
-    </script>
-    <?php endif; ?>
+    document.addEventListener("DOMContentLoaded", function () {
+        
+        // --- CALENDAR BLOCKING LOGIC ---
+        const startDateInput = document.querySelector('input[name="startdate"]');
+        const endDateInput = document.querySelector('input[name="enddate"]');
 
-    <script>
-    function sendHRReminder(reqId) {
-        const btn = document.getElementById('remindBtn_' + reqId);
-        const originalContent = btn.innerHTML;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
-        btn.disabled = true;
+        if (startDateInput && endDateInput) {
+            // When Start Date changes, set the minimum allowed End Date
+            startDateInput.addEventListener('change', function() {
+                endDateInput.min = this.value;
+                
+                // If an end date was already selected and is now invalid, clear it
+                if(endDateInput.value && endDateInput.value < this.value) {
+                    endDateInput.value = '';
+                }
+            });
+        }
+
+        // --- FLASH MESSAGES & VALIDATION ---
+        <?php if ($this->session->flashdata('success')): ?>
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: '<?= $this->session->flashdata('success'); ?>',
+                confirmButtonColor: '#4338ca',
+                timer: 3000
+            });
+        <?php endif; ?>
+
+        <?php if (validation_errors() && trim(validation_errors()) != ''): ?>
+            Swal.fire({
+                icon: 'error',
+                title: 'Submission Failed',
+                html: '<?= trim(str_replace(["\r", "\n"], '', validation_errors())); ?>',
+                confirmButtonColor: '#4338ca'
+            }).then(() => {
+                new bootstrap.Modal(document.getElementById('timeOffModal')).show();
+            });
+        <?php endif; ?>
+
+        // --- FORM SUBMISSION DIALOG ---
+        const requestForm = document.getElementById('leaveRequestForm');
+        if (requestForm) {
+            requestForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                // Extra safety check just in case browser doesn't support the 'min' attribute
+                if (startDateInput.value > endDateInput.value) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Invalid Dates',
+                        text: 'The End Date cannot be earlier than the Start Date.',
+                        confirmButtonColor: '#4338ca'
+                    });
+                    return; // Stop submission entirely
+                }
+
+                Swal.fire({
+                    title: 'Submit Leave Request?',
+                    text: "Please confirm that your dates and reasons are correct.",
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#4338ca',
+                    cancelButtonColor: '#dc3545',
+                    confirmButtonText: 'Yes, Submit'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        requestForm.submit();
+                    }
+                });
+            });
+        }
+    });
+
+    // --- AJAX REMINDER FUNCTION ---
+    function sendHRReminder(reqId, btnElement) {
+        const originalContent = btnElement.innerHTML;
+        btnElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+        btnElement.disabled = true;
+        
         $.ajax({
-            url:'<?= base_url("Employee/sendLeaveReminder/") ?>' + reqId,
-            type:'POST', dataType:'json',
-            data:{ '<?= $this->security->get_csrf_token_name(); ?>':'<?= $this->security->get_csrf_hash(); ?>' },
+            url: '<?= base_url("Employee/sendLeaveReminder/") ?>' + reqId,
+            type: 'POST', 
+            dataType: 'json',
+            data: { '<?= $this->security->get_csrf_token_name(); ?>':'<?= $this->security->get_csrf_hash(); ?>' },
             success: function (res) {
                 if (res.status === 'success') {
-                    btn.innerHTML = '<i class="fas fa-check"></i> Sent';
-                    btn.style.color = '#10b981';
+                    btnElement.innerHTML = '<i class="fas fa-check"></i> Sent';
+                    btnElement.style.color = '#10b981';
+                    
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Reminder Sent!',
+                        text: 'HR has been notified about your request.',
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true
+                    });
                 } else {
-                    btn.innerHTML = originalContent;
-                    btn.disabled = false;
+                    btnElement.innerHTML = originalContent;
+                    btnElement.disabled = false;
+                    
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Failed',
+                        text: res.message || 'Unable to send reminder right now.',
+                        confirmButtonColor: '#4338ca'
+                    });
                 }
             },
             error: function () {
-                btn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Error';
-                btn.disabled = false;
+                btnElement.innerHTML = originalContent;
+                btnElement.disabled = false;
+                
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Server Error',
+                    text: 'An unexpected error occurred. Please try again later.',
+                    confirmButtonColor: '#4338ca'
+                });
             }
         });
     }
 
+    // --- MODAL SUMMARY FORMATTING ---
     function viewFullSummary(text) {
         let cleanText = text;
         try { if (typeof text === 'string' && text.startsWith('"') && text.endsWith('"')) cleanText = JSON.parse(text); } catch(e){}

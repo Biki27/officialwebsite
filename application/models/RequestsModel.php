@@ -12,6 +12,7 @@ class RequestsModel extends CI_Model
         $empid = $this->session->userdata('empid');
         $res = $this->db->from('seemprequests')
             ->where('seemrq_empid = ', $empid)
+            ->order_by('seemrq_reqdate', 'DESC')
             ->get()
             ->result();
         return $res;
@@ -107,7 +108,7 @@ class RequestsModel extends CI_Model
         return $this->db->get()->result_array();
     }
 
-    // add code for Leave request Management for HR dashboard
+    
     public function get_all_requests()
     {
         $this->db->select('seemprequests.*, seempdetails.seempd_name');

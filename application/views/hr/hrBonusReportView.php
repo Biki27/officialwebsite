@@ -24,7 +24,7 @@ $today = date('Y-m-d');
                     // Show a range of years in the dropdown
                     for ($y = $current_year + 1; $y >= 2024; $y--): ?>
                         <option value="<?= $y ?>" <?= ($selected_year == $y) ? 'selected' : '' ?>>
-                            <?= $y ?> Bonus Cycle
+                            <?= $y ?> Cycle
                         </option>
                     <?php endfor; ?>
                 </select>
