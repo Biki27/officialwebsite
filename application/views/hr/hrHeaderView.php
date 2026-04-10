@@ -25,7 +25,10 @@
 
     <div class="sidebar" id="sidebar">
         <div class="logo text-center border-bottom mb-4 pb-3">
-            <div class="logo-icon"><i class="fas fa-user-tie"></i></div>
+            <div class="rounded-circle bg-primary d-inline-flex align-items-center justify-content-center mb-2" style="width: 60px; height: 60px;">
+                <!-- <i class="fas fa-user-tie"></i> -->
+                <img src="<?= base_url() ?>imgs/logo-without-bg.png" alt="Suropriyo Logo" class="img-fluid" style="max-width: 50px;">
+        </div>
             <h5 class="fw-bold text-primary">HR Portal</h5>
         </div>
         <nav class="nav flex-column">
