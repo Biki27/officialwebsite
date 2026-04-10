@@ -148,7 +148,6 @@ h2.text-white, .page-title {
 .action-btns .btn { padding: .35rem .6rem; border-radius: var(--r-sm); }
 
 /* ─── Modals ─── */
-.modal-content { border-radius: var(--r-xl); border: none; box-shadow: var(--shadow-lg); overflow: hidden; }
 .modal-header { background: linear-gradient(135deg, var(--brand-600), var(--brand-500)); color: white; border: none; }
 .modal-header .btn-close { filter: invert(1) brightness(2); }
 
@@ -164,4 +163,50 @@ h2.text-white, .page-title {
 }
 @media (max-width: 576px) {
   .form-modal-grid { grid-template-columns: 1fr; }
+}
+/* --- Updated Modal Scrolling Logic --- */
+
+/* Base Modal Container */
+.modal-content { 
+    border-radius: var(--r-xl); 
+    border: none; 
+    box-shadow: var(--shadow-lg); 
+    overflow: hidden; 
+    display: flex;
+    flex-direction: column;
+}
+
+/* Ensure the form takes up available space and allows internal scrolling */
+#projectModalForm {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* Important to keep the scroll inside modal-body */
+}
+
+/* Enable the scroll on the body section */
+.modal-body {
+    overflow-y: auto;
+    max-height: 70vh; /* Limits height so footer stays visible */
+    -webkit-overflow-scrolling: touch; /* Smooth scroll for iOS */
+}
+
+/* Mobile specific fixes */
+@media (max-width: 576px) {
+    .modal-dialog-scrollable {
+        margin: 0.5rem;
+        height: calc(100% - 1rem);
+    }
+    
+    .modal-content {
+        max-height: 90vh; /* Keeps the modal within the phone screen */
+    }
+
+    .form-modal-grid { 
+        grid-template-columns: 1fr; /* Stack inputs for better height management */
+        gap: 0.75rem;
+    }
+    
+    .modal-body {
+        padding: 1rem !important;
+    }
 }
