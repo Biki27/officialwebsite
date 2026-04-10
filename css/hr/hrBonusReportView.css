@@ -153,3 +153,94 @@
     color: #dc2626;
     border-left: 4px solid #dc2626;
 }
+/* ============================================================
+   MOBILE RESPONSIVENESS (CSS ONLY)
+   ============================================================ */
+@media (max-width: 992px) {
+    /* 1. Main Container & Header Alignment */
+    .main-content {
+        margin-left: 0 !important;
+        padding: 80px 16px 24px 16px !important;
+    }
+    
+    .d-flex.justify-content-between.align-items-center.mb-4.pb-2 {
+        align-items: flex-start !important;
+    }
+    .page-title { flex: 1; padding-right: 12px; }
+    .page-title h3 { font-size: 1.4rem !important; line-height: 1.3; }
+
+    /* 2. Stack Stat Cards */
+    .row.g-4 > div { margin-bottom: 16px; }
+    .stat-card { padding: 20px; border-radius: 16px; }
+
+    /* 3. CSS-Only Table to Card Layout */
+    .table-card { border: none; background: transparent; box-shadow: none; }
+    .table-card table, .table-card thead, .table-card tbody, .table-card th, .table-card td, .table-card tr { display: block; width: 100%; }
+    
+    /* Hide Table Header Visually */
+    .table-card thead tr { position: absolute; top: -9999px; left: -9999px; }
+
+    /* Style the Card (Row) */
+    .table-card tbody tr {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        margin-bottom: 16px;
+        padding: 20px;
+        box-shadow: var(--shadow-sm);
+    }
+
+    /* First Column: Employee Details (Acts as Card Header) */
+    .table-card tbody td:first-child {
+        border-bottom: 2px solid var(--border);
+        padding: 0 0 16px 0 !important;
+        margin-bottom: 12px;
+        text-align: left;
+    }
+
+    /* Style the Data Rows inside the Card */
+    .table-card tbody td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0 !important;
+        border-bottom: 1px solid var(--surface-2);
+        text-align: right;
+    }
+
+    /* Inject Labels via CSS for Mobile */
+    .table-card tbody td::before {
+        font-weight: 700;
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        margin-right: 15px;
+        text-align: left;
+    }
+
+    /* Map column numbers to specific Bonus Labels */
+    .table-card tbody td:nth-child(2)::before { content: "Current Salary"; }
+    .table-card tbody td:nth-child(3)::before { content: "Last Bonus"; }
+    .table-card tbody td:nth-child(4)::before { content: "Next Eligibility"; }
+
+    /* Remove pseudo-labels from the Header and Action columns */
+    .table-card tbody td:first-child::before,
+    .table-card tbody td:last-child::before { display: none; }
+
+    /* Last Column: Action Button Full Width */
+    .table-card tbody td:last-child {
+        border-bottom: none;
+        padding: 16px 0 0 0 !important;
+    }
+    .table-card tbody td:last-child .btn-manage {
+        width: 100%;
+        padding: 12px;
+        border-radius: 12px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    /* Fix Modal padding for Mobile */
+    .modal-body { padding: 20px !important; }
+}
