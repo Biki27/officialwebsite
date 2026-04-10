@@ -1058,7 +1058,6 @@ class Employee extends CI_Controller
             redirect('Employee/EmployeeOverview');
         }
     }
-    // 
     // --- Employee Portal: View Salary Slips Page ---
     public function mySalarySlips()
     {
@@ -1129,28 +1128,42 @@ class Employee extends CI_Controller
     {
         if (
             $this->session->has_userdata('empid') &&
-            $this->session->has_userdata('email') &&
-            $this->session->has_userdata('accesslevel') &&
-            $this->session->has_userdata('branch') &&
-            $this->session->has_userdata('status') &&
             $this->session->userdata('status') == 'active' &&
             $this->session->userdata('accesslevel') == 'EMPL'
         ) {
+            $this->load->model('AttendanceModel');
             $this->load->model('EmployeeModel');
-            $attendeces = $this->EmployeeModel->get_all_loginlog_for_thisempid();
+
+            $empid = $this->session->userdata('empid');
+
+            // 1. Get and Clean POST data
+            $start = $this->input->post('startdate', TRUE);
+            $end = $this->input->post('enddate', TRUE);
+
+            // 2. Default logic: If no dates provided, show current month
+            if (empty($start) && empty($end)) {
+                $start = date('Y-m-01');
+                $end = date('Y-m-d'); // To today
+            }
+
+            // 3. Fetch filtered records using existing model logic
+            $attendeces = $this->AttendanceModel->find_empid_with_daterange($empid, $start, $end);
 
             $data = array(
-                'attendence' => $attendeces
+                'attendence' => $attendeces,
+                'start' => $start,
+                'end' => $end
             );
 
             $this->load->view('employee/employeeHeaderView');
+            // Pass the $data which now contains 'start' and 'end'
             $this->load->view('employee/employeeAttendenceView.php', $data);
         } else {
             $this->session->sess_destroy();
             $this->load->view('errors/invalidAccessView');
         }
     }
-    // Employee Attendence
+    // Employee  Request
     function EmployeeRequest()
     {
         if (
@@ -1655,7 +1668,7 @@ class Employee extends CI_Controller
 
         redirect('Employee/products');
     }
-    
+
     // job management by 
     public function viewJobs()
     {
