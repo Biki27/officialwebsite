@@ -31,7 +31,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
     <!-- Sidebar -->
     <div class="sidebar">
         <div class="logo">
-            <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width: 60px; height: 60px;">
+            <div class="logo-icon rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width: 60px; height: 60px;">
                 <!-- <i class="fas fa-building"></i> -->
                  <img src="<?= base_url() ?>imgs/logo-without-bg.png" alt="Suropriyo Logo" class="img-fluid" style="max-width: 50px;">
             </div>
