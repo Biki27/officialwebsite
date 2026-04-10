@@ -628,15 +628,35 @@ class EmployeeModel extends CI_Model
 
     public function check_bonus_eligibility($empid)
     {
-        $last_bonus = $this->db->where('bonus_empid', $empid)->order_by('bonus_date', 'DESC')->limit(1)->get('seemp_bonuses')->row();
-        if (!$last_bonus)
-            return ['eligible' => true];
+        // Fetch joining date and last bonus record
+        $emp = $this->db->select('seempd_joiningdate')
+            ->where('seempd_empid', $empid)
+            ->get('seempdetails')
+            ->row();
 
+        $last_bonus = $this->db->where('bonus_empid', $empid)
+            ->order_by('bonus_date', 'DESC')
+            ->limit(1)
+            ->get('seemp_bonuses')
+            ->row();
+
+        $joining_date = $emp ? $emp->seempd_joiningdate : '1970-01-01';
+
+        // 1. Check 365 days policy
         $today = date('Y-m-d');
-        if ($today < $last_bonus->next_eligible_date) {
-            return ['eligible' => false, 'next_date' => $last_bonus->next_eligible_date];
+        if ($last_bonus && $today < $last_bonus->next_eligible_date) {
+            return [
+                'eligible' => false,
+                'next_date' => $last_bonus->next_eligible_date,
+                'joining_date' => $joining_date,
+                'message' => 'Annual cycle not complete'
+            ];
         }
-        return ['eligible' => true];
+
+        return [
+            'eligible' => true,
+            'joining_date' => $joining_date
+        ];
     }
 
     public function add_bonus($data)

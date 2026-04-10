@@ -200,6 +200,7 @@ $today = date('Y-m-d');
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+/*
 <script>
     function openBonusModal(empid, name, salary) {
         document.getElementById('bonus_emp_name').textContent = name;
@@ -214,6 +215,17 @@ $today = date('Y-m-d');
         fetch('<?= base_url("Employee/getBonusHistoryAjax/") ?>' + empid)
             .then(r => r.json())
             .then(res => {
+
+                const joiningDate = res.eligibility.joining_date;
+
+                // CRITICAL: Set the minimum date to the joining date
+                dateInput.setAttribute('min', joiningDate);
+
+                // Check if "today" is valid (if today is before joining date, adjust it)
+                const today = new Date().toISOString().split('T')[0];
+                if (today < joiningDate) {
+                    dateInput.value = joiningDate;
+                }
                 // Check Eligibility
                 if (!res.eligibility.eligible) {
                     const warn = document.getElementById('eligibility_warning');
@@ -249,5 +261,98 @@ $today = date('Y-m-d');
 
         bootstrap.Modal.getOrCreateInstance(document.getElementById('bonusModal')).show();
     }
+    // Add a final frontend check before submission
+    document.getElementById('bonusForm').addEventListener('submit', function (e) {
+        const dateInput = this.querySelector('input[name="bonus_date"]');
+        const minDate = dateInput.getAttribute('min');
 
+        // Check if the selected date is before the joining date
+        if (dateInput.value < minDate) {
+            e.preventDefault(); // Stop the form from submitting
+
+            // Custom message as requested
+            alert("You can't select this date because the employee joined on " + minDate);
+
+            // Reset the date to the joining date to help the HR correct it
+            dateInput.value = minDate;
+        }
+    });
+
+</script>
+*/
+<script>
+    function openBonusModal(empid, name, salary) {
+        document.getElementById('bonus_emp_name').textContent = name;
+        document.getElementById('bonus_empid').value = empid;
+
+        // Reset View states
+        const warn = document.getElementById('eligibility_warning');
+        const form = document.getElementById('bonus_form_container');
+        const dateInput = document.querySelector('input[name="bonus_date"]');
+
+        warn.classList.add('d-none');
+        form.classList.remove('d-none');
+
+        fetch('<?= base_url("Employee/getBonusHistoryAjax/") ?>' + empid)
+            .then(r => r.json())
+            .then(res => {
+                // 1. Get the joining date from the response
+                const joiningDate = res.eligibility.joining_date;
+
+                // 2. Set the minimum allowed date in the calendar picker
+                dateInput.setAttribute('min', joiningDate);
+
+                // 3. Auto-adjust value if current "today" is invalid for this employee
+                const todayStr = new Date().toISOString().split('T')[0];
+                dateInput.value = (todayStr < joiningDate) ? joiningDate : todayStr;
+
+                // 4. Check 365-day Policy Eligibility
+                if (!res.eligibility.eligible) {
+                    warn.classList.remove('d-none');
+                    document.getElementById('next_date_label').textContent = res.eligibility.next_date;
+                    form.classList.add('d-none');
+                    warn.innerHTML = `<i class="fas fa-lock me-2"></i> 
+                    <strong>Policy Restriction:</strong> ${res.eligibility.message}. 
+                    Eligibility returns on ${res.eligibility.next_date}`;
+                }
+
+                // Render History logic (remains the same)
+                const tbody = document.getElementById('bonusHistoryBody');
+                tbody.innerHTML = '';
+                if (res.history.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-muted">No records.</td></tr>';
+                } else {
+                    res.history.forEach(b => {
+                        tbody.innerHTML += `
+                        <tr>
+                            <td class="ps-3 fw-bold">${b.bonus_date}</td>
+                            <td class="text-success fw-bold">₹${parseFloat(b.bonus_amount).toFixed(2)}</td>
+                            <td><span class="badge-soft">Completed</span></td>
+                            <td class="pe-3 small text-muted">${b.bonus_reason}</td>
+                        </tr>`;
+                    });
+                }
+            });
+
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('bonusModal')).show();
+    }
+
+    /** * NEW: Validation for mistake in selecting past date
+     * Shows a message if the selected date is before the joining date.
+     */
+    document.getElementById('bonusForm').addEventListener('submit', function (e) {
+        const dateInput = this.querySelector('input[name="bonus_date"]');
+        const minDate = dateInput.getAttribute('min'); // This is the joining_date we set earlier
+
+        if (dateInput.value < minDate) {
+            e.preventDefault(); // Stop the form from submitting
+
+            // Show the custom alert message
+            alert("You can't select this date because the employee joined on " + minDate);
+
+            // Correct the field automatically to the joining date
+            dateInput.value = minDate;
+            dateInput.focus();
+        }
+    });
 </script>
