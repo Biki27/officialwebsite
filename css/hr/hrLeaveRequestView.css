@@ -126,6 +126,19 @@
   margin-bottom: 18px;
   animation: slideDown .3s ease;
 }
+
+/* Employee-triggered reminder banner — purple variant */
+.reminder-banner-emp {
+  background: linear-gradient(135deg, #f5f3ff, #ede9fe);
+  border-color: #c4b5fd;
+  border-left-color: #7c3aed;
+}
+.reminder-banner-emp .reminder-text { color: #4c1d95; }
+.reminder-banner-emp .reminder-text strong { color: #3b0764; }
+.reminder-banner-emp .reminder-close-btn { color: #6d28d9; }
+.emp-reminder-icon { background: #7c3aed !important; }
+.emp-action-btn    { background: #7c3aed !important; }
+.emp-action-btn:hover { background: #5b21b6 !important; }
 @keyframes slideDown { from { opacity:0; transform:translateY(-8px) } to { opacity:1; transform:translateY(0) } }
 
 .reminder-banner .reminder-icon {
@@ -323,6 +336,11 @@
   color: var(--text-secondary);
 }
 
+/* ── Employee-Reminded Stat Card ── */
+.stat-emp-reminded::before { background: linear-gradient(90deg, #7c3aed, #a78bfa); }
+.stat-emp-reminded .stat-icon { background: #ede9fe; color: #7c3aed; }
+.emp-reminded-badge { background: #7c3aed; }
+
 /* ── Overdue Row Highlight ── */
 .row-overdue {
   background: linear-gradient(90deg, rgba(253,246,220,.6), transparent) !important;
@@ -330,7 +348,16 @@
 }
 .row-overdue:hover { background: linear-gradient(90deg, rgba(253,246,220,.9), var(--brand-50)) !important; }
 
-/* ── Request ID Cell ── */
+/* ── Employee-Reminded Row Highlight (stronger, purple tinted) ── */
+.row-emp-reminded {
+  background: linear-gradient(90deg, rgba(237,233,254,.65), transparent) !important;
+  border-left: 3px solid #7c3aed !important;
+}
+.row-emp-reminded:hover {
+  background: linear-gradient(90deg, rgba(237,233,254,.9), var(--brand-50)) !important;
+}
+
+/* ── Request ID badges ── */
 .req-id { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .req-id-badge {
   background: var(--brand-50);
@@ -343,6 +370,28 @@
   letter-spacing: .3px;
   white-space: nowrap;
 }
+
+/* Employee sent a reminder — purple pulsing badge */
+.emp-reminded-flag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #ede9fe;
+  color: #7c3aed;
+  border: 1px solid #c4b5fd;
+  border-radius: 20px;
+  padding: 2px 8px;
+  font-size: .68rem;
+  font-weight: 700;
+  white-space: nowrap;
+  animation: remindedPulse 1.8s ease-in-out infinite;
+}
+@keyframes remindedPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(124,58,237,.3); }
+  50%       { box-shadow: 0 0 0 4px rgba(124,58,237,.0); }
+}
+
+/* Time-overdue badge */
 .overdue-flag {
   background: #fef3c7;
   color: #b45309;
@@ -358,6 +407,12 @@
   0%, 100% { opacity: 1; }
   50% { opacity: .6; }
 }
+
+/* ── Employee-reminded filter tab ── */
+.filter-tab.tab-emp-reminded.active {
+  background: linear-gradient(135deg, #7c3aed, #a78bfa);
+}
+.emp-reminded-count { background: rgba(255,255,255,.3) !important; }
 
 /* ── Employee Cell ── */
 .emp-cell { display: flex; align-items: center; gap: 10px; }

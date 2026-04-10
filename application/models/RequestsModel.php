@@ -119,13 +119,21 @@ class RequestsModel extends CI_Model
         return $this->db->get()->result();
     }
 
+    // public function update_request_status($id, $status)
+    // {
+    //     $this->db->where('seemrq_id', $id);
+    //     return $this->db->update('seemprequests', [
+    //         'seemrq_status' => $status
+    //     ]);
+    // }
     public function update_request_status($id, $status)
-    {
-        $this->db->where('seemrq_id', $id);
-        return $this->db->update('seemprequests', [
-            'seemrq_status' => $status
-        ]);
-    }
+{
+    $this->db->where('seemrq_id', $id);
+    return $this->db->update('seemprequests', [
+        'seemrq_status'   => $status,
+        'seemrq_reminder' => 0   // ← ADD THIS LINE — clears the flag after HR acts
+    ]);
+}
     public function get_requestes_for_thisempid_custom($empid)
     {
         return $this->db->from('seemprequests')

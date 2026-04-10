@@ -41,13 +41,16 @@
 
             <!-- ══ STATS CARDS ══ -->
             <?php
-                $total    = count($requests);
-                $pending  = count(array_filter((array)$requests, fn($r) => $r->seemrq_status === 'pending'));
-                $approved = count(array_filter((array)$requests, fn($r) => $r->seemrq_status === 'approved'));
-                $rejected = count(array_filter((array)$requests, fn($r) => $r->seemrq_status === 'rejected'));
+                $total        = count($requests);
+                $pending      = count(array_filter((array)$requests, fn($r) => $r->seemrq_status === 'pending'));
+                $approved     = count(array_filter((array)$requests, fn($r) => $r->seemrq_status === 'approved'));
+                $rejected     = count(array_filter((array)$requests, fn($r) => $r->seemrq_status === 'rejected'));
 
-                // Find old pending requests (> 3 days old)
-                $reminders = array_filter((array)$requests, function($r) {
+                // Rows where employee clicked "Remind HR" — DB flag seemrq_reminder = 1
+                $emp_reminded = array_filter((array)$requests, fn($r) => !empty($r->seemrq_reminder) && $r->seemrq_reminder == 1);
+
+                // Overdue: pending AND older than 3 days (time-based, separate from employee reminder)
+                $overdue = array_filter((array)$requests, function($r) {
                     return $r->seemrq_status === 'pending' &&
                            (strtotime('now') - strtotime($r->seemrq_reqdate)) > (3 * 86400);
                 });
@@ -85,11 +88,24 @@
                         <div class="stat-label">Rejected</div>
                     </div>
                 </div>
-                <?php if (count($reminders) > 0): ?>
-                <div class="stat-card stat-reminder pulse-card" onclick="filterByStatus('reminder')">
+
+                <!-- Employee-triggered reminder card — only shown when an employee clicked "Remind HR" -->
+                <?php if (count($emp_reminded) > 0): ?>
+                <div class="stat-card stat-emp-reminded pulse-card" onclick="filterByStatus('emp_reminded')">
                     <div class="stat-icon"><i class="fas fa-bell"></i></div>
                     <div class="stat-info">
-                        <div class="stat-number"><?= count($reminders) ?></div>
+                        <div class="stat-number"><?= count($emp_reminded) ?></div>
+                        <div class="stat-label">Employee Reminders</div>
+                    </div>
+                    <span class="stat-badge emp-reminded-badge">Action needed</span>
+                </div>
+                <?php endif; ?>
+
+                <?php if (count($overdue) > 0): ?>
+                <div class="stat-card stat-reminder pulse-card" onclick="filterByStatus('overdue')">
+                    <div class="stat-icon"><i class="fas fa-hourglass-end"></i></div>
+                    <div class="stat-info">
+                        <div class="stat-number"><?= count($overdue) ?></div>
                         <div class="stat-label">Overdue Reviews</div>
                     </div>
                     <span class="stat-badge reminder-badge">3+ days old</span>
@@ -97,15 +113,32 @@
                 <?php endif; ?>
             </div>
 
-            <!-- ══ REMINDER BANNER ══ -->
-            <?php if (count($reminders) > 0): ?>
-            <div class="reminder-banner" id="reminderBanner">
-                <div class="reminder-icon"><i class="fas fa-bell"></i></div>
+            <!-- ══ EMPLOYEE-TRIGGERED REMINDER BANNER (highest priority) ══ -->
+            <?php if (count($emp_reminded) > 0): ?>
+            <div class="reminder-banner reminder-banner-emp" id="empReminderBanner">
+                <div class="reminder-icon emp-reminder-icon"><i class="fas fa-bell"></i></div>
                 <div class="reminder-text">
-                    <strong><?= count($reminders) ?> pending request<?= count($reminders) > 1 ? 's' : '' ?></strong>
-                    <?= count($reminders) > 1 ? 'have' : 'has' ?> been waiting for more than 3 days and require your immediate attention.
+                    <strong><?= count($emp_reminded) ?> employee<?= count($emp_reminded) > 1 ? 's' : '' ?> sent you a reminder</strong>
+                    — <?= count($emp_reminded) > 1 ? 'these requests are' : 'this request is' ?> still pending and the employee is following up. Please take action.
                 </div>
-                <button class="reminder-action-btn" onclick="filterByStatus('reminder')">
+                <button class="reminder-action-btn emp-action-btn" onclick="filterByStatus('emp_reminded')">
+                    <i class="fas fa-bell me-1"></i> View Reminders
+                </button>
+                <button class="reminder-close-btn" onclick="this.closest('.reminder-banner').style.display='none'">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <?php endif; ?>
+
+            <!-- ══ OVERDUE BANNER (time-based) ══ -->
+            <?php if (count($overdue) > 0): ?>
+            <div class="reminder-banner" id="reminderBanner">
+                <div class="reminder-icon"><i class="fas fa-hourglass-end"></i></div>
+                <div class="reminder-text">
+                    <strong><?= count($overdue) ?> pending request<?= count($overdue) > 1 ? 's' : '' ?></strong>
+                    <?= count($overdue) > 1 ? 'have' : 'has' ?> been waiting for more than 3 days and need your attention.
+                </div>
+                <button class="reminder-action-btn" onclick="filterByStatus('overdue')">
                     <i class="fas fa-eye me-1"></i> Review Now
                 </button>
                 <button class="reminder-close-btn" onclick="this.closest('.reminder-banner').style.display='none'">
@@ -133,10 +166,16 @@
                         <i class="fas fa-times me-1"></i> Rejected
                         <span class="tab-count"><?= $rejected ?></span>
                     </button>
-                    <?php if (count($reminders) > 0): ?>
-                    <button class="filter-tab tab-reminder" data-status="reminder">
-                        <i class="fas fa-bell me-1"></i> Overdue
-                        <span class="tab-count reminder-count"><?= count($reminders) ?></span>
+                    <?php if (count($emp_reminded) > 0): ?>
+                    <button class="filter-tab tab-emp-reminded" data-status="emp_reminded">
+                        <i class="fas fa-bell me-1"></i> Reminded
+                        <span class="tab-count emp-reminded-count"><?= count($emp_reminded) ?></span>
+                    </button>
+                    <?php endif; ?>
+                    <?php if (count($overdue) > 0): ?>
+                    <button class="filter-tab tab-reminder" data-status="overdue">
+                        <i class="fas fa-hourglass-end me-1"></i> Overdue
+                        <span class="tab-count reminder-count"><?= count($overdue) ?></span>
                     </button>
                     <?php endif; ?>
                 </div>
@@ -169,21 +208,27 @@
                         <?php if (!empty($requests)): ?>
                             <?php foreach ($requests as $req): ?>
                                 <?php
-                                    $isOverdue = ($req->seemrq_status === 'pending' &&
-                                                  (strtotime('now') - strtotime($req->seemrq_reqdate)) > (3 * 86400));
-                                    $rowClass = $isOverdue ? 'row-overdue' : '';
+                                    $isOverdue   = ($req->seemrq_status === 'pending' &&
+                                                    (strtotime('now') - strtotime($req->seemrq_reqdate)) > (3 * 86400));
+                                    $isReminded  = !empty($req->seemrq_reminder) && $req->seemrq_reminder == 1;
+                                    $rowClass    = $isReminded ? 'row-emp-reminded' : ($isOverdue ? 'row-overdue' : '');
                                     $daysWaiting = round((strtotime('now') - strtotime($req->seemrq_reqdate)) / 86400);
                                 ?>
                                 <tr class="<?= $rowClass ?>"
                                     data-status="<?= strtolower($req->seemrq_status) ?>"
-                                    data-overdue="<?= $isOverdue ? '1' : '0' ?>"
+                                    data-overdue="<?= $isOverdue  ? '1' : '0' ?>"
+                                    data-reminded="<?= $isReminded ? '1' : '0' ?>"
                                     data-search="<?= strtolower($req->seemrq_empid . ' ' . ($req->seempd_name ?? '') . ' ' . $req->seemrq_reason) ?>">
 
                                     <!-- Request ID -->
                                     <td>
                                         <div class="req-id">
                                             <span class="req-id-badge">REQ<?= str_pad($req->seemrq_id, 4, '0', STR_PAD_LEFT) ?></span>
-                                            <?php if ($isOverdue): ?>
+                                            <?php if ($isReminded): ?>
+                                                <span class="emp-reminded-flag" title="Employee sent a reminder for this request">
+                                                    <i class="fas fa-bell"></i> Reminded
+                                                </span>
+                                            <?php elseif ($isOverdue): ?>
                                                 <span class="overdue-flag" title="Waiting <?= $daysWaiting ?> days">
                                                     <i class="fas fa-exclamation-triangle"></i> <?= $daysWaiting ?>d
                                                 </span>
@@ -418,12 +463,14 @@
 
             rows.forEach(row => {
                 const status   = row.dataset.status;
-                const overdue  = row.dataset.overdue === '1';
+                const overdue  = row.dataset.overdue   === '1';
+                const reminded = row.dataset.reminded  === '1';
                 const haystack = row.dataset.search || row.innerText.toLowerCase();
 
                 const matchStatus =
-                    currentFilter === 'all'      ? true :
-                    currentFilter === 'reminder'  ? (status === 'pending' && overdue) :
+                    currentFilter === 'all'         ? true :
+                    currentFilter === 'emp_reminded' ? reminded :
+                    currentFilter === 'overdue'      ? (status === 'pending' && overdue) :
                     status === currentFilter;
 
                 const matchSearch = q === '' || haystack.includes(q);
@@ -438,8 +485,9 @@
 
             noRes.style.display = visible === 0 ? 'block' : 'none';
 
-            const label = currentFilter === 'all' ? 'requests' :
-                          currentFilter === 'reminder' ? 'overdue requests' :
+            const label = currentFilter === 'all'          ? 'requests' :
+                          currentFilter === 'emp_reminded'  ? 'employee-reminded requests' :
+                          currentFilter === 'overdue'       ? 'overdue requests' :
                           currentFilter + ' requests';
             resInfo.textContent = visible > 0
                 ? `Showing ${visible} ${label}${q ? ' matching "' + q + '"' : ''}`

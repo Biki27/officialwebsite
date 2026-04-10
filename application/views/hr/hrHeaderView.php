@@ -49,6 +49,11 @@
                 href="<?= base_url('Employee/RegisterEmployee') ?>">
                 <i class="fas fa-user-plus me-2"></i> Add Employee
             </a>
+            <!-- leave management -->
+             <a class="nav-link <?= ($this->uri->segment(2) == 'viewEmployeeLeaveRequests') ? 'active' : '' ?>"
+                href="<?= base_url('Employee/viewEmployeeLeaveRequests') ?>">
+                <i class="fas fa-plane-departure me-2"></i> Leave Management
+            </a>
             <a class="nav-link <?= ($this->uri->segment(2) == 'viewJobs') ? 'active' : '' ?>"
                 href="<?= base_url('Employee/viewJobs') ?>">
                 <i class="fas fa-list-alt me-2"></i> Manage Jobs
