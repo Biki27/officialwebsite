@@ -131,7 +131,7 @@ h2 { font-weight: 800; font-size: 1.5rem; letter-spacing: -0.3px; }
     color: rgba(255,255,255,0.5);
     border-radius: 12px 0 0 12px;
 }
-.input-group .form-control { border-left: none; border-radius: 0 12px 12px 0; }
+/* .input-group .form-control { border-left: none; border-radius: 0 12px 12px 0; } */
 
 /* Google button */
 .custom-google-btn {
