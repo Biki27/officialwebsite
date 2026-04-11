@@ -297,6 +297,9 @@ class EmployeeModel extends CI_Model
             'seempd_experience' => $data['experience'],
             'seempd_dob' => $data['dob'],
             'seempd_joiningdate' => $data['joiningDate'],
+            'seempd_permanent_date' => $data['permanentDate'],
+            'seempd_termination_date' => $data['terminationDate'],
+            'seempd_termination_reason' => $data['terminationReason'],
             'seempd_increment' => $data['increment'],
             'seempd_address_permanent' => $data['permAddress'],
             'seempd_address_current' => $data['currentAddress'],
@@ -592,32 +595,33 @@ class EmployeeModel extends CI_Model
     }
 
     // --- Bonus Management Functions ---
+    // In EmployeeModel.php
     public function get_yearly_bonus_report($year)
     {
         $sql = "
-        SELECT 
-            e.seemp_id, 
-            d.seempd_name, 
-            d.seempd_salary,
-            b.bonus_amount, 
-            b.bonus_date, 
-            b.next_eligible_date, 
-            b.bonus_reason, 
-            b.bonus_status
-        FROM seemployee e
-        JOIN seempdetails d ON e.seemp_id = d.seempd_empid
-        LEFT JOIN seemp_bonuses b ON e.seemp_id = b.bonus_empid 
-            AND b.bonus_id = (
-                SELECT MAX(bonus_id) 
-                FROM seemp_bonuses 
-                WHERE bonus_empid = e.seemp_id 
-                AND YEAR(bonus_date) = ? -- This ensures the bonus belongs to the selected year
-            )
-        WHERE e.seemp_status = 'active' 
-        AND e.seemp_acesslevel = 'EMPL'
-        ORDER BY d.seempd_name ASC";
+    SELECT 
+        e.seemp_id, 
+        d.seempd_name, 
+        d.seempd_salary,
+        d.seempd_permanent_date, -- ADD THIS LINE
+        b.bonus_amount, 
+        b.bonus_date, 
+        b.next_eligible_date, 
+        b.bonus_reason, 
+        b.bonus_status
+    FROM seemployee e
+    JOIN seempdetails d ON e.seemp_id = d.seempd_empid
+    LEFT JOIN seemp_bonuses b ON e.seemp_id = b.bonus_empid 
+        AND b.bonus_id = (
+            SELECT MAX(bonus_id) 
+            FROM seemp_bonuses 
+            WHERE bonus_empid = e.seemp_id 
+            AND YEAR(bonus_date) = ?
+        )
+    WHERE e.seemp_status = 'active' 
+    AND e.seemp_acesslevel = 'EMPL'
+    ORDER BY d.seempd_name ASC";
 
-        // Pass the $year variable into the query
         return $this->db->query($sql, array($year))->result();
     }
 
@@ -628,8 +632,7 @@ class EmployeeModel extends CI_Model
 
     public function check_bonus_eligibility($empid)
     {
-        // Fetch joining date and last bonus record
-        $emp = $this->db->select('seempd_joiningdate')
+        $emp = $this->db->select('seempd_permanent_date')
             ->where('seempd_empid', $empid)
             ->get('seempdetails')
             ->row();
@@ -640,22 +643,40 @@ class EmployeeModel extends CI_Model
             ->get('seemp_bonuses')
             ->row();
 
-        $joining_date = $emp ? $emp->seempd_joiningdate : '1970-01-01';
+        $permanent_date = ($emp && !empty($emp->seempd_permanent_date)) ? $emp->seempd_permanent_date : null;
 
-        // 1. Check 365 days policy
+        // Calculate the threshold: Permanent Date + 365 Days
+        $eligibility_threshold = $permanent_date ? date('Y-m-d', strtotime($permanent_date . ' + 365 days')) : null;
         $today = date('Y-m-d');
+
+        if (!$permanent_date) {
+            return ['eligible' => false, 'permanent_date' => null, 'message' => 'Employee is not yet Permanent.'];
+        }
+
+        // Validation: Must be at least 365 days after becoming permanent
+        if ($today < $eligibility_threshold) {
+            return [
+                'eligible' => false,
+                'next_date' => $eligibility_threshold,
+                'permanent_date' => $permanent_date,
+                'message' => 'Employee completes 365 days of permanency on ' . date('d M Y', strtotime($eligibility_threshold))
+            ];
+        }
+
+        // Existing check: 365 days since the last bonus
         if ($last_bonus && $today < $last_bonus->next_eligible_date) {
             return [
                 'eligible' => false,
                 'next_date' => $last_bonus->next_eligible_date,
-                'joining_date' => $joining_date,
-                'message' => 'Annual cycle not complete'
+                'permanent_date' => $permanent_date,
+                'message' => 'Annual bonus cycle not complete.'
             ];
         }
 
         return [
             'eligible' => true,
-            'joining_date' => $joining_date
+            'permanent_date' => $permanent_date,
+            'eligibility_threshold' => $eligibility_threshold // Pass this to JS
         ];
     }
 
