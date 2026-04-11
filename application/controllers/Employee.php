@@ -1893,6 +1893,13 @@ class Employee extends CI_Controller
             $data['monthly_slips'] = $this->EmployeeModel->get_slips_by_month($selected_month);
             $data['selected_month'] = $selected_month;
 
+            // --- NEW CALCULATION FOR TOTAL COST ---
+            $total_salary_cost = 0;
+            foreach ($data['monthly_slips'] as $slip) {
+                $total_salary_cost += (float) $slip->net_salary;
+            }
+            $data['total_salary_cost'] = $total_salary_cost;
+
             // 4. Calculate Stats for the Dashboard
             $data['total_emps'] = count($data['employees']);
             $data['processed_count'] = count($data['monthly_slips']);

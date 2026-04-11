@@ -964,6 +964,7 @@
         </div>
 
         <!-- ══ METRIC CARDS ══ -->
+        <!--
         <div class="row g-3 mb-4">
             <div class="col-md-4">
                 <div class="metric-card">
@@ -981,7 +982,7 @@
                         <div class="metric-label">Slips Generated</div>
                         <div class="metric-value green"><?= $processed_count ?></div>
                     </div>
-                    <!-- Progress -->
+                    
                     <?php if ($total_emps > 0): ?>
                         <div style="margin-left:auto;width:44px;height:44px;position:relative;">
                             <?php $pct = round(($processed_count / $total_emps) * 100); ?>
@@ -1007,6 +1008,62 @@
                 </div>
             </div>
         </div>
+                    -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <div class="metric-icon purple"><i class="fas fa-users"></i></div>
+                    <div>
+                        <div class="metric-label">Total Employees</div>
+                        <div class="metric-value"><?= $total_emps ?></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="metric-card" style="border-left: 4px solid #4f46e5;">
+                    <div class="metric-icon purple"><i class="fas fa-indian-rupee-sign"></i></div>
+                    <div>
+                        <div class="metric-label">Total Disbursed</div>
+                        <div class="metric-value" style="color:#4f46e5;">₹<?= number_format($total_salary_cost, 2) ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <div class="metric-icon green"><i class="fas fa-check-circle"></i></div>
+                    <div>
+                        <div class="metric-label">Slips Generated</div>
+                        <div class="metric-value green"><?= $processed_count ?></div>
+                    </div>
+                    <?php if ($total_emps > 0): ?>
+                        <div style="margin-left:auto;width:40px;height:40px;position:relative;">
+                            <?php $pct = round(($processed_count / $total_emps) * 100); ?>
+                            <svg viewBox="0 0 36 36" style="transform:rotate(-90deg);">
+                                <circle cx="18" cy="18" r="15.9" fill="none" stroke="#e2e8f0" stroke-width="3" />
+                                <circle cx="18" cy="18" r="15.9" fill="none" stroke="#10b981" stroke-width="3"
+                                    stroke-dasharray="<?= $pct ?> 100" stroke-dashoffset="0" stroke-linecap="round" />
+                            </svg>
+                            <span
+                                style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:.55rem;font-weight:800;color:#10b981;"><?= $pct ?>%</span>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <div class="metric-icon amber"><i class="fas fa-hourglass-half"></i></div>
+                    <div>
+                        <div class="metric-label">Pending</div>
+                        <div class="metric-value amber"><?= $pending_count ?></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
 
         <!-- ══ EMPLOYEE TABLE ══ -->
         <div class="table-card">
