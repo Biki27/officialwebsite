@@ -17,7 +17,7 @@ $today = date('Y-m-d');
                 <p>Track annual eligibility and manage employee performance bonuses.</p>
             </div>
 
-            <form action="<?= base_url('Employee/hrBonusReportView') ?>" method="GET" class="d-flex gap-2">
+            <form action="<?= base_url('Employee/BonusReportView') ?>" method="GET" class="d-flex gap-2">
                 <select name="year" class="form-select filter-select" onchange="this.form.submit()">
                     <?php
                     $current_year = date('Y');

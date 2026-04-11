@@ -102,24 +102,19 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                             <div class="info-label">Last Login</div>
                             <div class="info-value"><?= $info->seemp_lastlogin ?></div>
                         </div>
+                        <!-- Termination date if inactive otherwise disabled -->
+                        <?php if ($info->seemp_status == 'inactive') : ?>
                         <div class="info-item">
                             <div class="info-label">Termination Date</div>
                             <div class="info-value"><?= $info->seempd_termination_date ?></div>
                         </div>
+                         
                         <div class="info-item">
                             <div class="info-label">Reason for Termination</div>
                             <div class="info-value"><?= $info->seempd_termination_reason ?></div>
                         </div>
-
-                        <!--  COVER LETTER AS TEXT -->
-                        <!-- <div class="info-item" style="grid-column: 1 / -1;">
-                            <div class="info-label">Cover Letter</div>
-                            <div class="info-value">
-                                <div class="cover-letter-text">
-                                    <?= $info->sejoba_coverletter ?>
-                                </div>
-                            </div>
-                        </div> -->
+                        <?php endif; ?>
+                         
                         <!-- Projects details -->
                         <div class="info-item" style="grid-column: 1 / -1;">
                             <div class="info-label">Projects</div>
