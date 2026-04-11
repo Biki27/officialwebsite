@@ -2158,7 +2158,7 @@ class Employee extends CI_Controller
     }
 
     // bouns management system 
-    public function hrBonusReportView()
+    public function BonusReportView()
     {
         if ($this->session->userdata('accesslevel') != 'HR' && $this->session->userdata('accesslevel') != 'ADMIN') {
             redirect('Employee/Login');
@@ -2178,8 +2178,8 @@ class Employee extends CI_Controller
             'report' => $this->EmployeeModel->get_yearly_bonus_report($year),
             'total_emps' => $this->EmployeeModel->get_total_staff_count()
         ];
-
-        $this->load->view('hr/hrHeaderView');
+        $header = ($this->session->userdata('accesslevel') == 'HR') ? 'hr/hrHeaderView' : 'employee/adminHeaderView';
+        $this->load->view($header);
         $this->load->view('hr/hrBonusReportView', $data);
     }
     // AJAX route to fetch bonus history and eligibility for an employee
@@ -2199,7 +2199,7 @@ class Employee extends CI_Controller
         $check = $this->EmployeeModel->check_bonus_eligibility($post['bonus_empid']);
         if (!$check['eligible']) {
             $this->session->set_flashdata('error', 'Employee not eligible until ' . $check['next_date']);
-            redirect('Employee/hrBonusReportView');
+            redirect('Employee/BonusReportView');
         }
 
         $data = [
@@ -2212,7 +2212,7 @@ class Employee extends CI_Controller
 
         $this->EmployeeModel->add_bonus($data);
         $this->session->set_flashdata('success', 'Bonus recorded successfully');
-        redirect('Employee/hrBonusReportView');
+        redirect('Employee/BonusReportView');
     }
 
     // AJAX route to fetch the bonus amount for payroll processing

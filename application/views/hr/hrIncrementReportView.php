@@ -126,12 +126,18 @@ $current_ym_str = date('Y-m');
                                         <span class="text-muted">-</span>
                                     <?php endif; ?>
                                 </td>
-
+                                <!-- Action if user_access level is HR then show the manage button otherwise lock -->
                                 <td class="text-end pe-4">
-                                    <button class="btn btn-sm btn-primary btn-manage"
-                                        onclick='openIncrementModal("<?= $emp->seemp_id ?>", <?= htmlspecialchars(json_encode($emp->seempd_name), ENT_QUOTES, "UTF-8") ?>, <?= (float)$emp->seempd_salary ?>)'>
-                                        <i class="fas fa-sliders-h me-1"></i> Manage
-                                    </button>
+                                    <?php if ($this->session->accesslevel == 'HR'): ?>
+                                        <button class="btn btn-sm btn-primary btn-manage"
+                                            onclick='openIncrementModal("<?= $emp->seemp_id ?>", <?= htmlspecialchars(json_encode($emp->seempd_name), ENT_QUOTES, "UTF-8") ?>, <?= (float)$emp->seempd_salary ?>)'>
+                                            <i class="fas fa-sliders-h me-1"></i> Manage
+                                        </button>
+                                    <?php else: ?>
+                                        <button class="btn btn-sm btn-secondary btn-lock" disabled>
+                                            <i class="fas fa-lock me-1"></i> Locked
+                                        </button>
+                                    <?php endif; ?>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

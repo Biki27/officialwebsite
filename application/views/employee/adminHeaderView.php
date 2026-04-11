@@ -38,20 +38,31 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             <h5>Suropriyo Enterprise</h5>
         </div>
         <nav class="nav flex-column">
-            <a class="nav-link" href="<?= base_url() ?>Employee/Dashboard">
+            <a class="nav-link <?= ($this->uri->segment(2) == 'Dashboard') ? 'active' : '' ?>" href="<?= base_url() ?>Employee/Dashboard">
                 <i class="fas fa-chart-line"></i> Overview
             </a>
-            <a class="nav-link" href="<?= base_url() ?>Employee/viewEmployee">
+            <a class="nav-link <?= ($this->uri->segment(2) == 'viewEmployee') ? 'active' : '' ?>" 
+                href="<?= base_url() ?>Employee/viewEmployee">
                 <i class="fas fa-users"></i> Employees
             </a>
-            <a class="nav-link" href="<?= base_url() ?>Employee/viewAttendance">
+            <a class="nav-link <?= ($this->uri->segment(2) == 'viewAttendance') ? 'active' : '' ?>" href="<?= base_url() ?>Employee/viewAttendance">
                 <i class="fas fa-calendar-alt"></i> Attendance
             </a>
+            <!-- increment report -->
+              <a href="<?= base_url('Employee/incrementReport') ?>"
+                class="nav-link <?= ($this->uri->segment(2) == 'incrementReport') ? 'active' : '' ?>">
+                <i class="fas fa-chart-pie me-2"></i>Increment Report
+            </a>
+            <!-- bonus management -->
+            <a href="<?= base_url('Employee/BonusReportView') ?>"
+                class="nav-link <?= ($this->uri->segment(2) == 'BonusReportView') ? 'active' : '' ?>">
+                <i class="fas fa-gift me-2"></i> Bonus Report
+            </a>
 
-            <a class="nav-link" href="<?= base_url() ?>Employee/viewProjects">
+            <a class="nav-link <?= ($this->uri->segment(2) == 'viewProjects') ? 'active' : '' ?>" href="<?= base_url() ?>Employee/viewProjects">
                 <i class="fas fa-project-diagram"></i> Projects
             </a>
-            <a class="nav-link" href="<?= base_url() ?>Employee/products">
+            <a class="nav-link <?= ($this->uri->segment(2) == 'products') ? 'active' : '' ?>" href="<?= base_url() ?>Employee/products">
                 <i class="fas fa-box"></i> Product
             </a>
             <a class="nav-link" onclick="logout()">
@@ -96,14 +107,5 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 }
             });
         };
-        // Active nav link highlight
-        document.addEventListener('DOMContentLoaded', function () {
-            const currentUrl = window.location.href;
-            const navLinks = document.querySelectorAll('.sidebar .nav-link');
-            navLinks.forEach(link => {
-                if (link.href && currentUrl.includes(link.getAttribute('href'))) {
-                    link.classList.add('active');
-                }
-            });
-        });
+        
     </script>

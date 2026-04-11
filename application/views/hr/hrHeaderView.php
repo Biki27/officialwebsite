@@ -65,8 +65,8 @@
                 class="nav-link <?= ($this->uri->segment(2) == 'incrementReport') ? 'active' : '' ?>">
                 <i class="fas fa-chart-pie me-2"></i>Increment Report
             </a>
-            <a href="<?= base_url('Employee/hrBonusReportView') ?>"
-                class="nav-link <?= ($this->uri->segment(2) == 'hrBonusReportView') ? 'active' : '' ?>">
+            <a href="<?= base_url('Employee/BonusReportView') ?>"
+                class="nav-link <?= ($this->uri->segment(2) == 'BonusReportView') ? 'active' : '' ?>">
                 <i class="fas fa-gift me-2"></i> Bonus Management
             </a>
             <a class="nav-link <?= ($this->uri->segment(2) == 'salaryManagement') ? 'active' : '' ?>"

@@ -110,11 +110,18 @@ $today = date('Y-m-d');
                                         </span>
                                     <?php endif; ?>
                                 </td>
+                                <!-- Action if user_access level is HR then show the manage button otherwise lock -->
                                 <td class="text-end pe-4">
-                                    <button class="btn btn-sm btn-primary btn-manage"
-                                        onclick="openBonusModal('<?= $emp->seemp_id ?>', '<?= addslashes($emp->seempd_name) ?>', <?= (float) $emp->seempd_salary ?>)">
-                                        <i class="fas fa-plus-circle me-1"></i> Manage Bonus
-                                    </button>
+                                    <?php if ($this->session->accesslevel == 'HR'): ?>
+                                        <button class="btn btn-sm btn-primary btn-manage"
+                                            onclick="openBonusModal('<?= $emp->seemp_id ?>', '<?= addslashes($emp->seempd_name) ?>', <?= (float) $emp->seempd_salary ?>)">
+                                            <i class="fas fa-plus-circle me-1"></i> Manage Bonus
+                                        </button>
+                                    <?php else: ?>
+                                        <button class="btn btn-sm btn-secondary btn-lock" disabled>
+                                            <i class="fas fa-lock me-1"></i> Locked
+                                        </button>
+                                    <?php endif; ?>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
