@@ -165,17 +165,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
                             value="<?= isset($emp) ? $emp->seempd_permanent_date : '' ?>">
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label text-danger">Termination Date</label>
-                        <input type="date" class="form-control border-danger" id="terminationDate"
-                            name="terminationDate" value="<?= isset($emp) ? $emp->seempd_termination_date : '' ?>">
-                    </div>
-                    <!-- Reason for Termination -->
-                    <div class="form-group" style="grid-column: 1 / -1;">
-                        <label class="form-label">Reason for Termination</label>
-                        <textarea class="form-control" name="terminationReason" rows="2"
-                            placeholder="Enter reason if employee is terminated..."><?= isset($emp) ? $emp->seempd_termination_reason : '' ?></textarea>
-                    </div>
+
                     <div class="form-group">
                         <label class="form-label">Access Level <span class="required">*</span></label>
                         <select name="accessLevel" id="accessLevel" class="form-select">
@@ -185,13 +175,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
                             <option value="ADMIN" <?= (isset($emp) && $emp->seemp_acesslevel == 'ADMIN') ? 'selected' : '' ?>>Admin</option>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Status <span class="required">*</span></label>
-                        <select class="form-select" id="status" name="status" required>
-                            <option value="active" <?= (isset($emp) && $emp->seemp_status == 'active') ? 'selected' : '' ?>>Active</option>
-                            <option value="inactive" <?= (isset($emp) && $emp->seemp_status == 'inactive') ? 'selected' : '' ?>>Inactive</option>
-                        </select>
-                    </div>
+
                 </div>
 
                 <div class="row g-3 mb-4">
@@ -556,27 +540,11 @@ defined('BASEPATH') or exit('No direct script access allowed');
             const isUpdate = <?= isset($emp) ? 'true' : 'false' ?>;
             const joinVal = joinInput.value;
             const permVal = permInput.value;
-            const termVal = termInput.value;
 
             // Validation for Permanent Date
             if (permVal && joinVal) {
                 if (new Date(permVal) < new Date(joinVal)) {
                     errors.push("Permanent Date cannot be earlier than the Joining Date.");
-                }
-            }
-
-            // Validation for Termination Date
-            if (termVal) {
-                if (permVal) {
-                    // Check against Permanent Date if present
-                    if (new Date(termVal) < new Date(permVal)) {
-                        errors.push("Termination Date must be on or after the Permanent Date.");
-                    }
-                } else if (joinVal) {
-                    // Check against Joining Date if Permanent Date is absent
-                    if (new Date(termVal) < new Date(joinVal)) {
-                        errors.push("Termination Date must be on or after the Joining Date.");
-                    }
                 }
             }
 
@@ -704,24 +672,13 @@ defined('BASEPATH') or exit('No direct script access allowed');
         });
         const joinInput = document.getElementById('joiningDate');
         const permInput = document.getElementById('permanentDate');
-        const termInput = document.getElementById('terminationDate');
 
         function restrictDates() {
             const joinDate = joinInput.value;
-            const permDate = permInput.value;
 
             // Rule 1: Permanent Date cannot be before Joining Date
             if (joinDate) {
                 permInput.min = joinDate;
-            }
-
-            // Rule 2: Termination Date Logic
-            // If Permanent Date exists, Termination must be after Permanent Date
-            // If no Permanent Date, Termination must be after Joining Date
-            if (permDate) {
-                termInput.min = permDate;
-            } else if (joinDate) {
-                termInput.min = joinDate;
             }
         }
 

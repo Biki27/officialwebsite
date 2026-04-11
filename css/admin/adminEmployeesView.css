@@ -165,3 +165,127 @@ h2.text-white,
   .search-box { padding: 14px; }
   .employees-table { font-size: .82rem; }
 }
+/* Container for the switch */
+.enterprise-switch {
+    position: relative;
+    width: 90px;
+    height: 32px;
+}
+
+/* Hide the actual checkbox */
+.status-toggle-input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+/* The visible slider track */
+.status-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #e5e7eb; /* Light gray for inactive */
+    transition: .4s;
+    border-radius: 34px;
+    border: 1px solid #d1d5db;
+}
+
+/* The sliding circle */
+.status-slider:before {
+    position: absolute;
+    content: "";
+    height: 24px;
+    width: 24px;
+    left: 4px;
+    bottom: 3px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+    z-index: 2;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Colors for Active state */
+.status-toggle-input:checked + .status-slider {
+    background-color: #461bb9; /* Your primary purple */
+    border-color: #3b169b;
+}
+
+.status-toggle-input:checked + .status-slider:before {
+    transform: translateX(56px);
+}
+
+/* Inline text labels */
+.status-text {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    transition: .3s;
+}
+
+.active-text { left: 10px; color: white; opacity: 0; }
+.inactive-text { right: 8px; color: #6b7280; opacity: 1; }
+
+.status-toggle-input:checked + .status-slider .active-text { opacity: 1; }
+.status-toggle-input:checked + .status-slider .inactive-text { opacity: 0; }
+/* Modal Container Styling */
+.custom-enterprise-modal {
+    border-radius: 16px;
+    border: none;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+/* Form Inputs Styling */
+.enterprise-input {
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    padding: 12px 15px;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.enterprise-input:focus {
+    border-color: #461bb9;
+    box-shadow: 0 0 0 3px rgba(70, 27, 185, 0.1);
+    outline: none;
+}
+
+/* Button Refinements */
+.custom-enterprise-modal .btn {
+    border-radius: 10px;
+    padding: 10px 24px;
+    transition: transform 0.1s ease;
+}
+
+.custom-enterprise-modal .btn:active {
+    transform: scale(0.98);
+}
+
+.custom-enterprise-modal .btn-light {
+    background-color: #f3f4f6;
+    color: #4b5563;
+    border: none;
+}
+
+.custom-enterprise-modal .btn-light:hover {
+    background-color: #e5e7eb;
+}
+
+.custom-enterprise-modal .btn-danger {
+    background-color: #ef4444;
+    border: none;
+}
+
+.custom-enterprise-modal .btn-danger:hover {
+    background-color: #dc2626;
+}
+
+/* Labels */
+.custom-enterprise-modal .form-label {
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+    display: block;
+}

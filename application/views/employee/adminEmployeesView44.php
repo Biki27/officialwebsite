@@ -106,7 +106,6 @@ $csrf_hash = $this->security->get_csrf_hash();
                     <input type="checkbox"
                       id="status_<?= $emp->seemp_id ?>"
                       class="status-toggle-input"
-                      data-joining-date="<?= $emp->seempd_joiningdate ?>"
                       <?= $emp->seemp_status == 'active' ? 'checked' : '' ?>
                       onchange="handleStatusChange('<?= $emp->seemp_id ?>', this)">
                     <label for="status_<?= $emp->seemp_id ?>" class="status-slider">
@@ -200,38 +199,37 @@ $csrf_hash = $this->security->get_csrf_hash();
   <!-- Termination Modal -->
   <div class="modal fade" id="terminationModal" tabindex="-1" data-bs-backdrop="static">
     <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content custom-enterprise-modal">
-        <div class="modal-header border-0 pb-0">
-          <h5 class="modal-title fw-bold text-dark">
-            <i class="fas fa-user-slash me-2 text-danger"></i>Deactivate Profile
-          </h5>
-          <button type="button" class="btn-close shadow-none" onclick="cancelTermination()"></button>
+        <div class="modal-content custom-enterprise-modal">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold text-dark">
+                    <i class="fas fa-user-slash me-2 text-danger"></i>Deactivate Profile
+                </h5>
+                <button type="button" class="btn-close shadow-none" onclick="cancelTermination()"></button>
+            </div>
+            <div class="modal-body pt-3">
+                <p class="text-muted small mb-4">
+                    You are deactivating <span class="fw-bold text-dark" id="term_emp_name"></span>. 
+                    This will move the employee to the inactive list.
+                </p>
+                <input type="hidden" id="term_empid">
+                
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-uppercase text-muted">Termination Date</label>
+                    <input type="date" id="modal_term_date" class="form-control enterprise-input" value="<?= date('Y-m-d') ?>">
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-uppercase text-muted">Reason for Termination</label>
+                    <textarea id="modal_term_reason" class="form-control enterprise-input" rows="4" placeholder="Briefly explain the reason for deactivation..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0 pb-4 justify-content-center">
+                <button type="button" class="btn btn-light px-4 fw-bold" onclick="cancelTermination()">Keep Active</button>
+                <button type="button" class="btn btn-danger px-4 fw-bold shadow-sm" onclick="confirmTermination()">Confirm Deactivation</button>
+            </div>
         </div>
-        <div class="modal-body pt-3">
-          <p class="text-muted small mb-4">
-            You are deactivating <span class="fw-bold text-dark" id="term_emp_name"></span>.
-            This will move the employee to the inactive list.
-          </p>
-          <input type="hidden" id="term_empid">
-          <input type="hidden" id="term_joining_date">
-
-          <div class="mb-3">
-            <label class="form-label small fw-bold text-uppercase text-muted">Termination Date</label>
-            <input type="date" id="modal_term_date" class="form-control enterprise-input" value="<?= date('Y-m-d') ?>">
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label small fw-bold text-uppercase text-muted">Reason for Termination</label>
-            <textarea id="modal_term_reason" class="form-control enterprise-input" rows="4" placeholder="Briefly explain the reason for deactivation..."></textarea>
-          </div>
-        </div>
-        <div class="modal-footer border-0 pt-0 pb-4 justify-content-center">
-          <button type="button" class="btn btn-light px-4 fw-bold" onclick="cancelTermination()">Keep Active</button>
-          <button type="button" class="btn btn-danger px-4 fw-bold shadow-sm" onclick="confirmTermination()">Confirm Deactivation</button>
-        </div>
-      </div>
     </div>
-  </div>
+</div>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
@@ -335,44 +333,36 @@ $csrf_hash = $this->security->get_csrf_hash();
     // status toggle logic with confirmation modal for deactivation
     let currentToggle = null;
 
-    function handleStatusChange(empid, toggle) {
-      const isChecked = toggle.checked;
-      currentToggle = toggle;
+function handleStatusChange(empid, toggle) {
+    const isChecked = toggle.checked;
+    currentToggle = toggle;
 
-      if (!isChecked) {
+    if (!isChecked) {
         // 1. ACTIVE TO INACTIVE: Open Deactivation Modal
         document.getElementById('term_empid').value = empid;
-        document.getElementById('term_emp_name').innerText = empid;
-        document.getElementById('term_joining_date').value = toggle.dataset.joiningDate || '';
-        // Enforce min date on the date picker itself
-        const termDateInput = document.getElementById('modal_term_date');
-        if (toggle.dataset.joiningDate) {
-          termDateInput.min = toggle.dataset.joiningDate;
-        } else {
-          termDateInput.removeAttribute('min');
-        }
+        document.getElementById('term_emp_name').innerText = empid; 
         new bootstrap.Modal(document.getElementById('terminationModal')).show();
-      } else {
+    } else {
         // 2. INACTIVE TO ACTIVE: SweetAlert Confirmation
         Swal.fire({
-          title: 'Reactivate Employee?',
-          text: "Are you sure you want to change this employee's status back to Active?",
-          icon: 'question',
-          showCancelButton: true,
-          confirmButtonColor: '#461bb9', // Matches your enterprise theme
-          cancelButtonColor: '#6c757d',
-          confirmButtonText: 'Yes, Activate!'
+            title: 'Reactivate Employee?',
+            text: "Are you sure you want to change this employee's status back to Active?",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#461bb9', // Matches your enterprise theme
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Yes, Activate!'
         }).then((result) => {
-          if (result.isConfirmed) {
-            // User clicked Yes -> Proceed with activation
-            updateStatusInDB(empid, 'active', null, null);
-          } else {
-            // User clicked Cancel -> Revert the toggle visually
-            toggle.checked = false;
-          }
+            if (result.isConfirmed) {
+                // User clicked Yes -> Proceed with activation
+                updateStatusInDB(empid, 'active', null, null);
+            } else {
+                // User clicked Cancel -> Revert the toggle visually
+                toggle.checked = false;
+            }
         });
-      }
     }
+}
 
     function cancelTermination() {
       if (currentToggle) currentToggle.checked = true; // Revert toggle
@@ -383,15 +373,9 @@ $csrf_hash = $this->security->get_csrf_hash();
       const empid = document.getElementById('term_empid').value;
       const date = document.getElementById('modal_term_date').value;
       const reason = document.getElementById('modal_term_reason').value;
-      const joiningDate = document.getElementById('term_joining_date').value;
 
       if (!date || !reason) {
-        Swal.fire({ icon: 'warning', title: 'Required Fields', text: 'Please provide both a termination date and a reason.', confirmButtonColor: '#461bb9' });
-        return;
-      }
-
-      if (joiningDate && new Date(date) < new Date(joiningDate)) {
-        Swal.fire({ icon: 'error', title: 'Invalid Date', text: 'Termination date cannot be earlier than the joining date (' + joiningDate + ').', confirmButtonColor: '#461bb9' });
+        alert("Please provide both date and reason.");
         return;
       }
 

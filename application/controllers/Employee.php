@@ -621,7 +621,7 @@ class Employee extends CI_Controller
 
         echo json_encode($project);   // null if not found, object if found
     }
-    // remove
+    // 
     function RegisterEmployee()
     {
         if (
@@ -751,7 +751,7 @@ class Employee extends CI_Controller
             'seemp_branch' => $formData['branch'],
             'seemp_email' => $formData['email'],
             'seemp_pass' => password_hash($formData['password'], PASSWORD_DEFAULT),
-            'seemp_status' => strtolower($formData['status']),
+            // 'seemp_status' => strtolower($formData['status']),
             'seemp_acesslevel' => $formData['accessLevel']
         ];
 
@@ -766,8 +766,8 @@ class Employee extends CI_Controller
             'seempd_dob' => $formData['dob'],
             'seempd_joiningdate' => $formData['joiningDate'],
             'seempd_permanent_date' => !empty($formData['permanentDate']) ? $formData['permanentDate'] : NULL,
-            'seempd_termination_date' => !empty($formData['terminationDate']) ? $formData['terminationDate'] : NULL,
-            'seempd_termination_reason' => $formData['terminationReason'],
+            // 'seempd_termination_date' => !empty($formData['terminationDate']) ? $formData['terminationDate'] : NULL,
+            // 'seempd_termination_reason' => $formData['terminationReason'],
             // 'seempd_increment' => $formData['increment'],
             'seempd_address_permanent' => $formData['permAddress'],
             'seempd_address_current' => $formData['currentAddress'],
@@ -1002,7 +1002,7 @@ class Employee extends CI_Controller
             'empName' => $this->input->post('empName'),
             'email' => $this->input->post('email'),
             'branch' => $this->input->post('branch'),
-            'status' => $this->input->post('status'),
+            // 'status' => $this->input->post('status'),
             'designation' => $this->input->post('designation'),
             'phone' => $this->input->post('phone'),
             'salary' => $this->input->post('salary'),
@@ -1011,8 +1011,8 @@ class Employee extends CI_Controller
             'joiningDate' => $this->input->post('joiningDate'),
 
             'permanentDate' => $this->input->post('permanentDate'),
-            'terminationDate' => $this->input->post('terminationDate'),
-            'terminationReason' => $this->input->post('terminationReason'),
+            // 'terminationDate' => $this->input->post('terminationDate'),
+            // 'terminationReason' => $this->input->post('terminationReason'),
 
             'permAddress' => $this->input->post('permAddress'),
             'currentAddress' => $this->input->post('currentAddress'),
@@ -1035,6 +1035,29 @@ class Employee extends CI_Controller
         redirect('Employee/viewEmployee');
     }
 
+    // In Employee.php controller
+    public function updateEmployeeStatusAjax()
+    {
+        $empid = $this->input->post('empid');
+        $status = $this->input->post('status'); // 'active' or 'inactive'
+        $term_date = $this->input->post('term_date'); // Sent from modal
+        $term_reason = $this->input->post('term_reason');
+
+        $this->db->trans_start();
+
+        // Update main table
+        $this->db->where('seemp_id', $empid)->update('seemployee', ['seemp_status' => $status]);
+
+        // Update details table
+        $details = ($status == 'inactive')
+            ? ['seempd_termination_date' => $term_date, 'seempd_termination_reason' => $term_reason]
+            : ['seempd_termination_date' => NULL, 'seempd_termination_reason' => NULL];
+
+        $this->db->where('seempd_empid', $empid)->update('seempdetails', $details);
+
+        $this->db->trans_complete();
+        echo json_encode(['success' => $this->db->trans_status()]);
+    }
     // Employee Overview
     function EmployeeOverview()
     {
@@ -2117,7 +2140,7 @@ class Employee extends CI_Controller
             $this->session->set_flashdata(
                 'msg',
                 "Failed: Effective date cannot be in a past month ({$human}). "
-                . 'Use the current month (' . date('F Y') . ') or a future date.'
+                    . 'Use the current month (' . date('F Y') . ') or a future date.'
             );
             redirect('Employee/incrementReport');
             return;
