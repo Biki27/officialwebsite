@@ -1,8 +1,9 @@
-<?php 
+<?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,11 +13,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="<?= base_url('css/admin/adminEmployeeDetailsView.css') ?>" rel="stylesheet">
 </head>
+
 <body>
 
     <!-- Main Content -->
     <div class="main-content">
-       
+
         <div class="employee-container">
             <!-- Header -->
             <div class="emp-header">
@@ -34,7 +36,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     <div class="info-grid">
                         <div class="info-item">
                             <div class="info-label">Employee ID</div>
-                            <div class="info-value"><?= $info->seemp_id?></div>
+                            <div class="info-value"><?= $info->seemp_id ?></div>
                         </div>
 
                         <div class="info-item">
@@ -44,7 +46,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
                         <div class="info-item">
                             <div class="info-label">Email</div>
-                            <div class="info-value"><?= $info->seemp_email?></div>
+                            <div class="info-value"><?= $info->seemp_email ?></div>
                         </div>
 
                         <div class="info-item">
@@ -81,7 +83,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                             <div class="info-label">Joining Date</div>
                             <div class="info-value"><?= $info->seempd_joiningdate ?></div>
                         </div>
-
+                        <div class="info-item">
+                            <div class="info-label">Permanent Date</div>
+                            <div class="info-value"><?= $info->seempd_permanent_date ?></div>
+                        </div>
+                        
                         <div class="info-item">
                             <div class="info-label">Branch</div>
                             <div class="info-value"><?= $info->seemp_branch ?></div>
@@ -94,7 +100,15 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
                         <div class="info-item">
                             <div class="info-label">Last Login</div>
-                            <div class="info-value"><?= $info->seemp_lastlogin	 ?></div>
+                            <div class="info-value"><?= $info->seemp_lastlogin ?></div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Termination Date</div>
+                            <div class="info-value"><?= $info->seempd_termination_date ?></div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Reason for Termination</div>
+                            <div class="info-value"><?= $info->seempd_termination_reason ?></div>
                         </div>
 
                         <!--  COVER LETTER AS TEXT -->
@@ -102,67 +116,66 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                             <div class="info-label">Cover Letter</div>
                             <div class="info-value">
                                 <div class="cover-letter-text">
-                                    <?= $info->sejoba_coverletter	 ?>
+                                    <?= $info->sejoba_coverletter ?>
                                 </div>
                             </div>
                         </div> -->
                         <!-- Projects details -->
-                         <div class="info-item" style="grid-column: 1 / -1;">
+                        <div class="info-item" style="grid-column: 1 / -1;">
                             <div class="info-label">Projects</div>
-                            <div class="info-value"><?= $info->seempd_project?></div>
+                            <div class="info-value"><?= $info->seempd_project ?></div>
                         </div>
 
-                       
+
 
                         <div class="info-item" style="grid-column: 1 / -1;">
                             <div class="info-label">Permanent Address</div>
-                            <div class="info-value"><?= $info->seempd_address_permanent	 ?></div>
+                            <div class="info-value"><?= $info->seempd_address_permanent ?></div>
                         </div>
 
                         <div class="info-item" style="grid-column: 1 / -1;">
                             <div class="info-label">Current Address</div>
-                            <div class="info-value"><?= $info->seempd_address_current	 ?></div>
+                            <div class="info-value"><?= $info->seempd_address_current ?></div>
                         </div>
 
                         <div class="info-item">
                             <div class="info-label">Aadhar No</div>
-                            <div class="info-value"><?= $info->	seempd_aadhar ?></div>
+                            <div class="info-value"><?= $info->seempd_aadhar ?></div>
                         </div>
 
                         <div class="info-item">
                             <div class="info-label">PAN No</div>
-                            <div class="info-value"><?= $info->seempd_pan	?></div>
+                            <div class="info-value"><?= $info->seempd_pan ?></div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Right: Photo Section -->
-               <div class="photo-section">
-                    <?php 
-                        // Generate a beautiful initials avatar matching your theme
-                        $initials_avatar = "https://ui-avatars.com/api/?name=" . urlencode($info->seempd_name) . "&background=461bb9&color=ffffff&size=180&bold=true";
+                <div class="photo-section">
+                    <?php
+                    // Generate a beautiful initials avatar matching your theme
+                    $initials_avatar = "https://ui-avatars.com/api/?name=" . urlencode($info->seempd_name) . "&background=461bb9&color=ffffff&size=180&bold=true";
 
-                        $profile_pic = (!empty($info->seempd_img)) 
-                                       ? base_url('uploads/' . $info->seempd_img) 
-                                       : $initials_avatar;
+                    $profile_pic = (!empty($info->seempd_img))
+                        ? base_url('uploads/' . $info->seempd_img)
+                        : $initials_avatar;
                     ?>
-                    
-                    <img src="<?= $profile_pic ?>" 
-                         alt="Employee Photo" 
-                         class="emp-photo"
-                         onerror="this.onerror=null; this.src='<?= $initials_avatar ?>';">
+
+                    <img src="<?= $profile_pic ?>" alt="Employee Photo" class="emp-photo"
+                        onerror="this.onerror=null; this.src='<?= $initials_avatar ?>';">
 
                     <?= form_open('Employee/RegisterEmployee') ?>
-                        <input type="hidden" name="empid" value="<?= $info->seemp_id ?>" />
-                        <button type="submit" class="edit-btn">
-                            <i class="fas fa-user-edit me-2"></i>Edit Profile
-                        </button>
+                    <input type="hidden" name="empid" value="<?= $info->seemp_id ?>" />
+                    <button type="submit" class="edit-btn">
+                        <i class="fas fa-user-edit me-2"></i>Edit Profile
+                    </button>
                     <?= form_close() ?>
                 </div>
             </div>
         </div>
     </div>
 
-   
+
 </body>
+
 </html>

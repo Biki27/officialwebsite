@@ -9,9 +9,9 @@ defined('BASEPATH') or exit('No direct script access allowed');
     <?php if ($this->session->flashdata('msg')):
         $msg = $this->session->flashdata('msg');
         $isError = (stripos($msg, 'Failed') !== false || stripos($msg, 'Error') !== false);
-    ?>
+        ?>
         <script>
-            document.addEventListener("DOMContentLoaded", function() {
+            document.addEventListener("DOMContentLoaded", function () {
                 Swal.fire({
                     title: '<?= $isError ? "Oops!" : "Success!" ?>',
                     text: <?= json_encode($msg) ?>,
@@ -90,7 +90,8 @@ defined('BASEPATH') or exit('No direct script access allowed');
                         <select class="form-select" id="branch" name="branch" required>
                             <option value="">Select Branch</option>
                             <?php foreach ($branches as $branch_value => $branch_label): ?>
-                                <option value="<?= htmlspecialchars($branch_value, ENT_QUOTES) ?>" <?= ($current_branch == $branch_value) ? 'selected' : '' ?>>
+                                <option value="<?= htmlspecialchars($branch_value, ENT_QUOTES) ?>"
+                                    <?= ($current_branch == $branch_value) ? 'selected' : '' ?>>
                                     <?= htmlspecialchars($branch_label, ENT_QUOTES) ?>
                                 </option>
                             <?php endforeach; ?>
@@ -114,7 +115,8 @@ defined('BASEPATH') or exit('No direct script access allowed');
                         <select class="form-select" id="designation" name="designation" required>
                             <option value="">Select Designation</option>
                             <?php foreach ($designations as $designation): ?>
-                                <option value="<?= htmlspecialchars($designation, ENT_QUOTES) ?>" <?= ($current_designation == $designation) ? 'selected' : '' ?>>
+                                <option value="<?= htmlspecialchars($designation, ENT_QUOTES) ?>"
+                                    <?= ($current_designation == $designation) ? 'selected' : '' ?>>
                                     <?= htmlspecialchars($designation, ENT_QUOTES) ?>
                                 </option>
                             <?php endforeach; ?>
@@ -134,7 +136,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
                             required>
                     </div>
                     <!-- salary -->
-                     <div class="form-group">
+                    <div class="form-group">
                         <label class="form-label">Salary (₹) <span class="required">*</span></label>
                         <input type="number" class="form-control" id="salary" name="salary"
                             value="<?= isset($emp) ? $emp->seempd_salary : (isset($prefill_applicant) ? htmlspecialchars($prefill_applicant->sejoba_exp_salary, ENT_QUOTES) : '') ?>"
@@ -155,6 +157,24 @@ defined('BASEPATH') or exit('No direct script access allowed');
                         <label class="form-label">Joining Date <span class="required">*</span></label>
                         <input type="date" class="form-control" id="joiningDate" name="joiningDate"
                             value="<?= isset($emp) ? $emp->seempd_joiningdate : date('Y-m-d') ?>" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Permanent Date</label>
+                        <input type="date" class="form-control" id="permanentDate" name="permanentDate"
+                            value="<?= isset($emp) ? $emp->seempd_permanent_date : '' ?>">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label text-danger">Termination Date</label>
+                        <input type="date" class="form-control border-danger" id="terminationDate"
+                            name="terminationDate" value="<?= isset($emp) ? $emp->seempd_termination_date : '' ?>">
+                    </div>
+                    <!-- Reason for Termination -->
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label class="form-label">Reason for Termination</label>
+                        <textarea class="form-control" name="terminationReason" rows="2"
+                            placeholder="Enter reason if employee is terminated..."><?= isset($emp) ? $emp->seempd_termination_reason : '' ?></textarea>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Access Level <span class="required">*</span></label>
@@ -315,7 +335,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
         let typingTimer;
         const doneTypingInterval = 500; // Wait 0.5 seconds after typing stops
 
-        empidInput.addEventListener('input', function() {
+        empidInput.addEventListener('input', function () {
             clearTimeout(typingTimer);
             let currentVal = this.value.trim();
 
@@ -351,9 +371,9 @@ defined('BASEPATH') or exit('No direct script access allowed');
             formData.append('<?= $this->security->get_csrf_token_name(); ?>', csrfInput.value);
 
             fetch('<?= base_url("Employee/checkEmployeeIdAjax") ?>', {
-                    method: 'POST',
-                    body: formData
-                })
+                method: 'POST',
+                body: formData
+            })
                 .then(response => response.json())
                 .then(data => {
                     // IMPORTANT: Update the CSRF token on the page so the final form submission works!
@@ -390,8 +410,8 @@ defined('BASEPATH') or exit('No direct script access allowed');
         const emailFeedback = document.getElementById('emailFeedback');
         const originalEmail = "<?= isset($emp) ? $emp->seemp_email : '' ?>";
         let emailTypingTimer;
-     
-        emailInput.addEventListener('input', function() {
+
+        emailInput.addEventListener('input', function () {
             clearTimeout(emailTypingTimer);
             let currentVal = this.value.trim();
 
@@ -434,9 +454,9 @@ defined('BASEPATH') or exit('No direct script access allowed');
             formData.append('<?= $this->security->get_csrf_token_name(); ?>', csrfInput.value);
 
             fetch('<?= base_url("Employee/checkEmployeeEmailAjax") ?>', {
-                    method: 'POST',
-                    body: formData
-                })
+                method: 'POST',
+                body: formData
+            })
                 .then(response => response.json())
                 .then(data => {
                     // IMPORTANT: Update the CSRF token on the page
@@ -461,7 +481,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
                     emailFeedback.innerHTML = '<span class="text-warning small"><i class="fas fa-exclamation-triangle"></i> Error checking email.</span>';
                 });
         }
-        
+
         let hasCustomPhoto = <?= (isset($emp) && !empty($emp->seempd_img)) ? 'true' : 'false' ?>;
 
         // Dynamic Avatar live update when typing name
@@ -474,7 +494,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
         }
 
         // Photo preview logic with size validation
-        document.getElementById('photoInput').addEventListener('change', function(e) {
+        document.getElementById('photoInput').addEventListener('change', function (e) {
             const file = e.target.files[0];
 
             if (file) {
@@ -489,7 +509,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
                     return;
                 }
                 const reader = new FileReader();
-                reader.onload = function(e) {
+                reader.onload = function (e) {
                     document.getElementById('photoPreview').src = e.target.result;
                     hasCustomPhoto = true; // Stop the live text from overwriting the uploaded image
                 };
@@ -498,7 +518,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
         });
 
         // CV Status logic
-        document.getElementById('cvInput').addEventListener('change', function(e) {
+        document.getElementById('cvInput').addEventListener('change', function (e) {
             const fileName = e.target.files[0].name;
             document.getElementById('cvStatusText').innerText = "Selected: " + fileName;
         });
@@ -514,10 +534,10 @@ defined('BASEPATH') or exit('No direct script access allowed');
         }
 
         // Form Submission Logic
-        document.getElementById('employeeForm').addEventListener('submit', function(e) {
+        document.getElementById('employeeForm').addEventListener('submit', function (e) {
             e.preventDefault(); // ALWAYS stop the form first for SweetAlert
             let allProjects = [];
-            document.querySelectorAll('.project-input').forEach(function(input) {
+            document.querySelectorAll('.project-input').forEach(function (input) {
                 if (input.value.trim() !== '') {
                     allProjects.push(input.value.trim());
                 }
@@ -534,6 +554,31 @@ defined('BASEPATH') or exit('No direct script access allowed');
             const password = document.querySelector('input[name="password"]').value;
             const cvInput = document.getElementById('cvInput').files.length;
             const isUpdate = <?= isset($emp) ? 'true' : 'false' ?>;
+            const joinVal = joinInput.value;
+            const permVal = permInput.value;
+            const termVal = termInput.value;
+
+            // Validation for Permanent Date
+            if (permVal && joinVal) {
+                if (new Date(permVal) < new Date(joinVal)) {
+                    errors.push("Permanent Date cannot be earlier than the Joining Date.");
+                }
+            }
+
+            // Validation for Termination Date
+            if (termVal) {
+                if (permVal) {
+                    // Check against Permanent Date if present
+                    if (new Date(termVal) < new Date(permVal)) {
+                        errors.push("Termination Date must be on or after the Permanent Date.");
+                    }
+                } else if (joinVal) {
+                    // Check against Joining Date if Permanent Date is absent
+                    if (new Date(termVal) < new Date(joinVal)) {
+                        errors.push("Termination Date must be on or after the Joining Date.");
+                    }
+                }
+            }
 
             let errors = [];
             // Basic Validations 
@@ -647,17 +692,46 @@ defined('BASEPATH') or exit('No direct script access allowed');
             } else {
                 currAddr.removeAttribute('readonly');
                 currAddr.style.backgroundColor = "";
-                currAddr.value = "";  
+                currAddr.value = "";
             }
         }
 
         // Optional: Keep current address updated if user types in permanent address while checked
-        document.getElementById('permAddress').addEventListener('input', function() {
+        document.getElementById('permAddress').addEventListener('input', function () {
             if (document.getElementById('sameAddressCheck').checked) {
                 document.getElementById('currentAddress').value = this.value;
             }
         });
-        
+        const joinInput = document.getElementById('joiningDate');
+        const permInput = document.getElementById('permanentDate');
+        const termInput = document.getElementById('terminationDate');
+
+        function restrictDates() {
+            const joinDate = joinInput.value;
+            const permDate = permInput.value;
+
+            // Rule 1: Permanent Date cannot be before Joining Date
+            if (joinDate) {
+                permInput.min = joinDate;
+            }
+
+            // Rule 2: Termination Date Logic
+            // If Permanent Date exists, Termination must be after Permanent Date
+            // If no Permanent Date, Termination must be after Joining Date
+            if (permDate) {
+                termInput.min = permDate;
+            } else if (joinDate) {
+                termInput.min = joinDate;
+            }
+        }
+
+        // Listen for changes to update constraints in real-time
+        joinInput.addEventListener('change', restrictDates);
+        permInput.addEventListener('change', restrictDates);
+
+        // Initialize on page load for existing records
+        restrictDates();
+
     </script>
 </body>
 

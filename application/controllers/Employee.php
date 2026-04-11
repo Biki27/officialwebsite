@@ -564,7 +564,7 @@ class Employee extends CI_Controller
         // Auth guard
         if (
             !$this->session->has_userdata('empid') ||
-            $this->session->userdata('status')      !== 'active' ||
+            $this->session->userdata('status') !== 'active' ||
             $this->session->userdata('accesslevel') !== 'ADMIN'
         ) {
             echo json_encode(['success' => false, 'message' => 'Unauthorized']);
@@ -584,8 +584,8 @@ class Employee extends CI_Controller
 
         if ($deleted) {
             echo json_encode([
-                'success'   => true,
-                'message'   => 'Project deleted successfully.',
+                'success' => true,
+                'message' => 'Project deleted successfully.',
                 'csrf_hash' => $this->security->get_csrf_hash(),   // Refresh token for next request
             ]);
         } else {
@@ -675,6 +675,10 @@ class Employee extends CI_Controller
         $this->form_validation->set_rules('empid', 'Employee ID', 'required|trim|is_unique[seemployee.seemp_id]');
         $this->form_validation->set_rules('email', 'Email', 'required|trim|valid_email|is_unique[seemployee.seemp_email]');
         $this->form_validation->set_rules('phone', 'Phone', 'required|numeric|exact_length[10]');
+
+        $this->form_validation->set_rules('permanentDate', 'Permanent Date', 'callback_check_permanent_date');
+        $this->form_validation->set_rules('terminationDate', 'Termination Date', 'callback_check_termination_date');
+
         $this->form_validation->set_rules('aadhar', 'Aadhar', 'required|numeric|exact_length[12]');
         $this->form_validation->set_rules('password', 'Password', 'required|min_length[6]');
         $this->form_validation->set_rules('branch', 'Branch', 'required');
@@ -761,6 +765,9 @@ class Employee extends CI_Controller
             'seempd_experience' => $formData['experience'],
             'seempd_dob' => $formData['dob'],
             'seempd_joiningdate' => $formData['joiningDate'],
+            'seempd_permanent_date' => !empty($formData['permanentDate']) ? $formData['permanentDate'] : NULL,
+            'seempd_termination_date' => !empty($formData['terminationDate']) ? $formData['terminationDate'] : NULL,
+            'seempd_termination_reason' => $formData['terminationReason'],
             // 'seempd_increment' => $formData['increment'],
             'seempd_address_permanent' => $formData['permAddress'],
             'seempd_address_current' => $formData['currentAddress'],
@@ -790,6 +797,48 @@ class Employee extends CI_Controller
         }
     }
 
+    /**
+     * Server-side validation: Permanent Date must be >= Joining Date
+     */
+    public function check_permanent_date($permanentDate)
+    {
+        $joiningDate = $this->input->post('joiningDate');
+
+        if (!empty($permanentDate) && !empty($joiningDate)) {
+            if (strtotime($permanentDate) < strtotime($joiningDate)) {
+                $this->form_validation->set_message('check_permanent_date', 'The Permanent Date cannot be earlier than the Joining Date.');
+                return FALSE;
+            }
+        }
+        return TRUE;
+    }
+
+    /**
+     * Server-side validation for Termination Date logic
+     */
+    public function check_termination_date($terminationDate)
+    {
+        $joiningDate = $this->input->post('joiningDate');
+        $permanentDate = $this->input->post('permanentDate');
+
+        if (!empty($terminationDate)) {
+            // Priority 1: Check against Permanent Date if it exists
+            if (!empty($permanentDate)) {
+                if (strtotime($terminationDate) < strtotime($permanentDate)) {
+                    $this->form_validation->set_message('check_termination_date', 'The Termination Date must be on or after the Permanent Date.');
+                    return FALSE;
+                }
+            }
+            // Priority 2: Check against Joining Date
+            elseif (!empty($joiningDate)) {
+                if (strtotime($terminationDate) < strtotime($joiningDate)) {
+                    $this->form_validation->set_message('check_termination_date', 'The Termination Date must be on or after the Joining Date.');
+                    return FALSE;
+                }
+            }
+        }
+        return TRUE;
+    }
     // --- AJAX Check for Duplicate Employee ID ---
     public function checkEmployeeIdAjax()
     {
@@ -864,6 +913,9 @@ class Employee extends CI_Controller
         // Set Standard Validation Rules
         $this->form_validation->set_rules('empName', 'Employee Name', 'required|trim');
         $this->form_validation->set_rules('phone', 'Phone', 'required|numeric|exact_length[10]');
+        $this->form_validation->set_rules('permanentDate', 'Permanent Date', 'callback_check_permanent_date');
+        $this->form_validation->set_rules('terminationDate', 'Termination Date', 'callback_check_termination_date');
+
         $this->form_validation->set_rules('aadhar', 'Aadhar', 'required|numeric|exact_length[12]');
         $this->form_validation->set_rules(
             'salary',
@@ -957,6 +1009,11 @@ class Employee extends CI_Controller
             'experience' => $this->input->post('experience'),
             'dob' => $this->input->post('dob'),
             'joiningDate' => $this->input->post('joiningDate'),
+
+            'permanentDate' => $this->input->post('permanentDate'),
+            'terminationDate' => $this->input->post('terminationDate'),
+            'terminationReason' => $this->input->post('terminationReason'),
+
             'permAddress' => $this->input->post('permAddress'),
             'currentAddress' => $this->input->post('currentAddress'),
             'aadhar' => $this->input->post('aadhar'),
@@ -1863,24 +1920,24 @@ class Employee extends CI_Controller
                 $data = $this->security->xss_clean($post);
 
                 // 1. Get the values from the form
-                $basic      = (float)$this->input->post('basic');
-                $transport  = (float)$this->input->post('transport');
-                $incentive  = (float)$this->input->post('incentive');
-                $bonus_amt  = (float)$this->input->post('bonus_amt');
-                $overtime   = (float)$this->input->post('overtime');
-                $round_off  = (float)$this->input->post('round_off');
+                $basic = (float) $this->input->post('basic');
+                $transport = (float) $this->input->post('transport');
+                $incentive = (float) $this->input->post('incentive');
+                $bonus_amt = (float) $this->input->post('bonus_amt');
+                $overtime = (float) $this->input->post('overtime');
+                $round_off = (float) $this->input->post('round_off');
 
-                $pf             = (float)$this->input->post('pf');
-                $esi_deduction  = (float)$this->input->post('esi_deduction');
-                $prof_tax       = (float)$this->input->post('prof_tax');
-                $late_fees      = (float)$this->input->post('late_fees');
-                $loss_of_pay    = (float)$this->input->post('loss_of_pay');
-                $loan           = (float)$this->input->post('loan');
+                $pf = (float) $this->input->post('pf');
+                $esi_deduction = (float) $this->input->post('esi_deduction');
+                $prof_tax = (float) $this->input->post('prof_tax');
+                $late_fees = (float) $this->input->post('late_fees');
+                $loss_of_pay = (float) $this->input->post('loss_of_pay');
+                $loan = (float) $this->input->post('loan');
 
                 // 2. Calculate Gross Earnings, Total Deductions, and Net Salary
-                $data['gross_earnings']   = $basic + $transport + $incentive + $overtime + $round_off + $bonus_amt;
+                $data['gross_earnings'] = $basic + $transport + $incentive + $overtime + $round_off + $bonus_amt;
                 $data['total_deductions'] = $pf + $esi_deduction + $prof_tax + $late_fees + $loss_of_pay + $loan;
-                $data['net_salary']       = $data['gross_earnings'] - $data['total_deductions'];
+                $data['net_salary'] = $data['gross_earnings'] - $data['total_deductions'];
 
                 // 3. VALIDATION CHECK: Net Salary should not be negative
                 if ($data['net_salary'] < 0) {
@@ -2035,7 +2092,7 @@ class Employee extends CI_Controller
             }
         }
 
-        $emp_id         = trim($post['inc_empid']);
+        $emp_id = trim($post['inc_empid']);
         $effective_date = trim($post['inc_date']);
         $inc_percentage = (float) $post['inc_percentage'];
 
@@ -2052,7 +2109,7 @@ class Employee extends CI_Controller
         // effective_date must be in the current month or a future month.
         // Days in the current month that have already passed are still allowed
         // (e.g. setting 01-Apr when today is 08-Apr is fine).
-        $today_ym     = date('Y-m');
+        $today_ym = date('Y-m');
         $effective_ym = substr($effective_date, 0, 7); // 'Y-m' portion
 
         if ($effective_ym < $today_ym) {
@@ -2060,7 +2117,7 @@ class Employee extends CI_Controller
             $this->session->set_flashdata(
                 'msg',
                 "Failed: Effective date cannot be in a past month ({$human}). "
-                    . 'Use the current month (' . date('F Y') . ') or a future date.'
+                . 'Use the current month (' . date('F Y') . ') or a future date.'
             );
             redirect('Employee/incrementReport');
             return;
@@ -2096,13 +2153,13 @@ class Employee extends CI_Controller
 
         // ── 6. Persist — the model decides 'applied' vs 'pending' ─────────────
         $increment_data = [
-            'inc_empid'          => $emp_id,
+            'inc_empid' => $emp_id,
             'inc_effective_date' => $effective_date,
-            'inc_percentage'     => $inc_percentage,
-            'inc_amount'         => $computed_inc_amount,   // server-computed
-            'old_salary'         => $verified_old_salary,   // DB-verified
-            'new_salary'         => $computed_new_salary,   // server-computed
-            'inc_reason'         => $post['inc_reason'] ?? '',
+            'inc_percentage' => $inc_percentage,
+            'inc_amount' => $computed_inc_amount,   // server-computed
+            'old_salary' => $verified_old_salary,   // DB-verified
+            'new_salary' => $computed_new_salary,   // server-computed
+            'inc_reason' => $post['inc_reason'] ?? '',
         ];
 
         $result = $this->EmployeeModel->add_salary_increment($increment_data);

@@ -70,9 +70,29 @@ $today = date('Y-m-d');
                     </thead>
                     <tbody>
                         <?php foreach ($report as $emp):
+                            $today = date('Y-m-d');
                             $is_eligible = true;
-                            if (!empty($emp->next_eligible_date) && $today < $emp->next_eligible_date) {
+                            $lock_reason = "";
+
+                            // 1. Calculate Initial Eligibility (365 days from Permanent Date)
+                            //
+                            $initial_eligibility = !empty($emp->seempd_permanent_date)
+                                ? date('Y-m-d', strtotime($emp->seempd_permanent_date . ' + 365 days'))
+                                : null;
+
+                            // 2. Determine Eligibility Status and Lock Reason
+                            if (empty($emp->seempd_permanent_date)) {
+                                //
                                 $is_eligible = false;
+                                $lock_reason = "Not Permanent";
+                            } elseif ($today < $initial_eligibility) {
+                                //
+                                $is_eligible = false;
+                                $lock_reason = "Locked until " . date('d M Y', strtotime($initial_eligibility));
+                            } elseif (!empty($emp->next_eligible_date) && $today < $emp->next_eligible_date) {
+                                //
+                                $is_eligible = false;
+                                $lock_reason = "Locked until " . date('d M Y', strtotime($emp->next_eligible_date));
                             }
                             ?>
                             <tr>
@@ -105,8 +125,7 @@ $today = date('Y-m-d');
                                     <?php else: ?>
                                         <span
                                             class="badge-soft bg-danger bg-opacity-10 text-danger border border-danger px-2 py-1">
-                                            <i class="fas fa-lock me-1"></i> Locked until
-                                            <?= date('d M Y', strtotime($emp->next_eligible_date)) ?>
+                                            <i class="fas fa-lock me-1"></i> <?= $lock_reason ?>
                                         </span>
                                     <?php endif; ?>
                                 </td>
@@ -200,87 +219,10 @@ $today = date('Y-m-d');
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-/*
-<script>
-    function openBonusModal(empid, name, salary) {
-        document.getElementById('bonus_emp_name').textContent = name;
-        document.getElementById('bonus_empid').value = empid;
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-        // Reset View
-        const warn = document.getElementById('eligibility_warning');
-        const form = document.getElementById('bonus_form_container');
-        warn.classList.add('d-none');
-        form.classList.remove('d-none');
-
-        fetch('<?= base_url("Employee/getBonusHistoryAjax/") ?>' + empid)
-            .then(r => r.json())
-            .then(res => {
-
-                const joiningDate = res.eligibility.joining_date;
-
-                // CRITICAL: Set the minimum date to the joining date
-                dateInput.setAttribute('min', joiningDate);
-
-                // Check if "today" is valid (if today is before joining date, adjust it)
-                const today = new Date().toISOString().split('T')[0];
-                if (today < joiningDate) {
-                    dateInput.value = joiningDate;
-                }
-                // Check Eligibility
-                if (!res.eligibility.eligible) {
-                    const warn = document.getElementById('eligibility_warning');
-
-                    warn.classList.remove('d-none');
-
-                    document.getElementById('next_date_label').textContent = res.eligibility.next_date;
-                    form.classList.add('d-none');
-                    warn.innerHTML = `<i class="fas fa-lock me-2"></i> 
-                    <strong>Policy Restriction:</strong> ${res.eligibility.message}. 
-                    Eligibility returns on ${res.eligibility.next_date}`;
-
-                    document.getElementById('bonus_form_container').classList.add('d-none');
-                }
-
-                // Render History
-                const tbody = document.getElementById('bonusHistoryBody');
-                tbody.innerHTML = '';
-                if (res.history.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-muted">No records.</td></tr>';
-                } else {
-                    res.history.forEach(b => {
-                        tbody.innerHTML += `
-                        <tr>
-                            <td class="ps-3 fw-bold">${b.bonus_date}</td>
-                            <td class="text-success fw-bold">₹${parseFloat(b.bonus_amount).toFixed(2)}</td>
-                            <td><span class="badge-soft">Completed</span></td>
-                            <td class="pe-3 small text-muted">${b.bonus_reason}</td>
-                        </tr>`;
-                    });
-                }
-            });
-
-        bootstrap.Modal.getOrCreateInstance(document.getElementById('bonusModal')).show();
-    }
-    // Add a final frontend check before submission
-    document.getElementById('bonusForm').addEventListener('submit', function (e) {
-        const dateInput = this.querySelector('input[name="bonus_date"]');
-        const minDate = dateInput.getAttribute('min');
-
-        // Check if the selected date is before the joining date
-        if (dateInput.value < minDate) {
-            e.preventDefault(); // Stop the form from submitting
-
-            // Custom message as requested
-            alert("You can't select this date because the employee joined on " + minDate);
-
-            // Reset the date to the joining date to help the HR correct it
-            dateInput.value = minDate;
-        }
-    });
-
-</script>
-*/
-<script>
+<!-- <script>
     function openBonusModal(empid, name, salary) {
         document.getElementById('bonus_emp_name').textContent = name;
         document.getElementById('bonus_empid').value = empid;
@@ -355,4 +297,72 @@ $today = date('Y-m-d');
             dateInput.focus();
         }
     });
+</script> -->
+<script>
+function openBonusModal(empid, name, salary) {
+    document.getElementById('bonus_emp_name').textContent = name;
+    document.getElementById('bonus_empid').value = empid;
+
+    const warn = document.getElementById('eligibility_warning');
+    const form = document.getElementById('bonus_form_container');
+    const dateInput = document.querySelector('input[name="bonus_date"]');
+
+    warn.classList.add('d-none');
+    form.classList.remove('d-none');
+
+    fetch('<?= base_url("Employee/getBonusHistoryAjax/") ?>' + empid)
+        .then(r => r.json())
+        .then(res => {
+            // The EARLIEST date HR can select is Permanent Date + 365 days
+            const minAllowedDate = res.eligibility.eligibility_threshold;
+
+            if (minAllowedDate) {
+                // Lock the calendar so no date before (Perm Date + 365) can be picked
+                dateInput.setAttribute('min', minAllowedDate);
+                
+                const today = new Date().toISOString().split('T')[0];
+                // Set default value to today, or the minAllowedDate if today is too early
+                dateInput.value = (today > minAllowedDate) ? today : minAllowedDate;
+            }
+
+            if (!res.eligibility.eligible) {
+                warn.classList.remove('d-none');
+                form.classList.add('d-none');
+                warn.innerHTML = `<i class="fas fa-lock me-2"></i> 
+                <strong>Policy Restriction:</strong> ${res.eligibility.message}`;
+            }
+
+            // Render History...
+            const tbody = document.getElementById('bonusHistoryBody');
+            tbody.innerHTML = '';
+            if (res.history.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-muted">No records.</td></tr>';
+            } else {
+                res.history.forEach(b => {
+                    tbody.innerHTML += `
+                    <tr>
+                        <td class="ps-3 fw-bold">${b.bonus_date}</td>
+                        <td class="text-success fw-bold">₹${parseFloat(b.bonus_amount).toFixed(2)}</td>
+                        <td><span class="badge-soft">Completed</span></td>
+                        <td class="pe-3 small text-muted">${b.bonus_reason}</td>
+                    </tr>`;
+                });
+            }
+        });
+
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('bonusModal')).show();
+}
+
+// Final submission guard
+document.getElementById('bonusForm').addEventListener('submit', function (e) {
+    const dateInput = this.querySelector('input[name="bonus_date fantasy"]');
+    const minDate = dateInput.getAttribute('min');
+
+    if (minDate && dateInput.value < minDate) {
+        e.preventDefault();
+        alert("Selection Error: You can only select a date on or after " + minDate + " (Permanent Date + 365 days).");
+        dateInput.value = minDate;
+    }
+});
+
 </script>
