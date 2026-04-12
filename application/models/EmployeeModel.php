@@ -274,7 +274,7 @@ class EmployeeModel extends CI_Model
         $employee_data = [
             'seemp_email' => $data['email'],
             'seemp_branch' => strtoupper($data['branch']),
-            'seemp_status' => strtolower($data['status']),
+            'seemp_status' => !empty($data['status']) ? strtolower($data['status']) : 'active',
             'seemp_acesslevel' => strtoupper($data['accessLevel'])
         ];
 
@@ -632,54 +632,47 @@ class EmployeeModel extends CI_Model
 
     public function check_bonus_eligibility($empid)
     {
+        // 1. Fetch Permanent Date
         $emp = $this->db->select('seempd_permanent_date')
             ->where('seempd_empid', $empid)
             ->get('seempdetails')
             ->row();
 
+        // 2. Fetch the absolute latest bonus recorded
         $last_bonus = $this->db->where('bonus_empid', $empid)
             ->order_by('bonus_date', 'DESC')
             ->limit(1)
             ->get('seemp_bonuses')
             ->row();
 
-        $permanent_date = ($emp && !empty($emp->seempd_permanent_date)) ? $emp->seempd_permanent_date : null;
-
-        // Calculate the threshold: Permanent Date + 365 Days
-        $eligibility_threshold = $permanent_date ? date('Y-m-d', strtotime($permanent_date . ' + 365 days')) : null;
+        $perm_date = ($emp && !empty($emp->seempd_permanent_date)) ? $emp->seempd_permanent_date : null;
         $today = date('Y-m-d');
 
-        if (!$permanent_date) {
-            return ['eligible' => false, 'permanent_date' => null, 'message' => 'Employee is not yet Permanent.'];
+        if (!$perm_date) {
+            return ['eligible' => false, 'message' => 'Employee is not yet Permanent.'];
         }
 
-        // Validation: Must be at least 365 days after becoming permanent
-        if ($today < $eligibility_threshold) {
-            return [
-                'eligible' => false,
-                'next_date' => $eligibility_threshold,
-                'permanent_date' => $permanent_date,
-                'message' => 'Employee completes 365 days of permanency on ' . date('d M Y', strtotime($eligibility_threshold))
-            ];
-        }
+        // 3. Determine the Milestone (Floor) Date
+        // If no bonus exists: Floor = Permanent Date + 365 days
+        // If bonus exists: Floor = Last Bonus Next Eligible Date
+        $milestone_date = (!$last_bonus)
+            ? date('Y-m-d', strtotime($perm_date . ' + 365 days'))
+            : $last_bonus->next_eligible_date;
 
-        // Existing check: 365 days since the last bonus
-        if ($last_bonus && $today < $last_bonus->next_eligible_date) {
+        // Server-side blocking if today is before the milestone
+        if ($today < $milestone_date) {
             return [
                 'eligible' => false,
-                'next_date' => $last_bonus->next_eligible_date,
-                'permanent_date' => $permanent_date,
-                'message' => 'Annual bonus cycle not complete.'
+                'next_date' => $milestone_date,
+                'message' => 'Annual cycle not complete. Eligible again on ' . date('d M Y', strtotime($milestone_date))
             ];
         }
 
         return [
             'eligible' => true,
-            'permanent_date' => $permanent_date,
-            'eligibility_threshold' => $eligibility_threshold // Pass this to JS
+            'eligibility_threshold' => $milestone_date // This becomes the 'min' for the calendar
         ];
     }
-
     public function add_bonus($data)
     {
         // Force Next Eligible Date to be +365 days
@@ -698,6 +691,35 @@ class EmployeeModel extends CI_Model
             ->where('bonus_date <=', $end)
             ->get('seemp_bonuses')->row();
         return $res ? $res->bonus_amount : 0;
+    }
+
+    /**
+     * Fetches employees and their nearest upcoming bonus dates.
+     */
+    public function get_upcoming_bonuses()
+    {
+        $sql = "
+    SELECT 
+        d.seempd_name, 
+        d.seempd_empid,
+        -- Identify the next eligibility date:
+        -- If they had a bonus, it's the next_eligible_date from that bonus.
+        -- If no bonus, it's 365 days after their permanent date.
+        COALESCE(
+            (SELECT next_eligible_date FROM seemp_bonuses 
+             WHERE bonus_empid = d.seempd_empid 
+             ORDER BY bonus_date DESC LIMIT 1),
+            DATE_ADD(d.seempd_permanent_date, INTERVAL 365 DAY)
+        ) as nearest_bonus_date
+    FROM seempdetails d
+    JOIN seemployee e ON d.seempd_empid = e.seemp_id
+    WHERE e.seemp_status = 'active'
+    -- Only show dates that haven't passed or are very recent
+    HAVING nearest_bonus_date >= CURDATE()
+    ORDER BY nearest_bonus_date ASC
+    LIMIT 5";
+
+        return $this->db->query($sql)->result();
     }
     /**
      * Fetches the bonus amount for a specific employee if it matches the payroll month.

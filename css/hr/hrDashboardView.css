@@ -11,8 +11,15 @@
 }
 
 @keyframes pageIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ══ PAGE HEADER ══ */
@@ -34,7 +41,9 @@
   line-height: 1.2;
 }
 
-.page-header h1 span { color: var(--brand-600); }
+.page-header h1 span {
+  color: var(--brand-600);
+}
 
 .page-subtitle {
   display: flex;
@@ -69,8 +78,15 @@
 }
 
 @keyframes blink {
-  0%, 100% { opacity: 1 }
-  50% { opacity: .3 }
+
+  0%,
+  100% {
+    opacity: 1
+  }
+
+  50% {
+    opacity: .3
+  }
 }
 
 .btn-brand {
@@ -133,7 +149,9 @@
   text-decoration: none;
 }
 
-.reminder-link:hover { opacity: .8; }
+.reminder-link:hover {
+  opacity: .8;
+}
 
 /* ══ KPI GRID ══ */
 .kpi-grid {
@@ -157,7 +175,9 @@
 .kpi-card::before {
   content: '';
   position: absolute;
-  top: 0; left: 0; right: 0;
+  top: 0;
+  left: 0;
+  right: 0;
   height: 3px;
   background: var(--kpi-accent, linear-gradient(90deg, var(--brand-600), var(--brand-400)));
   border-radius: var(--r-lg) var(--r-lg) 0 0;
@@ -208,10 +228,21 @@
   font-weight: 500;
 }
 
-.kpi-meta.up { color: var(--success); }
-.kpi-meta.warn { color: var(--warning); }
-.kpi-meta.down { color: var(--danger); }
-.kpi-meta.info { color: var(--info); }
+.kpi-meta.up {
+  color: var(--success);
+}
+
+.kpi-meta.warn {
+  color: var(--warning);
+}
+
+.kpi-meta.down {
+  color: var(--danger);
+}
+
+.kpi-meta.info {
+  color: var(--info);
+}
 
 .kpi-track {
   height: 4px;
@@ -232,21 +263,25 @@
   --kpi-icon-bg: #ede9fe;
   --kpi-icon-color: #461bb9;
 }
+
 .kpi-card.v-blue {
   --kpi-accent: linear-gradient(90deg, #2563eb, #60a5fa);
   --kpi-icon-bg: #dbeafe;
   --kpi-icon-color: #2563eb;
 }
+
 .kpi-card.v-green {
   --kpi-accent: linear-gradient(90deg, #059669, #34d399);
   --kpi-icon-bg: #d1fae5;
   --kpi-icon-color: #059669;
 }
+
 .kpi-card.v-amber {
   --kpi-accent: linear-gradient(90deg, #d97706, #fbbf24);
   --kpi-icon-bg: #fef3c7;
   --kpi-icon-color: #d97706;
 }
+
 .kpi-card.v-red {
   --kpi-accent: linear-gradient(90deg, #dc2626, #f87171);
   --kpi-icon-bg: #fee2e2;
@@ -269,7 +304,9 @@
   transition: box-shadow .25s ease;
 }
 
-.panel:hover { box-shadow: var(--shadow-sm); }
+.panel:hover {
+  box-shadow: var(--shadow-sm);
+}
 
 .panel-head {
   display: flex;
@@ -311,7 +348,9 @@
   transition: opacity .2s;
 }
 
-.panel-head a:hover { opacity: 1; }
+.panel-head a:hover {
+  opacity: 1;
+}
 
 .att-donut-wrap {
   display: flex;
@@ -372,7 +411,9 @@
   color: var(--brand-700);
 }
 
-.row-reminder { background: #fffbeb !important; }
+.row-reminder {
+  background: #fffbeb !important;
+}
 
 .se-table thead th {
   background: linear-gradient(135deg, var(--brand-600), var(--brand-500));
@@ -390,7 +431,9 @@
   transition: background .18s ease;
 }
 
-.se-table tbody tr:hover { background: var(--brand-50); }
+.se-table tbody tr:hover {
+  background: var(--brand-50);
+}
 
 .se-table tbody td {
   padding: 12px 14px;
@@ -410,7 +453,9 @@
   opacity: .85;
 }
 
-.detail-link:hover { opacity: 1; }
+.detail-link:hover {
+  opacity: 1;
+}
 
 .action-approve,
 .action-reject {
@@ -458,7 +503,9 @@
   border-bottom: 1px solid var(--border);
 }
 
-.applicant-row:last-of-type { border-bottom: none; }
+.applicant-row:last-of-type {
+  border-bottom: none;
+}
 
 .ap-name {
   font-size: .83rem;
@@ -528,7 +575,9 @@
   cursor: pointer;
 }
 
-.shortcut-btn:last-child { margin-bottom: 0; }
+.shortcut-btn:last-child {
+  margin-bottom: 0;
+}
 
 .shortcut-btn:hover {
   background: var(--brand-50);
@@ -560,6 +609,21 @@
   font-weight: 700;
 }
 
+.bonus-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  color: #d97706;
+  border: 1px solid #fcd34d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .82rem;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
 .modal-field-label {
   display: block;
   font-size: .7rem;
@@ -576,37 +640,71 @@
 
 /* Large Desktop */
 @media (max-width: 1400px) {
-  .kpi-grid { grid-template-columns: repeat(3, 1fr); }
+  .kpi-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 /* Standard Desktop / Landscape Tablet */
 @media (max-width: 1200px) {
-  .dash-grid { grid-template-columns: 1fr; }
+  .dash-grid {
+    grid-template-columns: 1fr;
+  }
+
   /* Override the inline style from the PHP view on smaller screens */
-  .panel[style*="grid-column: span 2;"] { grid-column: span 1 !important; }
+  .panel[style*="grid-column: span 2;"] {
+    grid-column: span 1 !important;
+  }
 }
 
 /* Tablet & Mobile (Main Content Reset) */
 @media (max-width: 992px) {
+
   /* This removes the sidebar margin so content utilizes the full screen */
-  .main-content { margin-left: 0; padding: 80px 16px 26px; }
-  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
-  .page-header h1 { font-size: 1.35rem; }
+  .main-content {
+    margin-left: 0;
+    padding: 80px 16px 26px;
+  }
+
+  .kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .page-header h1 {
+    font-size: 1.35rem;
+  }
 }
 
 /* Mobile Devices */
 @media (max-width: 768px) {
+
   /* 1. Stack the Page Header Buttons */
-  .page-header { flex-direction: column; align-items: flex-start; gap: 15px; }
-  .page-header .btn-brand { width: 100%; justify-content: center; }
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .page-header .btn-brand {
+    width: 100%;
+    justify-content: center;
+  }
 
   /* 2. Fix the Attendance Donut alignment */
-  .att-donut-wrap { flex-direction: column; align-items: flex-start; }
-  .att-stat { width: 100%; }
+  .att-donut-wrap {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .att-stat {
+    width: 100%;
+  }
 
   /* 3. Transform Table into Mobile Cards */
-  .se-table thead { display: none; }
-  
+  .se-table thead {
+    display: none;
+  }
+
   .se-table tbody tr {
     display: block;
     background: var(--surface-2);
@@ -645,21 +743,38 @@
 
   /* Ensure flex content inside columns aligns correctly on mobile */
   .se-table tbody td .d-flex {
-     justify-content: flex-end !important;
-     text-align: right;
+    justify-content: flex-end !important;
+    text-align: right;
   }
-  .se-table tbody td .text-md-start { text-align: right !important; }
-  .se-table tbody td .align-items-md-start { align-items: flex-end !important; }
+
+  .se-table tbody td .text-md-start {
+    text-align: right !important;
+  }
+
+  .se-table tbody td .align-items-md-start {
+    align-items: flex-end !important;
+  }
 }
 
 /* Small Mobile */
 @media (max-width: 480px) {
-  .kpi-grid { grid-template-columns: 1fr; }
-  .kpi-card { padding: 16px; }
+  .kpi-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .kpi-card {
+    padding: 16px;
+  }
 }
 
 /* Extra Small Screens */
 @media (max-width: 400px) {
-  .reminder-banner { flex-direction: column; text-align: center; }
-  .reminder-link { margin: 10px auto 0; }
+  .reminder-banner {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .reminder-link {
+    margin: 10px auto 0;
+  }
 }

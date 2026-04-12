@@ -1448,6 +1448,7 @@ class Employee extends CI_Controller
             $data['today_attendance'] = $this->AttendanceModel->get_today_attendance_list();
             $data['recent_leaves'] = $this->RequestsModel->get_pending_leaves_with_balance();
             $data['recent_applicants'] = $this->jobApplicationModel->get_recent_applicants(5);
+            $data['upcoming_bonuses'] = $this->EmployeeModel->get_upcoming_bonuses();
 
             // Load Views
             $this->load->view('hr/hrHeaderView');
