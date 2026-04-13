@@ -10,6 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
 
     <style>
         /* ══════════════ BASE ══════════════ */
@@ -901,6 +902,51 @@
                 grid-template-columns: 1fr;
             }
         }
+         
+        /* ═══════════════════════════════════════════════
+           DATATABLES CUSTOM THEME OVERRIDES (Matched to HR Theme)
+        ═══════════════════════════════════════════════ */
+        .dataTables_wrapper { padding: 20px 24px; }
+        .dataTables_wrapper .row:first-child { margin-bottom: 20px; align-items: center; }
+        .dataTables_filter input {
+            background-color: #f8fafc; border: 1.5px solid #e2e8f0; color: #1e293b;
+            font-size: 0.875rem; border-radius: 10px; padding: 8px 16px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02); transition: all 0.3s ease; width: 250px;
+        }
+        .dataTables_filter input:focus {
+            outline: none; border-color: #4f46e5; box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); background: #fff;
+        }
+        .dataTables_length select {
+            background-color: #f8fafc; border: 1.5px solid #e2e8f0; color: #1e293b;
+            font-size: 0.875rem; border-radius: 10px; padding: 6px 32px 6px 12px; margin: 0 8px;
+        }
+        .dataTables_length select:focus { outline: none; border-color: #4f46e5; }
+        .dataTables_wrapper .row:last-child { margin-top: 20px; align-items: center; }
+        .dataTables_info { font-size: 0.85rem; color: #94a3b8 !important; font-weight: 600; }
+        .dataTables_paginate .pagination { margin: 0; gap: 4px; }
+        .dataTables_paginate .page-item .page-link {
+            border: none; color: #64748b; background-color: transparent; border-radius: 8px;
+            font-weight: 600; font-size: 0.85rem; padding: 8px 14px; transition: all 0.2s ease;
+        }
+        .dataTables_paginate .page-item:not(.active):not(.disabled) .page-link:hover {
+            background-color: #f1f5f9; color: #4f46e5;
+        }
+        .dataTables_paginate .page-item.active .page-link {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed) !important; color: #fff !important;
+            box-shadow: 0 4px 10px rgba(79, 70, 229, 0.2);
+        }
+        /* Fix sorting arrows */
+        table.dataTable thead .sorting:before, table.dataTable thead .sorting_asc:before, 
+        table.dataTable thead .sorting_desc:before, table.dataTable thead .sorting_asc_disabled:before, 
+        table.dataTable thead .sorting_desc_disabled:before, table.dataTable thead .sorting:after, 
+        table.dataTable thead .sorting_asc:after, table.dataTable thead .sorting_desc:after, 
+        table.dataTable thead .sorting_asc_disabled:after, table.dataTable thead .sorting_desc_disabled:after {
+            bottom: 12px !important; opacity: 0.4;
+        }
+        table.dataTable thead .sorting_asc:before, table.dataTable thead .sorting_desc:after {
+            opacity: 1; color: #fff;
+        }
+    </style>
     </style>
 </head>
 
@@ -910,7 +956,7 @@
     // ── Flash Messages ──
     if ($this->session->flashdata('error')): ?>
         <script>
-            document.addEventListener("DOMContentLoaded", function () {
+            document.addEventListener("DOMContentLoaded", function() {
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
@@ -923,14 +969,14 @@
 
     <?php if ($this->session->flashdata('success')): ?>
         <script>
-            document.addEventListener("DOMContentLoaded", function () {
+            document.addEventListener("DOMContentLoaded", function() {
                 Swal.mixin({
-                    toast: true,
-                    position: 'top-end',
-                    showConfirmButton: false,
-                    timer: 3500,
-                    timerProgressBar: true
-                })
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3500,
+                        timerProgressBar: true
+                    })
                     .fire({
                         icon: 'success',
                         title: <?= json_encode($this->session->flashdata('success')) ?>
@@ -1067,14 +1113,13 @@
 
         <!-- ══ EMPLOYEE TABLE ══ -->
         <div class="table-card">
-            <div class="table-card-header">
+            <div class="table-card-header" style="justify-content: space-between;">
                 <h5><i class="fas fa-list me-2" style="color:#4f46e5;"></i>Employee Roster</h5>
-                <div class="search-wrap">
-                    <i class="fas fa-search"></i>
-                    <input type="text" id="searchInput" placeholder="Search by name, ID…">
-                </div>
-            </div>
 
+                <a href="<?= base_url('Employee/exportSalaryReportCSV?month=' . $selected_month) ?>" class="btn btn-outline-success d-flex align-items-center gap-2" style="font-weight: 600; padding: 6px 14px; border-radius: 8px; border: 1.5px solid #10b981; color: #10b981; text-decoration: none; background: transparent; transition: all 0.2s;" onmouseover="this.style.background='#10b981'; this.style.color='#fff';" onmouseout="this.style.background='transparent'; this.style.color='#10b981';">
+                    <i class="fas fa-file-csv"></i> Export Payroll to CSV
+                </a>
+            </div>
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0" id="payrollTable">
                     <thead>
@@ -1092,7 +1137,7 @@
                             $is_processed = isset($monthly_slips[$emp->seemp_id]);
                             $slip_data = $is_processed ? $monthly_slips[$emp->seemp_id] : null;
                             $has_bank = !empty($emp->sebank_ac_no);
-                            ?>
+                        ?>
                             <tr class="<?= $is_processed ? 'processed' : '' ?>">
                                 <td class="ps-4">
                                     <span class="emp-id-badge"><?= htmlspecialchars($emp->seemp_id) ?></span>
@@ -1178,12 +1223,12 @@
                                 </td>
                             </tr>
                         <?php endforeach; ?>
-                        <tr id="noResultsRow" style="display:none;">
+                        <!-- <tr id="noResultsRow" style="display:none;">
                             <td colspan="6" class="text-center py-5 text-muted">
                                 <i class="fas fa-search fa-2x mb-2 d-block opacity-25"></i>No employees match your
                                 search.
                             </td>
-                        </tr>
+                        </tr> -->
                     </tbody>
                 </table>
             </div>
@@ -1681,77 +1726,96 @@
 
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+     
+
     <script>
-        /* ═══════════════════════════════════════════════
-   CONFIG — field definitions (keeps JS DRY)
-═══════════════════════════════════════════════ */
+        $(document).ready(function() {
+            // Initialize DataTables
+            $('#payrollTable').DataTable({
+                "pageLength": 25,
+                "order": [[ 1, "asc" ]], // Sort by Employee Name alphabetically by default
+                "language": {
+                    "search": "_INPUT_",
+                    "searchPlaceholder": "Search by name, ID..."
+                },
+                "dom": '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>t<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+                "columnDefs": [
+                    { "orderable": false, "targets": [3, 5] } // Disable sorting on Bank info and Action buttons
+                ]
+            });
+        });
+    
+   
         const EARNINGS = [{
-            name: 'basic',
-            label: 'Basic Salary',
-            desc: ''
-        },
-        {
-            name: 'transport',
-            label: 'Transport & HRA',
-            desc: ''
-        },
-        {
-            name: 'incentive',
-            label: 'Performance Incentive',
-            desc: ''
-        },
-        {
-            name: 'bonus_amt',
-            label: 'Annual Bonus',
-            desc: 'Fetched from Bonus Management system'
-        },
-        {
-            name: 'overtime',
-            label: 'Overtime Pay',
-            desc: 'Extra hours worked beyond duty schedule'
-        },
-        {
-            name: 'round_off',
-            label: 'Round-Off Adjustment',
-            desc: ''
-        },
+                name: 'basic',
+                label: 'Basic Salary',
+                desc: ''
+            },
+            {
+                name: 'transport',
+                label: 'Transport & HRA',
+                desc: ''
+            },
+            {
+                name: 'incentive',
+                label: 'Performance Incentive',
+                desc: ''
+            },
+            {
+                name: 'bonus_amt',
+                label: 'Annual Bonus',
+                desc: 'Fetched from Bonus Management system'
+            },
+            {
+                name: 'overtime',
+                label: 'Overtime Pay',
+                desc: 'Extra hours worked beyond duty schedule'
+            },
+            {
+                name: 'round_off',
+                label: 'Round-Off Adjustment',
+                desc: ''
+            },
         ];
         const DEDUCTIONS = [{
-            name: 'pf',
-            label: 'Provident Fund (PF)',
-            desc: '12% of Basic · EPFO',
-            // reasonId: 'reason_pf'
-        },
-        {
-            name: 'esi_deduction',
-            label: 'ESI Contribution',
-            desc: '0.75% of Gross',
-            // reasonId: null
-        },
-        {
-            name: 'prof_tax',
-            label: 'Professional Tax (PT)',
-            desc: 'State slab-based',
-            // reasonId: null
-        },
-        {
-            name: 'late_fees',
-            label: 'Late Arrival & No-Pay Leave (NPL)',
-            desc: '',
-            // reasonId: 'reason_late'
-        },
-        {
-            name: 'loss_of_pay',
-            label: 'Half-Day & Loss of Pay (LOP)',
-            desc: '',
-            // reasonId: 'reason_lop'
-        },
-        {
-            name: 'loan',
-            label: 'Loan Recovery (EMI)',
-            desc: '',
-            // reasonId: 'reason_loan'
-        },
+                name: 'pf',
+                label: 'Provident Fund (PF)',
+                desc: '12% of Basic · EPFO',
+                // reasonId: 'reason_pf'
+            },
+            {
+                name: 'esi_deduction',
+                label: 'ESI Contribution',
+                desc: '0.75% of Gross',
+                // reasonId: null
+            },
+            {
+                name: 'prof_tax',
+                label: 'Professional Tax (PT)',
+                desc: 'State slab-based',
+                // reasonId: null
+            },
+            {
+                name: 'late_fees',
+                label: 'Late Arrival & No-Pay Leave (NPL)',
+                desc: '',
+                // reasonId: 'reason_late'
+            },
+            {
+                name: 'loss_of_pay',
+                label: 'Half-Day & Loss of Pay (LOP)',
+                desc: '',
+                // reasonId: 'reason_lop'
+            },
+            {
+                name: 'loan',
+                label: 'Loan Recovery (EMI)',
+                desc: '',
+                // reasonId: 'reason_loan'
+            },
         ];
 
         /* ═══════════════════════════════════════════════
@@ -2007,8 +2071,8 @@
             } = calculateTotals ? {
                 net: getVal('basic') + getVal('transport') + getVal('incentive') + getVal('overtime') + getVal('round_off') - getVal('pf') - getVal('esi_deduction') - getVal('prof_tax') - getVal('late_fees') - getVal('loss_of_pay') - getVal('loan')
             } : {
-                    net: 0
-                };
+                net: 0
+            };
             btn.disabled = net < 0;
             btn.title = net < 0 ? 'Net salary is negative — reduce deductions or increase earnings.' : '';
         }
@@ -2163,17 +2227,17 @@
         /* ═══════════════════════════════════════════════
            LIVE SEARCH
         ═══════════════════════════════════════════════ */
-        document.getElementById('searchInput').addEventListener('input', function () {
-            const filter = this.value.toLowerCase();
-            const rows = document.querySelectorAll('#payrollTable tbody tr:not(#noResultsRow)');
-            let visible = 0;
-            rows.forEach(row => {
-                const match = row.innerText.toLowerCase().includes(filter);
-                row.style.display = match ? '' : 'none';
-                if (match) visible++;
-            });
-            document.getElementById('noResultsRow').style.display = visible === 0 ? '' : 'none';
-        });
+        // document.getElementById('searchInput').addEventListener('input', function() {
+        //     const filter = this.value.toLowerCase();
+        //     const rows = document.querySelectorAll('#payrollTable tbody tr:not(#noResultsRow)');
+        //     let visible = 0;
+        //     rows.forEach(row => {
+        //         const match = row.innerText.toLowerCase().includes(filter);
+        //         row.style.display = match ? '' : 'none';
+        //         if (match) visible++;
+        //     });
+        //     document.getElementById('noResultsRow').style.display = visible === 0 ? '' : 'none';
+        // });
 
         /* ═══════════════════════════════════════════════
            EDIT / RESET SLIP
@@ -2201,7 +2265,7 @@
                             slip_id: slipId,
                             '<?= $this->security->get_csrf_token_name(); ?>': '<?= $this->security->get_csrf_hash(); ?>'
                         },
-                        success: function (res) {
+                        success: function(res) {
                             if (res.status === 'success') {
                                 Swal.fire({
                                     icon: 'success',
@@ -2223,7 +2287,7 @@
         /* ═══════════════════════════════════════════════
            BOOTSTRAP TOOLTIPS
         ═══════════════════════════════════════════════ */
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             // Simple native title tooltips on .tip-icon via Bootstrap
             const tipEls = [].slice.call(document.querySelectorAll('.tip-icon'));
             tipEls.forEach(el => {
@@ -2235,7 +2299,7 @@
             }));
 
             // Reset modal state when hidden
-            salaryModalEl.addEventListener('hidden.bs.modal', function () {
+            salaryModalEl.addEventListener('hidden.bs.modal', function() {
                 resetSteps();
             });
         });

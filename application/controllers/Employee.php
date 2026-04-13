@@ -133,9 +133,10 @@ class Employee extends CI_Controller
                 }
             }
 
-            // ── Payroll counts for current month ──
+           // ── Payroll counts for current month ──
             // Uses the same model methods as salaryManagement() so counts always match.
-            $payroll_employees = $this->EmployeeModel->get_payroll_employees();
+            $current_month = date('Y-m');
+            $payroll_employees = $this->EmployeeModel->get_payroll_employees($current_month);
             $monthly_slips_now = $this->EmployeeModel->get_slips_by_month(date('Y-m'));
             $total_staff_count = $this->EmployeeModel->get_total_staff_count();
             $processed_count_now = count($monthly_slips_now);   // Slips Generated  (PAID)
@@ -682,7 +683,7 @@ class Employee extends CI_Controller
         $this->form_validation->set_rules('aadhar', 'Aadhar', 'required|numeric|exact_length[12]');
         $this->form_validation->set_rules('password', 'Password', 'required|min_length[6]');
         $this->form_validation->set_rules('branch', 'Branch', 'required');
-        $this->form_validation->set_rules('status', 'Status', 'required');
+        // $this->form_validation->set_rules('status', 'Status', 'required');
         $this->form_validation->set_rules('accessLevel', 'Access Level', 'required');
         $this->form_validation->set_rules(
             'salary',
@@ -1907,11 +1908,11 @@ class Employee extends CI_Controller
         if ($this->session->userdata('accesslevel') == 'HR' || $this->session->userdata('accesslevel') == 'ADMIN') {
             $this->load->model('EmployeeModel');
 
-            // 1. Determine which month HR is looking at (Defaults to current month)
+           // 1. Determine which month HR is looking at (Defaults to current month)
             $selected_month = $this->input->get('month') ? $this->input->get('month') : date('Y-m');
 
-            // 2. Fetch all active regular employees (No Admin/HR)
-            $data['employees'] = $this->EmployeeModel->get_payroll_employees();
+            // 2. Fetch all active regular employees (Filtered by joining date)
+            $data['employees'] = $this->EmployeeModel->get_payroll_employees($selected_month);
 
             // 3. Fetch all slips already generated for this specific month
             $data['monthly_slips'] = $this->EmployeeModel->get_slips_by_month($selected_month);
@@ -2255,16 +2256,29 @@ class Employee extends CI_Controller
         $this->load->model('EmployeeModel');
 
         // 1. Capture the year from the GET request, default to current year
-        $year = $this->input->get('year');
-        if (!$year) {
-            $year = date('Y');
-        }
+        // $year = $this->input->get('year');
+        // if (!$year) {
+        //     $year = date('Y');
+        // }
+
+        // // 2. Fetch the report data
+        // $data = [
+        //     'selected_year' => $year,
+        //     'report' => $this->EmployeeModel->get_yearly_bonus_report($year),
+        //     'total_emps' => $this->EmployeeModel->get_total_staff_count(),
+        //     'total_bonus_amount' => $this->EmployeeModel->get_total_bonus_amount_by_year($year)
+        // ];
+        // 1. Capture the year and status from the GET request
+        $year = $this->input->get('year') ?: date('Y');
+        $status = $this->input->get('status') ?: 'all';
 
         // 2. Fetch the report data
         $data = [
             'selected_year' => $year,
-            'report' => $this->EmployeeModel->get_yearly_bonus_report($year),
-            'total_emps' => $this->EmployeeModel->get_total_staff_count()
+            'selected_status' => $status,
+            'report' => $this->EmployeeModel->get_yearly_bonus_report($year, $status),
+            'total_emps' => $this->EmployeeModel->get_total_staff_count(),
+            'total_bonus_amount' => $this->EmployeeModel->get_total_bonus_amount_by_year($year)
         ];
         $header = ($this->session->userdata('accesslevel') == 'HR') ? 'hr/hrHeaderView' : 'employee/adminHeaderView';
         $this->load->view($header);
@@ -2316,6 +2330,124 @@ class Employee extends CI_Controller
 
         // Return the numeric amount as JSON
         echo json_encode($amount);
+    }
+    // Export Bonus Report to CSV
+    public function exportBonusReportCSV()
+    {
+        // Security check
+        if ($this->session->userdata('accesslevel') != 'HR' && $this->session->userdata('accesslevel') != 'ADMIN') {
+            redirect('Employee/Login');
+        }
+
+        $this->load->model('EmployeeModel');
+
+        $year = $this->input->get('year') ?: date('Y');
+        $status = $this->input->get('status') ?: 'all';
+
+        // Fetch the exact same data as the view
+        $report = $this->EmployeeModel->get_yearly_bonus_report($year, $status);
+
+        // Define the CSV filename
+        $filename = "Bonus_Report_{$year}_{$status}_" . date('Ymd') . ".csv";
+
+        // Set headers to force download
+        header("Content-Description: File Transfer");
+        header("Content-Disposition: attachment; filename=$filename");
+        header("Content-Type: application/csv; "); 
+
+        // Open standard output for writing
+        $file = fopen('php://output', 'w');
+
+        // Write the CSV Headers
+        $header = array("Employee ID", "Employee Name", "Current Salary", "Permanent Date", "Bonus Amount", "Bonus Date", "Eligibility Status");
+        fputcsv($file, $header);
+
+        // Loop through data and write to CSV
+        $today = date('Y-m-d');
+        foreach ($report as $emp) {
+            
+            // Replicate the eligibility logic for the report
+            $eligibility_status = "Eligible Now";
+            $initial_eligibility = !empty($emp->seempd_permanent_date) 
+                ? date('Y-m-d', strtotime($emp->seempd_permanent_date . ' + 365 days')) 
+                : null;
+
+            if (empty($emp->seempd_permanent_date)) {
+                $eligibility_status = "Not Permanent";
+            } elseif ($today < $initial_eligibility) {
+                $eligibility_status = "Locked until " . date('d M Y', strtotime($initial_eligibility));
+            } elseif (!empty($emp->next_eligible_date) && $today < $emp->next_eligible_date) {
+                $eligibility_status = "Locked until " . date('d M Y', strtotime($emp->next_eligible_date));
+            }
+
+            // Write the row
+            fputcsv($file, array(
+                $emp->seemp_id,
+                $emp->seempd_name,
+                $emp->seempd_salary,
+                $emp->seempd_permanent_date ? date('Y-m-d', strtotime($emp->seempd_permanent_date)) : 'N/A',
+                $emp->bonus_amount ? $emp->bonus_amount : '0.00',
+                $emp->bonus_date ? date('Y-m-d', strtotime($emp->bonus_date)) : 'N/A',
+                $eligibility_status
+            ));
+        }
+
+        fclose($file);
+        exit;
+    }
+    // Export Salary Management Report to CSV
+    public function exportSalaryReportCSV()
+    {
+        // Security Check
+        if ($this->session->userdata('accesslevel') != 'HR' && $this->session->userdata('accesslevel') != 'ADMIN') {
+            redirect('Employee/Login');
+        }
+
+        $this->load->model('EmployeeModel');
+        
+        // Capture the requested month
+        $selected_month = $this->input->get('month') ? $this->input->get('month') : date('Y-m');
+
+        // Fetch exact data matching the dashboard
+        $employees = $this->EmployeeModel->get_payroll_employees($selected_month);
+        $monthly_slips = $this->EmployeeModel->get_slips_by_month($selected_month);
+
+        // Setup File Name and Headers
+        $filename = "Payroll_Report_{$selected_month}_" . date('Ymd') . ".csv";
+
+        header("Content-Description: File Transfer");
+        header("Content-Disposition: attachment; filename=$filename");
+        header("Content-Type: application/csv; ");
+
+        $file = fopen('php://output', 'w');
+
+        // Write CSV Header
+        $header = array("Emp ID", "Employee Name", "Designation", "Branch", "Base Salary (Rs)", "Bank Status", "Process Status", "Net Salary (Rs)");
+        fputcsv($file, $header);
+
+        // Write Data Rows
+        foreach ($employees as $emp) {
+            $is_processed = isset($monthly_slips[$emp->seemp_id]);
+            $slip_data = $is_processed ? $monthly_slips[$emp->seemp_id] : null;
+            
+            $has_bank = !empty($emp->sebank_ac_no) ? "On File" : "Missing";
+            $status = $is_processed ? "Generated" : "Pending";
+            $net_salary = $slip_data ? $slip_data->net_salary : '0.00';
+
+            fputcsv($file, array(
+                $emp->seemp_id,
+                $emp->seempd_name,
+                $emp->seempd_designation,
+                $emp->seemp_branch,
+                $emp->seempd_salary,
+                $has_bank,
+                $status,
+                $net_salary
+            ));
+        }
+
+        fclose($file);
+        exit;
     }
 }
 
