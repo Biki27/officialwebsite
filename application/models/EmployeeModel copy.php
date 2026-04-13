@@ -8,37 +8,15 @@ class EmployeeModel extends CI_Model
 
     function getallemployee_with_joins()
     {
-        // Subqueries pull the most recent 'hired'/'rehired' date and the most recent
-        // 'terminated' date from the lifecycle ledger. These are used by the
-        // status-toggle modals to enforce correct min/max date boundaries.
-        $sql = "
-            SELECT
-                seemployee.*,
-                seempdetails.*,
-                sejobapplicant.sejoba_phone,
-                seempbankdetails.sebank_ac_no,
+        $res = $this->db
+            ->from('seemployee')
+            ->join('seempdetails', 'seemployee.seemp_id = seempdetails.seempd_empid', 'left')
+            ->join('sejobapplicant', 'seempdetails.seempd_jobaid = sejobapplicant.sejoba_id', 'left')
+            ->join('seempbankdetails', 'seemployee.seemp_id = seempbankdetails.sebank_empid', 'left') // Fetch Bank Details
+            ->get()
+            ->result();
 
-                /* Latest date this employee became active (hired OR rehired) */
-                (SELECT MAX(effective_date)
-                 FROM seemp_status_history
-                 WHERE empid = seemployee.seemp_id
-                   AND status_action IN ('hired', 'rehired')
-                ) AS last_active_since,
-
-                /* Latest date this employee was terminated */
-                (SELECT MAX(effective_date)
-                 FROM seemp_status_history
-                 WHERE empid = seemployee.seemp_id
-                   AND status_action = 'terminated'
-                ) AS last_terminated_on
-
-            FROM seemployee
-            LEFT JOIN seempdetails    ON seemployee.seemp_id        = seempdetails.seempd_empid
-            LEFT JOIN sejobapplicant  ON seempdetails.seempd_jobaid = sejobapplicant.sejoba_id
-            LEFT JOIN seempbankdetails ON seemployee.seemp_id       = seempbankdetails.sebank_empid
-        ";
-
-        return $this->db->query($sql)->result();
+        return $res;
     }
 
     function get_employee_with_id($empid = '')
@@ -352,10 +330,9 @@ class EmployeeModel extends CI_Model
             'seempd_experience' => $data['experience'],
             'seempd_dob' => $data['dob'],
             'seempd_joiningdate' => $data['joiningDate'],
-            'seempd_permanent_date' => $data['permanentDate'],
-            'seempd_termination_date' => $data['terminationDate'],
-            'seempd_termination_reason' => $data['terminationReason'],
-            'seempd_increment' => $data['increment'],
+            'seempd_termination_date'   => $data['terminationDate']   ?? NULL,
+            'seempd_termination_reason' => $data['terminationReason'] ?? NULL,
+            // 'seempd_increment'          => $data['increment']         ?? '',
             'seempd_address_permanent' => $data['permAddress'],
             'seempd_address_current' => $data['currentAddress'],
             'seempd_aadhar' => $data['aadhar'],
@@ -686,7 +663,7 @@ class EmployeeModel extends CI_Model
 
     //     return $this->db->query($sql, array($year))->result();
     // }
-   public function get_yearly_bonus_report($year, $status = 'all')
+    public function get_yearly_bonus_report($year, $status = 'all')
     {
         $sql = "
     SELECT 
@@ -853,15 +830,15 @@ class EmployeeModel extends CI_Model
         $this->db->where('bonus_status', 'completed');
         $query = $this->db->get('seemp_bonuses');
         $result = $query->row();
-        
+
         return $result->bonus_amount ? (float) $result->bonus_amount : 0.00;
     }
     public function get_lifecycle_history($empid)
     {
         return $this->db->where('empid', $empid)
-                        ->order_by('effective_date', 'ASC')
-                        ->order_by('history_id', 'ASC')
-                        ->get('seemp_status_history')
-                        ->result();
+            ->order_by('effective_date', 'ASC')
+            ->order_by('history_id', 'ASC')
+            ->get('seemp_status_history')
+            ->result();
     }
 }

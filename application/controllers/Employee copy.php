@@ -1041,257 +1041,95 @@ class Employee extends CI_Controller
     }
     public function updateEmployeeStatusAjax()
     {
-        // ── 1. Authorization ──────────────────────────────────────────────────
-        if ($this->session->userdata('accesslevel') != 'HR' &&
-            $this->session->userdata('accesslevel') != 'ADMIN') {
+        // 1. Authorization check
+        if ($this->session->userdata('accesslevel') != 'HR' && $this->session->userdata('accesslevel') != 'ADMIN') {
             echo json_encode(['success' => false, 'message' => 'Unauthorized']);
             return;
         }
 
-        $empid       = trim($this->input->post('empid')       ?? '');
-        $new_status  = trim($this->input->post('status')      ?? ''); // 'active' | 'inactive'
-        $term_date   = trim($this->input->post('term_date')   ?? '');
-        $term_reason = trim($this->input->post('term_reason') ?? '');
-        $rejoin_date = trim($this->input->post('rejoin_date') ?? '');
+        $empid      = $this->input->post('empid');
+        $status     = $this->input->post('status');
+        $term_date  = $this->input->post('term_date');
+        $term_reason = $this->input->post('term_reason');
+        $rejoin_date = $this->input->post('rejoin_date');
 
-        if (empty($empid) || !in_array($new_status, ['active', 'inactive'])) {
-            echo json_encode(['success' => false, 'message' => 'Invalid request parameters.']);
-            return;
-        }
+        // 2. Edge-case validation (same as before)
+        $emp_data = $this->db->select('seempd_joiningdate, seempd_termination_date')
+            ->where('seempd_empid', $empid)
+            ->get('seempdetails')->row();
 
-        // ── 2. Fetch current employee row ─────────────────────────────────────
-        $emp = $this->db
-            ->select('e.seemp_status, d.seempd_joiningdate, d.seempd_termination_date')
-            ->from('seemployee e')
-            ->join('seempdetails d', 'e.seemp_id = d.seempd_empid', 'left')
-            ->where('e.seemp_id', $empid)
-            ->get()->row();
-
-        if (!$emp) {
-            echo json_encode(['success' => false, 'message' => 'Employee not found.']);
-            return;
-        }
-
-        $joining_date = $emp->seempd_joiningdate; // e.g. "2025-03-01"
-
-        // ── 3. Fetch lifecycle history (ordered newest first) ──────────────────
-        //   latest_hire       = most recent 'hired' or 'rehired' event
-        //   latest_termination = most recent 'terminated' event
-        $latest_hire = $this->db
-            ->where('empid', $empid)
-            ->where_in('status_action', ['hired', 'rehired'])
-            ->order_by('effective_date', 'DESC')
-            ->order_by('history_id',     'DESC')
-            ->limit(1)
-            ->get('seemp_status_history')->row();
-
-        $latest_termination = $this->db
-            ->where('empid', $empid)
-            ->where('status_action', 'terminated')
-            ->order_by('effective_date', 'DESC')
-            ->order_by('history_id',     'DESC')
-            ->limit(1)
-            ->get('seemp_status_history')->row();
-
-        // Human-readable helpers for error messages
-        $fmt = fn($d) => date('d M Y', strtotime($d));
-
-        // ══════════════════════════════════════════════════════════════════════
-        //  CASE A — ACTIVE → INACTIVE (Termination)
-        // ══════════════════════════════════════════════════════════════════════
-        if ($new_status == 'inactive') {
-
-            // Guard: already inactive?
-            if ($emp->seemp_status == 'inactive') {
-                echo json_encode(['success' => false,
-                    'message' => 'This employee is already inactive.']);
-                return;
-            }
-
-            // Required fields
-            if (empty($term_date)) {
-                echo json_encode(['success' => false,
-                    'message' => 'Termination date is required.']);
-                return;
-            }
-            if (empty($term_reason)) {
-                echo json_encode(['success' => false,
-                    'message' => 'Reason for termination is required.']);
-                return;
-            }
-
-            // Rule T-1: term_date cannot be before joining date
-            if ($term_date < $joining_date) {
-                echo json_encode(['success' => false,
-                    'message' => 'Termination date (' . $fmt($term_date) . ') cannot be '
-                        . 'before the joining date (' . $fmt($joining_date) . ').']);
-                return;
-            }
-
-            // Rule T-2: term_date must be STRICTLY AFTER the last time they became active.
-            //   If they were rehired on 10 Apr they cannot be terminated on 10 Apr or earlier.
-            if ($latest_hire) {
-                $label = ($latest_hire->status_action === 'rehired') ? 'rehiring date' : 'joining date';
-                if ($term_date <= $latest_hire->effective_date) {
-                    echo json_encode(['success' => false,
-                        'message' => 'Termination date (' . $fmt($term_date) . ') must be '
-                            . 'AFTER their last ' . $label
-                            . ' (' . $fmt($latest_hire->effective_date) . '). '
-                            . 'Earliest allowed: '
-                            . $fmt(date('Y-m-d', strtotime($latest_hire->effective_date . ' +1 day'))) . '.']);
+        if ($emp_data) {
+            if ($status == 'inactive') {
+                if (!empty($term_date) && $term_date < $emp_data->seempd_joiningdate) {
+                    echo json_encode(['success' => false, 'message' => 'Termination date cannot be before joining date (' . $emp_data->seempd_joiningdate . ').']);
+                    return;
+                }
+            } else {
+                if (empty($rejoin_date)) {
+                    echo json_encode(['success' => false, 'message' => 'Rejoining date is required.']);
+                    return;
+                }
+                if ($rejoin_date < $emp_data->seempd_joiningdate) {
+                    echo json_encode(['success' => false, 'message' => 'Rejoining date cannot be earlier than hire date (' . $emp_data->seempd_joiningdate . ').']);
+                    return;
+                }
+                if (!empty($emp_data->seempd_termination_date) && $rejoin_date <= $emp_data->seempd_termination_date) {
+                    echo json_encode(['success' => false, 'message' => 'Rejoining date must be AFTER termination date (' . $emp_data->seempd_termination_date . ').']);
                     return;
                 }
             }
-
-            // Rule T-3: Cannot have two terminations in a row without a rehire in between.
-            //   The latest event overall must NOT already be a 'terminated' event.
-            $latest_event = $this->db
-                ->where('empid', $empid)
-                ->order_by('effective_date', 'DESC')
-                ->order_by('history_id',     'DESC')
-                ->limit(1)
-                ->get('seemp_status_history')->row();
-
-            if ($latest_event && $latest_event->status_action === 'terminated') {
-                echo json_encode(['success' => false,
-                    'message' => 'Cannot terminate again — employee was already terminated on '
-                        . $fmt($latest_event->effective_date)
-                        . '. Please reactivate them first before terminating again.']);
-                return;
-            }
-
-        // ══════════════════════════════════════════════════════════════════════
-        //  CASE B — INACTIVE → ACTIVE (Rejoin / Reactivation)
-        // ══════════════════════════════════════════════════════════════════════
-        } else {
-
-            // Guard: already active?
-            if ($emp->seemp_status == 'active') {
-                echo json_encode(['success' => false,
-                    'message' => 'This employee is already active.']);
-                return;
-            }
-
-            // Required field
-            if (empty($rejoin_date)) {
-                echo json_encode(['success' => false,
-                    'message' => 'Rejoining date is required.']);
-                return;
-            }
-
-            // Rule R-1: rejoin_date cannot be before original joining date
-            if ($rejoin_date < $joining_date) {
-                echo json_encode(['success' => false,
-                    'message' => 'Rejoining date (' . $fmt($rejoin_date) . ') cannot be '
-                        . 'before the original joining date (' . $fmt($joining_date) . ').']);
-                return;
-            }
-
-            // Rule R-2: rejoin_date must be STRICTLY AFTER the latest termination in history.
-            //   Example: terminated 4 Apr → cannot rejoin on 4 Apr or 2 Apr.
-            if ($latest_termination) {
-                if ($rejoin_date <= $latest_termination->effective_date) {
-                    $earliest_ok = date('Y-m-d',
-                        strtotime($latest_termination->effective_date . ' +1 day'));
-                    echo json_encode(['success' => false,
-                        'message' => 'Rejoining date (' . $fmt($rejoin_date) . ') must be '
-                            . 'AFTER the last termination date '
-                            . '(' . $fmt($latest_termination->effective_date) . '). '
-                            . 'Earliest allowed rejoining date: ' . $fmt($earliest_ok) . '.']);
-                    return;
-                }
-            }
-
-            // Rule R-3: Belt-and-suspenders check against seempdetails column
-            //   (in case history and details column are somehow out of sync)
-            $stored_term = $emp->seempd_termination_date ?? '';
-            if (!empty($stored_term) && $stored_term !== '0000-00-00') {
-                if ($rejoin_date <= $stored_term) {
-                    $earliest_ok = date('Y-m-d', strtotime($stored_term . ' +1 day'));
-                    echo json_encode(['success' => false,
-                        'message' => 'Rejoining date (' . $fmt($rejoin_date) . ') must be '
-                            . 'AFTER the recorded termination date '
-                            . '(' . $fmt($stored_term) . '). '
-                            . 'Earliest allowed rejoining date: ' . $fmt($earliest_ok) . '.']);
-                    return;
-                }
-            }
-
-            // Rule R-4: Cannot have two rehires in a row without a termination in between.
-            $latest_event = $this->db
-                ->where('empid', $empid)
-                ->order_by('effective_date', 'DESC')
-                ->order_by('history_id',     'DESC')
-                ->limit(1)
-                ->get('seemp_status_history')->row();
-
-            if ($latest_event &&
-                in_array($latest_event->status_action, ['hired', 'rehired'])) {
-                echo json_encode(['success' => false,
-                    'message' => 'Cannot reactivate — the last recorded event is already '
-                        . 'an activation (' . $latest_event->status_action . ' on '
-                        . $fmt($latest_event->effective_date) . '). '
-                        . 'No termination record was found after that date.']);
-                return;
-            }
         }
 
-        // ── 4. All validations passed — write to DB ───────────────────────────
+        // 3. ✅ START TRANSACTION AND ACTUALLY WRITE TO DB
         $this->db->trans_start();
 
-        if ($new_status == 'inactive') {
-
-            // A. Mark employee as inactive in main table
+        if ($status == 'inactive') {
+            // A. Mark employee as inactive
             $this->db->where('seemp_id', $empid)
-                     ->update('seemployee', ['seemp_status' => 'inactive']);
+                ->update('seemployee', ['seemp_status' => 'inactive']);
 
-            // B. Save termination details in details table
+            // B. Save termination details
             $this->db->where('seempd_empid', $empid)
-                     ->update('seempdetails', [
-                         'seempd_termination_date'   => $term_date,
-                         'seempd_termination_reason' => $term_reason,
-                     ]);
+                ->update('seempdetails', [
+                    'seempd_termination_date'   => $term_date,
+                    'seempd_termination_reason' => $term_reason
+                ]);
 
-            // C. Append 'terminated' to lifecycle ledger
+            // C. Log the event in the lifecycle history
             $this->db->insert('seemp_status_history', [
                 'empid'          => $empid,
                 'status_action'  => 'terminated',
                 'effective_date' => $term_date,
-                'reason'         => $term_reason,
+                'reason'         => $term_reason
             ]);
-
         } else {
-
-            // A. Mark employee as active in main table
+            // A. Mark employee as active
             $this->db->where('seemp_id', $empid)
-                     ->update('seemployee', ['seemp_status' => 'active']);
+                ->update('seemployee', ['seemp_status' => 'active']);
 
-            // B. Clear termination fields in details table
+            // B. Clear the termination fields
             $this->db->where('seempd_empid', $empid)
-                     ->update('seempdetails', [
-                         'seempd_termination_date'   => NULL,
-                         'seempd_termination_reason' => NULL,
-                     ]);
+                ->update('seempdetails', [
+                    'seempd_termination_date'   => NULL,
+                    'seempd_termination_reason' => NULL
+                ]);
 
-            // C. Append 'rehired' to lifecycle ledger
+            // C. Log the rehire event in the lifecycle history
             $this->db->insert('seemp_status_history', [
                 'empid'          => $empid,
                 'status_action'  => 'rehired',
                 'effective_date' => $rejoin_date,
-                'reason'         => 'Reactivated Profile',
+                'reason'         => 'Reactivated Profile'
             ]);
         }
 
+        // 4. ✅ COMMIT THE TRANSACTION
         $this->db->trans_complete();
 
         if ($this->db->trans_status() === FALSE) {
-            echo json_encode(['success' => false,
-                'message' => 'Database error. No changes were saved. Please try again.']);
+            echo json_encode(['success' => false, 'message' => 'Database transaction failed.']);
         } else {
-            $msg = ($new_status == 'inactive')
-                ? 'Employee deactivated successfully.'
-                : 'Employee reactivated successfully.';
-            echo json_encode(['success' => true, 'message' => $msg]);
+            echo json_encode(['success' => true, 'message' => 'Status updated successfully.']);
         }
     }
     // Employee Overview
@@ -2686,4 +2524,4 @@ class Employee extends CI_Controller
     }
 }
 
-// I want to add a new filed into the job application form  which is Gender and i want to add this field into the database(sejobapplicant) and also i want to show this field in the HR job application model section when the hr view the job applicants list.
+// I want to add a new filed into the job application form  which is Gender and i want to add this field into the database(sejobapplicant) and also i want to show this field in the HR job application model section when the hr view the job applicants list.  

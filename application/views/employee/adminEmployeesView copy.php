@@ -108,10 +108,8 @@ $csrf_hash = $this->security->get_csrf_hash();
                       class="status-toggle-input"
                       data-joining-date="<?= $emp->seempd_joiningdate ?>"
                       data-term-date="<?= $emp->seempd_termination_date ?>"
-                      data-last-active-since="<?= $emp->last_active_since ?? $emp->seempd_joiningdate ?>"
-                      data-last-terminated-on="<?= $emp->last_terminated_on ?? '' ?>"
                       <?= $emp->seemp_status == 'active' ? 'checked' : '' ?>
-                      onchange="handleStatusChange('<?= $emp->seemp_id ?>', this, <?= htmlspecialchars(json_encode($emp->seempd_name ?? $emp->seemp_id), ENT_QUOTES, 'UTF-8') ?>)">
+                      onchange="handleStatusChange('<?= $emp->seemp_id ?>', this)">
                     <label for="status_<?= $emp->seemp_id ?>" class="status-slider">
                       <span class="status-text active-text">Active</span>
                       <span class="status-text inactive-text">Inactive</span>
@@ -242,7 +240,6 @@ $csrf_hash = $this->security->get_csrf_hash();
           </p>
           <input type="hidden" id="term_empid">
           <input type="hidden" id="term_joining_date">
-          <input type="hidden" id="term_last_active">
 
           <div class="mb-3">
             <label class="form-label small fw-bold text-uppercase text-muted">Termination Date</label>
@@ -277,7 +274,6 @@ $csrf_hash = $this->security->get_csrf_hash();
             Please specify their official rejoining date for payroll purposes.
           </p>
           <input type="hidden" id="rejoin_empid">
-          <input type="hidden" id="rejoin_last_term">
 
           <div class="mb-3">
             <label class="form-label small fw-bold text-uppercase text-muted">Rejoining Date</label>
@@ -427,157 +423,120 @@ $csrf_hash = $this->security->get_csrf_hash();
           document.getElementById('dt_lifecycle_container').innerHTML = '<div class="text-center text-danger">Error loading timeline.</div>';
         });
     }
-    // ─────────────────────────────────────────────────────────────────────────
-    // STATUS TOGGLE — full date-sync validation on client + server
-    // ─────────────────────────────────────────────────────────────────────────
+    // status toggle logic with confirmation modal for deactivation
     let currentToggle = null;
 
-    // Adds one day to a "YYYY-MM-DD" string and returns the new string.
-    function addOneDay(dateStr) {
-      if (!dateStr || dateStr === '0000-00-00') return '';
-      const d = new Date(dateStr + 'T00:00:00'); // force local, avoid UTC offset shift
-      d.setDate(d.getDate() + 1);
-      return d.toISOString().split('T')[0];
-    }
-
-    // Returns "DD Mon YYYY" from a "YYYY-MM-DD" string (for error messages).
-    function fmtDate(dateStr) {
-      if (!dateStr || dateStr === '0000-00-00') return dateStr;
-      const d = new Date(dateStr + 'T00:00:00');
-      return d.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
-    }
-
-    function handleStatusChange(empid, toggle, empName) {
+    function handleStatusChange(empid, toggle) {
+      const isChecked = toggle.checked;
       currentToggle = toggle;
-      const name = empName || empid;
 
-      if (!toggle.checked) {
-        // ── ACTIVE → INACTIVE : open Termination modal ─────────────────────
-        const joiningDate      = toggle.dataset.joiningDate      || '';
-        const lastActiveSince  = toggle.dataset.lastActiveSince  || joiningDate;
-
-        document.getElementById('term_empid').value            = empid;
-        document.getElementById('term_emp_name').innerText     = name;
-        document.getElementById('term_joining_date').value     = joiningDate;
-        document.getElementById('term_last_active').value      = lastActiveSince;
+      if (!isChecked) {
+        // 1. ACTIVE TO INACTIVE: Open Termination Modal
+        document.getElementById('term_empid').value = empid;
+        document.getElementById('term_emp_name').innerText = empid;
+        document.getElementById('term_joining_date').value = toggle.dataset.joiningDate || '';
 
         const termDateInput = document.getElementById('modal_term_date');
-        // Min = the day AFTER the latest activation date (joined OR rehired).
-        // Cannot terminate on the same day they became active.
-        const minTermDate = lastActiveSince ? addOneDay(lastActiveSince) : joiningDate;
-        if (minTermDate) {
-          termDateInput.min   = minTermDate;
-          termDateInput.value = minTermDate; // default to earliest legal date
+        if (toggle.dataset.joiningDate) {
+          termDateInput.min = toggle.dataset.joiningDate;
         } else {
           termDateInput.removeAttribute('min');
-          termDateInput.value = new Date().toISOString().split('T')[0];
         }
-
-        document.getElementById('modal_term_reason').value = '';
         new bootstrap.Modal(document.getElementById('terminationModal')).show();
-
       } else {
-        // ── INACTIVE → ACTIVE : open Rejoin modal ──────────────────────────
-        // Use last_terminated_on from history (most accurate) with fallback
-        // to the termination date stored in seempdetails.
-        const lastTerminatedOn = toggle.dataset.lastTerminatedOn || toggle.dataset.termDate || '';
+        // 2. INACTIVE TO ACTIVE: Open Rejoin Modal
+        document.getElementById('rejoin_empid').value = empid;
+        document.getElementById('rejoin_emp_name').innerText = empid;
 
-        document.getElementById('rejoin_empid').value         = empid;
-        document.getElementById('rejoin_emp_name').innerText  = name;
-        document.getElementById('rejoin_last_term').value     = lastTerminatedOn;
+        const dateInput = document.getElementById('modal_rejoin_date');
+        const termDate = toggle.dataset.termDate;
 
-        const rejoinInput = document.getElementById('modal_rejoin_date');
-        if (lastTerminatedOn && lastTerminatedOn !== '0000-00-00') {
-          // Earliest legal rejoin = termination date + 1 day
-          const minRejoin    = addOneDay(lastTerminatedOn);
-          rejoinInput.min   = minRejoin;
-          rejoinInput.value = minRejoin;
+        // Dynamically lock the calendar so HR cannot pick an illegal date
+        if (termDate && termDate !== '0000-00-00') {
+          // If they were terminated on the 5th, the earliest they can rejoin is the 6th
+          let minRejoin = new Date(termDate);
+          minRejoin.setDate(minRejoin.getDate() + 1);
+          dateInput.min = minRejoin.toISOString().split('T')[0];
+          dateInput.value = dateInput.min;
         } else {
-          rejoinInput.removeAttribute('min');
-          rejoinInput.value = new Date().toISOString().split('T')[0];
+          dateInput.value = new Date().toISOString().split('T')[0];
+          dateInput.removeAttribute('min');
         }
 
         new bootstrap.Modal(document.getElementById('rejoinModal')).show();
       }
     }
 
-    // ── TERMINATION ──────────────────────────────────────────────────────────
+    // --- TERMINATION LOGIC ---
     function cancelTermination() {
-      if (currentToggle) currentToggle.checked = true; // revert toggle
+      if (currentToggle) currentToggle.checked = true; // Revert toggle
       bootstrap.Modal.getInstance(document.getElementById('terminationModal')).hide();
     }
 
     function confirmTermination() {
-      const empid          = document.getElementById('term_empid').value;
-      const date           = document.getElementById('modal_term_date').value;
-      const reason         = document.getElementById('modal_term_reason').value.trim();
-      const joiningDate    = document.getElementById('term_joining_date').value;
-      const lastActiveSince = document.getElementById('term_last_active').value;
+      const empid = document.getElementById('term_empid').value;
+      const date = document.getElementById('modal_term_date').value;
+      const reason = document.getElementById('modal_term_reason').value;
+      const joiningDate = document.getElementById('term_joining_date').value;
 
-      // Client-side guards (server re-validates everything too)
-      if (!date) {
-        Swal.fire({ icon:'warning', title:'Required', text:'Please select a termination date.', confirmButtonColor:'#461bb9' });
+      if (!date || !reason) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Required Fields',
+          text: 'Please provide both a termination date and a reason.',
+          confirmButtonColor: '#461bb9'
+        });
         return;
       }
-      if (!reason) {
-        Swal.fire({ icon:'warning', title:'Required', text:'Please provide a reason for termination.', confirmButtonColor:'#461bb9' });
-        return;
-      }
-      if (joiningDate && date < joiningDate) {
-        Swal.fire({ icon:'error', title:'Invalid Date',
-          text:'Termination date cannot be before the joining date (' + fmtDate(joiningDate) + ').',
-          confirmButtonColor:'#461bb9' });
-        return;
-      }
-      if (lastActiveSince && date <= lastActiveSince) {
-        Swal.fire({ icon:'error', title:'Invalid Date',
-          text:'Termination date must be AFTER the last activation date (' + fmtDate(lastActiveSince) + '). '
-             + 'Earliest allowed: ' + fmtDate(addOneDay(lastActiveSince)) + '.',
-          confirmButtonColor:'#461bb9' });
+      if (joiningDate && new Date(date) < new Date(joiningDate)) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Invalid Date',
+          text: 'Termination date cannot be earlier than the joining date.',
+          confirmButtonColor: '#461bb9'
+        });
         return;
       }
 
-      bootstrap.Modal.getInstance(document.getElementById('terminationModal')).hide();
       updateStatusInDB(empid, 'inactive', date, reason, null);
+      bootstrap.Modal.getInstance(document.getElementById('terminationModal')).hide();
     }
 
-    // ── REJOIN ────────────────────────────────────────────────────────────────
+    // --- REJOIN LOGIC ---
     function cancelRejoin() {
-      if (currentToggle) currentToggle.checked = false; // revert toggle
+      if (currentToggle) currentToggle.checked = false; // Revert toggle
       bootstrap.Modal.getInstance(document.getElementById('rejoinModal')).hide();
     }
 
     function confirmRejoin() {
-      const empid         = document.getElementById('rejoin_empid').value;
-      const date          = document.getElementById('modal_rejoin_date').value;
-      const lastTerminated = document.getElementById('rejoin_last_term').value;
+      const empid = document.getElementById('rejoin_empid').value;
+      const date = document.getElementById('modal_rejoin_date').value;
 
       if (!date) {
-        Swal.fire({ icon:'warning', title:'Required', text:'Please select a rejoining date.', confirmButtonColor:'#461bb9' });
-        return;
-      }
-      if (lastTerminated && lastTerminated !== '0000-00-00' && date <= lastTerminated) {
-        Swal.fire({ icon:'error', title:'Invalid Date',
-          text:'Rejoining date must be AFTER the termination date (' + fmtDate(lastTerminated) + '). '
-             + 'Earliest allowed: ' + fmtDate(addOneDay(lastTerminated)) + '.',
-          confirmButtonColor:'#461bb9' });
+        Swal.fire({
+          icon: 'warning',
+          title: 'Required',
+          text: 'Please provide a rejoining date.',
+          confirmButtonColor: '#461bb9'
+        });
         return;
       }
 
-      bootstrap.Modal.getInstance(document.getElementById('rejoinModal')).hide();
       updateStatusInDB(empid, 'active', null, null, date);
+      bootstrap.Modal.getInstance(document.getElementById('rejoinModal')).hide();
     }
 
-    // ── MASTER AJAX CALL ──────────────────────────────────────────────────────
+    // --- MASTER AJAX CALL ---
     function updateStatusInDB(empid, status, termDate, termReason, rejoinDate) {
-      const formData = new FormData();
-      formData.append('empid',  empid);
+      let formData = new FormData();
+      formData.append('empid', empid);
       formData.append('status', status);
-      if (termDate)   formData.append('term_date',   termDate);
+
+      if (termDate) formData.append('term_date', termDate);
       if (termReason) formData.append('term_reason', termReason);
       if (rejoinDate) formData.append('rejoin_date', rejoinDate);
-      formData.append('<?= $this->security->get_csrf_token_name(); ?>',
-                      '<?= $this->security->get_csrf_hash(); ?>');
+
+      formData.append('<?= $this->security->get_csrf_token_name(); ?>', '<?= $this->security->get_csrf_hash(); ?>');
 
       fetch('<?= base_url("Employee/updateEmployeeStatusAjax") ?>', {
           method: 'POST',
@@ -586,33 +545,11 @@ $csrf_hash = $this->security->get_csrf_hash();
         .then(r => r.json())
         .then(res => {
           if (res.success) {
-            // Update the data attributes on the toggle so subsequent
-            // opens of the modal use the freshly saved dates.
-            if (currentToggle) {
-              if (status === 'inactive' && termDate) {
-                currentToggle.dataset.lastTerminatedOn = termDate;
-                currentToggle.dataset.termDate         = termDate;
-              } else if (status === 'active' && rejoinDate) {
-                currentToggle.dataset.lastActiveSince  = rejoinDate;
-                currentToggle.dataset.lastTerminatedOn = '';
-                currentToggle.dataset.termDate         = '';
-              }
-            }
-            Swal.mixin({ toast:true, position:'top-end', showConfirmButton:false,
-                         timer:3000, timerProgressBar:true })
-              .fire({ icon:'success', title: res.message });
+            Swal.fire('Updated', 'Employee status changed to ' + status, 'success');
           } else {
-            // Revert the toggle to its previous state
+            Swal.fire('Error', res.message, 'error');
             if (currentToggle) currentToggle.checked = !currentToggle.checked;
-            Swal.fire({ icon:'error', title:'Cannot Update Status', text: res.message,
-                        confirmButtonColor:'#461bb9' });
           }
-        })
-        .catch(() => {
-          if (currentToggle) currentToggle.checked = !currentToggle.checked;
-          Swal.fire({ icon:'error', title:'Network Error',
-            text:'Could not reach the server. Please try again.',
-            confirmButtonColor:'#461bb9' });
         });
     }
   </script>
