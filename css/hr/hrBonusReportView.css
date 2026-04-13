@@ -244,3 +244,125 @@
     /* Fix Modal padding for Mobile */
     .modal-body { padding: 20px !important; }
 }
+/* ============================================================
+   DATATABLES CUSTOM THEME OVERRIDES
+   ============================================================ */
+
+/* 1. Main Wrapper Spacing */
+.dataTables_wrapper {
+    padding: 20px 24px; /* Matches the inner padding of your stat cards */
+}
+
+/* 2. Top Controls (Show Entries & Search) */
+.dataTables_wrapper .row:first-child {
+    margin-bottom: 20px;
+    align-items: center;
+}
+
+/* Search Input Styling */
+.dataTables_filter input {
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    border-radius: var(--r-md);
+    padding: 10px 16px;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.3s ease;
+    width: 250px;
+}
+
+.dataTables_filter input:focus {
+    outline: none;
+    border-color: var(--brand-500);
+    box-shadow: 0 0 0 0.2rem rgba(70, 27, 185, 0.15);
+}
+
+/* Length Select (Show X Entries) */
+.dataTables_length select {
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    border-radius: var(--r-md);
+    padding: 8px 32px 8px 12px;
+    box-shadow: var(--shadow-sm);
+    margin: 0 8px;
+}
+
+.dataTables_length select:focus {
+    outline: none;
+    border-color: var(--brand-500);
+}
+
+/* 3. Bottom Controls (Info & Pagination) */
+.dataTables_wrapper .row:last-child {
+    margin-top: 20px;
+    align-items: center;
+}
+
+.dataTables_info {
+    font-size: 0.85rem;
+    color: var(--text-secondary) !important;
+    font-weight: 500;
+}
+
+/* 4. Pagination Styling */
+.dataTables_paginate .pagination {
+    margin: 0;
+    gap: 4px; /* Space between buttons */
+}
+
+.dataTables_paginate .page-item .page-link {
+    border: none;
+    color: var(--text-secondary);
+    background-color: transparent;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    padding: 8px 14px;
+    transition: all 0.2s ease;
+}
+
+.dataTables_paginate .page-item:not(.active):not(.disabled) .page-link:hover {
+    background-color: var(--surface-2);
+    color: var(--brand-600);
+}
+
+/* Active Page Button (Purple Gradient to match your buttons) */
+.dataTables_paginate .page-item.active .page-link {
+    background: linear-gradient(135deg, var(--brand-600), var(--brand-500)) !important;
+    color: #fff !important;
+    box-shadow: 0 4px 10px rgba(70, 27, 185, 0.2);
+}
+
+.dataTables_paginate .page-item.disabled .page-link {
+    background-color: transparent;
+    color: #cbd5e1;
+}
+
+/* 5. Table Header Sorting Icons */
+table.dataTable thead th {
+    border-bottom: 2px solid var(--border) !important;
+}
+
+/* Override default sorting arrows to look cleaner */
+table.dataTable thead .sorting:before, 
+table.dataTable thead .sorting_asc:before, 
+table.dataTable thead .sorting_desc:before, 
+table.dataTable thead .sorting_asc_disabled:before, 
+table.dataTable thead .sorting_desc_disabled:before,
+table.dataTable thead .sorting:after, 
+table.dataTable thead .sorting_asc:after, 
+table.dataTable thead .sorting_desc:after, 
+table.dataTable thead .sorting_asc_disabled:after, 
+table.dataTable thead .sorting_desc_disabled:after {
+    bottom: 16px !important;
+    opacity: 0.3;
+}
+
+table.dataTable thead .sorting_asc:before,
+table.dataTable thead .sorting_desc:after {
+    opacity: 1;
+    color: var(--brand-600); /* Highlight active sort arrow */
+}

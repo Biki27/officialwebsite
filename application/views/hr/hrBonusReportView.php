@@ -3,7 +3,7 @@ $csrf_name = $this->security->get_csrf_token_name();
 $csrf_hash = $this->security->get_csrf_hash();
 $today = date('Y-m-d');
 ?>
-
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
 <link rel="stylesheet" href="<?= base_url('css/hr/hrBonusReportView.css') ?>">
 
 <div class="main-content">
@@ -17,25 +17,45 @@ $today = date('Y-m-d');
                 <p>Track annual eligibility and manage employee performance bonuses.</p>
             </div>
 
-            <form action="<?= base_url('Employee/BonusReportView') ?>" method="GET" class="d-flex gap-2">
-                <select name="year" class="form-select filter-select" onchange="this.form.submit()">
+            <form action="<?= base_url('Employee/BonusReportView') ?>" method="GET" class="d-flex gap-2" id="filterForm">
+                <select name="status" class="form-select filter-select" onchange="document.getElementById('filterForm').submit()">
+                    <option value="all" <?= ($selected_status == 'all') ? 'selected' : '' ?>>All Statuses</option>
+                    <option value="received" <?= ($selected_status == 'received') ? 'selected' : '' ?>>Received Bonus</option>
+                    <option value="pending" <?= ($selected_status == 'pending') ? 'selected' : '' ?>>No Bonus Yet</option>
+                </select>
+
+                <select name="year" class="form-select filter-select" onchange="document.getElementById('filterForm').submit()">
                     <?php
                     $current_year = date('Y');
-                    // Show a range of years in the dropdown
                     for ($y = $current_year + 1; $y >= 2024; $y--): ?>
                         <option value="<?= $y ?>" <?= ($selected_year == $y) ? 'selected' : '' ?>>
                             <?= $y ?> Cycle
                         </option>
                     <?php endfor; ?>
                 </select>
+
+                <a href="<?= base_url('Employee/exportBonusReportCSV?year=' . $selected_year . '&status=' . $selected_status) ?>" class="btn btn-outline-success d-flex align-items-center gap-2" style="font-weight: 600;">
+                    <i class="fas fa-file-csv"></i> Export
+                </a>
             </form>
         </div>
 
         <div class="row g-4 mb-4 pb-2">
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <div class="stat-card">
                     <div class="stat-icon success">
-                        <i class="fas fa-hand-holding-usd"></i>
+                        <i class="fas fa-rupee-sign"></i>
+                    </div>
+                    <div class="stat-details">
+                        <h6>Total Bonus (<?= $selected_year ?>)</h6>
+                        <h2>₹<?= number_format($total_bonus_amount, 2) ?></h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <div class="stat-icon primary">
+                        <i class="fas fa-users"></i>
                     </div>
                     <div class="stat-details">
                         <h6>Active Employees</h6>
@@ -43,7 +63,7 @@ $today = date('Y-m-d');
                     </div>
                 </div>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <div class="stat-card">
                     <div class="stat-icon primary">
                         <i class="fas fa-history"></i>
@@ -58,7 +78,8 @@ $today = date('Y-m-d');
 
         <div class="table-card">
             <div class="table-responsive">
-                <table class="table table-hover align-middle">
+                <!-- <table class="table table-hover align-middle"> -->
+                    <table id="bonusTable" class="table table-hover align-middle">
                     <thead>
                         <tr>
                             <th class="ps-4">Employee Details</th>
@@ -228,78 +249,25 @@ $today = date('Y-m-d');
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 
-<!-- 
 <script>
-function openBonusModal(empid, name, salary) {
-    document.getElementById('bonus_emp_name').textContent = name;
-    document.getElementById('bonus_empid').value = empid;
-
-    const warn = document.getElementById('eligibility_warning');
-    const form = document.getElementById('bonus_form_container');
-    const dateInput = document.querySelector('input[name="bonus_date"]');
-
-    warn.classList.add('d-none');
-    form.classList.remove('d-none');
-
-    fetch('<?= base_url("Employee/getBonusHistoryAjax/") ?>' + empid)
-        .then(r => r.json())
-        .then(res => {
-            // The EARLIEST date HR can select is Permanent Date + 365 days
-            const minAllowedDate = res.eligibility.eligibility_threshold;
-
-            if (minAllowedDate) {
-                // Lock the calendar so no date before (Perm Date + 365) can be picked
-                dateInput.setAttribute('min', minAllowedDate);
-                
-                const today = new Date().toISOString().split('T')[0];
-                // Set default value to today, or the minAllowedDate if today is too early
-                dateInput.value = (today > minAllowedDate) ? today : minAllowedDate;
-            }
-
-            if (!res.eligibility.eligible) {
-                warn.classList.remove('d-none');
-                form.classList.add('d-none');
-                warn.innerHTML = `<i class="fas fa-lock me-2"></i> 
-                <strong>Policy Restriction:</strong> ${res.eligibility.message}`;
-            }
-
-            // Render History...
-            const tbody = document.getElementById('bonusHistoryBody');
-            tbody.innerHTML = '';
-            if (res.history.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-muted">No records.</td></tr>';
-            } else {
-                res.history.forEach(b => {
-                    tbody.innerHTML += `
-                    <tr>
-                        <td class="ps-3 fw-bold">${b.bonus_date}</td>
-                        <td class="text-success fw-bold">₹${parseFloat(b.bonus_amount).toFixed(2)}</td>
-                        <td><span class="badge-soft">Completed</span></td>
-                        <td class="pe-3 small text-muted">${b.bonus_reason}</td>
-                    </tr>`;
-                });
-            }
-        });
-
-    bootstrap.Modal.getOrCreateInstance(document.getElementById('bonusModal')).show();
-}
-
-// Final submission guard
-document.getElementById('bonusForm').addEventListener('submit', function (e) {
-    const dateInput = this.querySelector('input[name="bonus_date fantasy"]');
-    const minDate = dateInput.getAttribute('min');
-
-    if (minDate && dateInput.value < minDate) {
-        e.preventDefault();
-        alert("Selection Error: You can only select a date on or after " + minDate + " (Permanent Date + 365 days).");
-        dateInput.value = minDate;
-    }
+$(document).ready(function() {
+    $('#bonusTable').DataTable({
+        "pageLength": 25,           // Show 25 records by default
+        "order": [[ 0, "asc" ]],    // Sort by the first column (Employee Details) ascending
+        "language": {
+            "search": "_INPUT_",
+            "searchPlaceholder": "Search employees..."
+        },
+        "dom": '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>t<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>', // Cleaner Bootstrap 5 layout
+        "columnDefs": [
+            { "orderable": false, "targets": 4 } // Disable sorting on the "Action" column
+        ]
+    });
 });
-
-</script>
--->
-<script>
+ 
     function openBonusModal(empid, name, salary) {
         document.getElementById('bonus_emp_name').textContent = name;
         document.getElementById('bonus_empid').value = empid;

@@ -432,17 +432,24 @@ class EmployeeModel extends CI_Model
         return $slips;
     }
     // Fetch only active, regular employees for Payroll (Excludes HR & ADMIN)
-    public function get_payroll_employees()
+    // Fetch only active, regular employees for Payroll who joined before/during the selected month
+    public function get_payroll_employees($selected_month = null)
     {
-        return $this->db
-            ->from('seemployee')
+        $this->db->from('seemployee')
             ->join('seempdetails', 'seemployee.seemp_id = seempdetails.seempd_empid', 'left')
             ->join('sejobapplicant', 'seempdetails.seempd_jobaid = sejobapplicant.sejoba_id', 'left')
             ->join('seempbankdetails', 'seemployee.seemp_id = seempbankdetails.sebank_empid', 'left')
             ->where('seemployee.seemp_acesslevel', 'EMPL') // Only regular employees
-            ->where('seemployee.seemp_status', 'active')   // Only active employees
-            ->get()
-            ->result();
+            ->where('seemployee.seemp_status', 'active');  // Only active employees
+
+        // THE FIX: Filter out employees who joined AFTER the selected month
+        if (!empty($selected_month)) {
+            // Convert 'YYYY-MM' to the last day of that month (e.g., '2026-04' -> '2026-04-30')
+            $last_day_of_month = date('Y-m-t', strtotime($selected_month . '-01'));
+            $this->db->where('seempdetails.seempd_joiningdate <=', $last_day_of_month);
+        }
+
+        return $this->db->get()->result();
     }
     // Add this to EmployeeModel.php
     public function delete_salary_slip($slip_id)
@@ -596,14 +603,42 @@ class EmployeeModel extends CI_Model
 
     // --- Bonus Management Functions ---
     // In EmployeeModel.php
-    public function get_yearly_bonus_report($year)
+    // public function get_yearly_bonus_report($year)
+    // {
+    //     $sql = "
+    //     SELECT 
+    //     e.seemp_id, 
+    //     d.seempd_name, 
+    //     d.seempd_salary,
+    //     d.seempd_permanent_date, -- ADD THIS LINE
+    //     b.bonus_amount, 
+    //     b.bonus_date, 
+    //     b.next_eligible_date, 
+    //     b.bonus_reason, 
+    //     b.bonus_status
+    // FROM seemployee e
+    // JOIN seempdetails d ON e.seemp_id = d.seempd_empid
+    // LEFT JOIN seemp_bonuses b ON e.seemp_id = b.bonus_empid 
+    //     AND b.bonus_id = (
+    //         SELECT MAX(bonus_id) 
+    //         FROM seemp_bonuses 
+    //         WHERE bonus_empid = e.seemp_id 
+    //         AND YEAR(bonus_date) = ?
+    //     )
+    // WHERE e.seemp_status = 'active' 
+    // AND e.seemp_acesslevel = 'EMPL'
+    // ORDER BY d.seempd_name ASC";
+
+    //     return $this->db->query($sql, array($year))->result();
+    // }
+   public function get_yearly_bonus_report($year, $status = 'all')
     {
         $sql = "
     SELECT 
         e.seemp_id, 
         d.seempd_name, 
         d.seempd_salary,
-        d.seempd_permanent_date, -- ADD THIS LINE
+        d.seempd_permanent_date,
         b.bonus_amount, 
         b.bonus_date, 
         b.next_eligible_date, 
@@ -616,13 +651,23 @@ class EmployeeModel extends CI_Model
             SELECT MAX(bonus_id) 
             FROM seemp_bonuses 
             WHERE bonus_empid = e.seemp_id 
-            AND YEAR(bonus_date) = ?
+            AND YEAR(bonus_date) = ? 
         )
     WHERE e.seemp_status = 'active' 
     AND e.seemp_acesslevel = 'EMPL'
-    ORDER BY d.seempd_name ASC";
+    AND YEAR(d.seempd_joiningdate) <= ? "; // <--- THE LOGICAL FIX
 
-        return $this->db->query($sql, array($year))->result();
+        // Apply the filter logic
+        if ($status === 'received') {
+            $sql .= " AND b.bonus_amount IS NOT NULL";
+        } elseif ($status === 'pending') {
+            $sql .= " AND b.bonus_amount IS NULL";
+        }
+
+        $sql .= " ORDER BY d.seempd_name ASC";
+
+        // Bind $year twice: [1] for the subquery, [2] for the joining date check
+        return $this->db->query($sql, array($year, $year))->result();
     }
 
     public function get_bonus_history($empid)
@@ -742,5 +787,18 @@ class EmployeeModel extends CI_Model
         $result = $query->row();
 
         return $result ? (float) $result->bonus_amount : 0.00;
+    }
+    /**
+     * Calculates the total bonus amount given in a specific year.
+     */
+    public function get_total_bonus_amount_by_year($year)
+    {
+        $this->db->select_sum('bonus_amount');
+        $this->db->where('YEAR(bonus_date)', $year);
+        $this->db->where('bonus_status', 'completed');
+        $query = $this->db->get('seemp_bonuses');
+        $result = $query->row();
+        
+        return $result->bonus_amount ? (float) $result->bonus_amount : 0.00;
     }
 }
