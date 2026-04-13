@@ -113,7 +113,9 @@
                                                 data-status="<?= htmlspecialchars($app->sejoba_state ?? '', ENT_QUOTES) ?>"
                                                 data-exp="<?= htmlspecialchars($app->sejoba_experience ?? '', ENT_QUOTES) ?>"
                                                 data-resume="<?= htmlspecialchars($app->sejoba_resume ?? '', ENT_QUOTES) ?>"
-                                                data-gender="<?= htmlspecialchars($app->sejoba_gender ?? 'Not Specified', ENT_QUOTES) ?>">
+                                                data-gender="<?= htmlspecialchars($app->sejoba_gender ?? 'Not Specified', ENT_QUOTES) ?>"
+                                                data-int-date="<?= $app->sejoba_interview_date ? date('d M, Y', strtotime($app->sejoba_interview_date)) : 'Not Scheduled' ?>"
+                                                data-int-time="<?= $app->sejoba_interview_time ? date('h:i A', strtotime($app->sejoba_interview_time)) : 'N/A' ?>">
 
                                                 View
                                             </button>
@@ -183,6 +185,10 @@
                                     <div class="info-label mt-3">Gender</div>
                                     <div class="info-value text-dark fw-medium" id="modal_gender"></div>
                                 </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="info-label mt-3">Scheduled Interview</div>
+                                <div class="info-value text-primary fw-bold" id="modal_interview_info"></div>
                             </div>
                         </div>
 
@@ -355,6 +361,13 @@
                             document.getElementById('modal_exp').innerText = data.exp ? data.exp + " Years" : "Not specified";
                             document.getElementById('modal_salary').innerText = data.salary ? "₹" + data.salary : "Not specified";
                             document.getElementById('modal_gender').innerText = data.gender || 'Not specified';
+
+                            // Populate Interview Info
+                            const interviewDisplay = (data.intDate !== 'Not Scheduled')
+                                ? `<i class="fas fa-clock me-1"></i> ${data.intDate} at ${data.intTime}`
+                                : '<span class="text-muted">No Interview Scheduled</span>';
+
+                            document.getElementById('modal_interview_info').innerHTML = interviewDisplay;
 
                             document.getElementById('review_applicant_id').value = data.id;
 

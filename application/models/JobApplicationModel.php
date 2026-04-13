@@ -90,11 +90,14 @@ class JobApplicationModel extends CI_Model
     public function get_all_applicants()
     {
         $this->db->select('
-            sejobapplicant.*, 
-            secandidates.full_name AS sejoba_name, 
-            secandidates.email AS sejoba_email, 
-            sejobs.sejob_jobtitle AS sejoba_position
-        ');
+        sejobapplicant.*, 
+        secandidates.full_name AS sejoba_name, 
+        secandidates.email AS sejoba_email, 
+        sejobs.sejob_jobtitle AS sejoba_position,
+        sejobapplicant.sejoba_gender,
+        sejobapplicant.sejoba_interview_date,
+        sejobapplicant.sejoba_interview_time
+    ');
         $this->db->from('sejobapplicant');
         $this->db->join('secandidates', 'sejobapplicant.candidate_id = secandidates.id', 'left');
         $this->db->join('sejobs', 'sejobapplicant.job_id = sejobs.sejob_id', 'left');
@@ -179,7 +182,7 @@ class JobApplicationModel extends CI_Model
         return $this->db->get()->result_array();
     }
     // Submits the finalized application into the bridging table
-    public function submit_application($candidate_id, $job_id, $resume_path, $cover_letter, $phone, $experience, $expected_salary,$gender)
+    public function submit_application($candidate_id, $job_id, $resume_path, $cover_letter, $phone, $experience, $expected_salary, $gender)
     {
         $data = array(
             'candidate_id' => $candidate_id,
@@ -187,7 +190,7 @@ class JobApplicationModel extends CI_Model
             'sejoba_phone' => $phone,
             'sejoba_experience' => $experience,
             'sejoba_exp_salary' => $expected_salary,
-            'sejoba_gender'     => $gender,
+            'sejoba_gender' => $gender,
             'sejoba_resume' => $resume_path,
             'sejoba_coverletter' => $cover_letter,
             'sejoba_state' => 'applied',
