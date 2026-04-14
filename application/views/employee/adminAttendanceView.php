@@ -16,9 +16,9 @@
 <body>
     <?php if (isset($alert)):
         $isError = (stripos($alert, 'error') !== false || stripos($alert, 'failed') !== false);
-    ?>
+        ?>
         <script>
-            document.addEventListener("DOMContentLoaded", function() {
+            document.addEventListener("DOMContentLoaded", function () {
                 Swal.fire({
                     title: '<?= $isError ? "Notice" : "Success" ?>',
                     text: <?= json_encode($alert) ?>,
@@ -57,7 +57,14 @@
                     <label class="text-white"><b>Employee ID</b></label>
                     <input type="text" id="searchempid" name="searchempid" class="search-bar" placeholder="Enter ID">
                 </div>
-
+                <div class="search-group">
+                    <label class="text-white"><b>Branch</b></label>
+                    <select id="branchFilter" name="branch" class="search-bar" style="background: white; color: black;">
+                        <option value="">All Branches</option>
+                        <option value="KOLKATA">Kolkata</option>
+                        <option value="HOWRAH">Howrah</option>
+                    </select>
+                </div>
                 <div class="search-group">
                     <label class="text-white"><b>Start Date</b></label>
                     <input type="date" id="startdate" name="startdate" class="search-bar">
@@ -124,7 +131,7 @@
 
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script>
-            $(document).ready(function() {
+            $(document).ready(function () {
 
                 let isSearching = false;
                 let originalData = [];
@@ -243,7 +250,7 @@
                                 confirmButtonText: 'Yes, Search',
                                 cancelButtonText: 'Cancel',
                                 confirmButtonColor: '#461bb9'
-                            }).then(function(result) {
+                            }).then(function (result) {
                                 if (result.isConfirmed) {
                                     startSpinner();
                                     _fireAjaxSearch(); // User confirmed — bypass validation and go
@@ -269,7 +276,7 @@
 
                 function storeOriginalData() {
                     originalData = [];
-                    $('#attendanceTable tr').each(function() {
+                    $('#attendanceTable tr').each(function () {
                         if ($(this).find('td').length > 1) {
                             originalData.push({
                                 date: $(this).find('td:eq(0)').text().trim(),
@@ -296,7 +303,7 @@
                             count++;
                         });
                     } else {
-                        originalData.forEach(function(r) {
+                        originalData.forEach(function (r) {
                             const text = (r.date + r.empid + r.name + r.login + r.logout + r.device + r.ip).toLowerCase();
                             if (text.includes(searchTerm.toLowerCase())) {
                                 $tbody.append(r.html);
@@ -316,7 +323,7 @@
 
                 // Live filter on Employee ID input
                 let searchTimeout;
-                $('#searchempid').on('input', function() {
+                $('#searchempid').on('input', function () {
                     clearError('searchempid');
                     clearTimeout(searchTimeout);
                     const term = $(this).val();
@@ -325,7 +332,7 @@
 
                 // ─── REAL-TIME DATE CROSS-VALIDATION ─────────────────────────────────────────
 
-                $('#startdate').on('change', function() {
+                $('#startdate').on('change', function () {
                     clearError('startdate');
                     clearError('enddate'); // Clear stale end-date error when start changes
                     const startVal = $(this).val();
@@ -341,7 +348,7 @@
                     }
                 });
 
-                $('#enddate').on('change', function() {
+                $('#enddate').on('change', function () {
                     clearError('enddate');
                     clearError('startdate'); // Clear stale start-date error when end changes
                     const startVal = $('#startdate').val();
@@ -367,6 +374,8 @@
                     const start = $('#startdate').val();
                     const end = $('#enddate').val();
 
+                    const branch = $('#branchFilter').val(); // Get the selected branch
+
                     const $tbody = $('#attendanceTable');
                     $tbody.html(`
             <tr>
@@ -387,14 +396,15 @@
                             searchempid: empid,
                             startdate: start,
                             enddate: end,
+                            branch: branch, // Include branch in the AJAX request
                             '<?= $this->security->get_csrf_token_name(); ?>': '<?= $this->security->get_csrf_hash(); ?>'
                         },
                         dataType: 'json',
                         timeout: 15000,
-                        success: function(response) {
+                        success: function (response) {
                             let html = '';
                             if (response && response.length > 0) {
-                                response.forEach(function(att) {
+                                response.forEach(function (att) {
                                     html += `
                             <tr>
                                 <td>${att.formatted_date}</td>
@@ -413,7 +423,7 @@
                             $tbody.html(html);
                             storeOriginalData();
                         },
-                        error: function(xhr, status) {
+                        error: function (xhr, status) {
                             let msg = 'Search failed. Please try again.';
                             if (status === 'timeout') msg = 'Search timed out. Try a narrower date range.';
                             else if (xhr.status === 403) msg = 'Session expired. Please refresh the page.';
@@ -429,7 +439,7 @@
                         </td>
                     </tr>`);
                         },
-                        complete: function() {
+                        complete: function () {
                             isSearching = false;
                             stopSpinner(); // Always restore icon when request finishes
                         }
@@ -439,7 +449,7 @@
                 // --- UPDATED SEARCH LOGIC ---
 
                 // Update the button click handler
-                $('#ajaxSearchBtn').on('click', function(e) {
+                $('#ajaxSearchBtn').on('click', function (e) {
                     e.preventDefault();
                     e.stopPropagation();
 
@@ -465,7 +475,7 @@
 
 
                 // Enter key on any search field
-                $('.search-bar').on('keypress', function(e) {
+                $('.search-bar').on('keypress', function (e) {
                     if (e.which === 13) {
                         e.preventDefault();
                         startSpinner();

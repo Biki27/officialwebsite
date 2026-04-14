@@ -363,36 +363,34 @@ class Employee extends CI_Controller
     }
     // add coded for view details of employee total leave and history details
     public function viewAttendanceAjax()
-    {
-        // 1. Authorization check similar to your existing viewAttendance method
-        $access = $this->session->userdata('accesslevel');
-        if ($this->session->userdata('status') != 'active' || !($access == 'ADMIN' || $access == 'HR')) {
-            echo json_encode([]);
-            return;
-        }
-
-        $this->load->model('AttendanceModel');
-
-        // 2. Get and Clean Input
-        $s_id = trim($this->input->post('searchempid', TRUE));
-        $start = $this->input->post('startdate', TRUE);
-        $end = $this->input->post('enddate', TRUE);
-
-        // 3. Fetch data using your existing model logic
-        $list = $this->AttendanceModel->find_empid_with_daterange($s_id, $start, $end);
-
-        // 4. Format the dates/times for the JSON output
-        foreach ($list as &$att) {
-            $att->formatted_date = date("d-M-Y", strtotime($att->seemp_logdate));
-            $att->formatted_login = date("h:i A", strtotime($att->seemp_logintime));
-            $att->formatted_logout = ($att->seemp_logouttime && $att->seemp_logouttime != '0000-00-00 00:00:00')
-                ? date("h:i A", strtotime($att->seemp_logouttime))
-                : '<span class="text-muted">Not Logged Out</span>';
-        }
-
-        // 5. Send JSON response back to the browser
-        echo json_encode($list);
+{
+    $access = $this->session->userdata('accesslevel');
+    if ($this->session->userdata('status') != 'active' || !($access == 'ADMIN' || $access == 'HR')) {
+        echo json_encode([]);
+        return;
     }
+
+    $this->load->model('AttendanceModel');
+
+    $s_id = trim($this->input->post('searchempid', TRUE));
+    $start = $this->input->post('startdate', TRUE);
+    $end = $this->input->post('enddate', TRUE);
+    $branch = $this->input->post('branch', TRUE); // Capture the branch from the POST request
+
+    // Pass the branch parameter to the model
+    $list = $this->AttendanceModel->find_empid_with_daterange($s_id, $start, $end, $branch);
+
+    foreach ($list as &$att) {
+        $att->formatted_date = date("d-M-Y", strtotime($att->seemp_logdate));
+        $att->formatted_login = date("h:i A", strtotime($att->seemp_logintime));
+        $att->formatted_logout = ($att->seemp_logouttime && $att->seemp_logouttime != '0000-00-00 00:00:00')
+            ? date("h:i A", strtotime($att->seemp_logouttime))
+            : '<span class="text-muted">Not Logged Out</span>';
+    }
+
+    echo json_encode($list);
+}
+
     // Admin view fetch job applicants details
     public function getApplicantDetails($id)
     {

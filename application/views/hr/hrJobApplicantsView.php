@@ -115,7 +115,8 @@
                                                 data-resume="<?= htmlspecialchars($app->sejoba_resume ?? '', ENT_QUOTES) ?>"
                                                 data-gender="<?= htmlspecialchars($app->sejoba_gender ?? 'Not Specified', ENT_QUOTES) ?>"
                                                 data-int-date="<?= $app->sejoba_interview_date ? date('d M, Y', strtotime($app->sejoba_interview_date)) : 'Not Scheduled' ?>"
-                                                data-int-time="<?= $app->sejoba_interview_time ? date('h:i A', strtotime($app->sejoba_interview_time)) : 'N/A' ?>">
+                                                data-int-time="<?= $app->sejoba_interview_time ? date('h:i A', strtotime($app->sejoba_interview_time)) : 'N/A' ?>"
+                                                data-comment="<?= htmlspecialchars($app->sejoba_comment ?? '', ENT_QUOTES) ?>">
 
                                                 View
                                             </button>
@@ -189,6 +190,11 @@
                             <div class="col-6">
                                 <div class="info-label mt-3">Scheduled Interview</div>
                                 <div class="info-value text-primary fw-bold" id="modal_interview_info"></div>
+                            </div>
+                            <!--Hr internal comments -->
+                             <div class="row mt-3">
+                                <div class="info-label">HR Internal Comments</div>
+                                <div class="info-value text-primary fw-bold" id="modal_comment_box"></div>
                             </div>
                         </div>
 
@@ -368,6 +374,12 @@
                                 : '<span class="text-muted">No Interview Scheduled</span>';
 
                             document.getElementById('modal_interview_info').innerHTML = interviewDisplay;
+
+                            // Populate HR Comments
+                            const commentBox = document.getElementById('modal_comment_box');
+                            commentBox.innerText = (data.comment && data.comment.trim() !== "")
+                                ? data.comment
+                                : "No comments added yet.";
 
                             document.getElementById('review_applicant_id').value = data.id;
 

@@ -48,6 +48,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             <a class="nav-link <?= ($this->uri->segment(2) == 'viewAttendance') ? 'active' : '' ?>" href="<?= base_url() ?>Employee/viewAttendance">
                 <i class="fas fa-calendar-alt"></i> Attendance
             </a>
+            <!-- add add employee -->
+            <a class="nav-link <?= ($this->uri->segment(2) == 'addEmployee') ? 'active' : '' ?>" href="<?= base_url() ?>Employee/registerEmployee">
+                <i class="fas fa-user-plus"></i> Add Employee
+            </a>
             <!-- increment report -->
               <a href="<?= base_url('Employee/incrementReport') ?>"
                 class="nav-link <?= ($this->uri->segment(2) == 'incrementReport') ? 'active' : '' ?>">
