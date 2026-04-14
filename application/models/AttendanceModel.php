@@ -7,9 +7,10 @@ class AttendanceModel extends CI_Model
     // Common helper to add the JOIN to all queries
     private function _get_attendance_with_names()
     {
-        $this->db->select('log.*, emp.seempd_name');
+        $this->db->select('log.*, emp.seempd_name, main.seemp_branch'); // Added branch field
         $this->db->from('seemployeeloginlog as log');
         $this->db->join('seempdetails as emp', 'log.seemp_logempid = emp.seempd_empid', 'left');
+        $this->db->join('seemployee as main', 'log.seemp_logempid = main.seemp_id', 'left'); // Join with main employee table
     }
     function get_attendance_of_all_employee()
     {
@@ -19,7 +20,8 @@ class AttendanceModel extends CI_Model
         return $this->db->get()->result();
     }
 
-    function find_empid_with_daterange($empid, $start, $end)
+    // Update the find function to accept the branch parameter
+    function find_empid_with_daterange($empid, $start, $end, $branch = '')
     {
         $this->_get_attendance_with_names();
 
@@ -29,6 +31,12 @@ class AttendanceModel extends CI_Model
             $this->db->or_like('emp.seempd_name', $empid);
             $this->db->group_end();
         }
+
+        // NEW: Branch filter logic using the ENUM values from your SQL
+        if (!empty($branch)) {
+            $this->db->where('main.seemp_branch', strtolower($branch));
+        }
+
         if (!empty($start)) {
             $this->db->where('log.seemp_logdate >=', $start);
         }
@@ -41,7 +49,6 @@ class AttendanceModel extends CI_Model
 
         return $this->db->get()->result();
     }
-
     function find_attendance_for_employee_id($empid = '')
     {
         if (trim($empid) == '')
