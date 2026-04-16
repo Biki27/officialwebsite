@@ -34,7 +34,7 @@ class AttendanceModel extends CI_Model
 
         // NEW: Branch filter logic using the ENUM values from your SQL
         if (!empty($branch)) {
-            $this->db->where('main.seemp_branch', strtolower($branch));
+            $this->db->where('main.seemp_branch', strtoupper($branch));
         }
 
         if (!empty($start)) {
@@ -49,6 +49,80 @@ class AttendanceModel extends CI_Model
 
         return $this->db->get()->result();
     }
+    
+
+    // DROP-IN REPLACEMENT for viewAttendanceAjax() in Employee.php.
+
+    public function viewAttendanceAjax()
+    {
+        // ── 1. Auth guard ──
+        $access = $this->session->userdata('accesslevel');
+        if (
+            $this->session->userdata('status') !== 'active' ||
+            ! in_array($access, ['ADMIN', 'HR'])
+        ) {
+            $this->output->set_content_type('application/json');
+            echo json_encode([]);
+            return;
+        }
+
+        $this->load->model('AttendanceModel');
+
+        // ── 2. Sanitise inputs ──
+        $s_id   = trim($this->input->post('searchempid', TRUE) ?? '');
+        $start  = trim($this->input->post('startdate',   TRUE) ?? '');
+        $end    = trim($this->input->post('enddate',     TRUE) ?? '');
+        $branch = trim($this->input->post('branch',      TRUE) ?? '');   // ← branch from dropdown
+
+        // ── 3. Validate branch — only allow known values ──
+        $allowed_branches = ['KOLKATA', 'HOWRAH', ''];   // add more branches here as needed
+        if (! in_array(strtoupper($branch), $allowed_branches)) {
+            $branch = '';   // silently reset unknown/tampered values
+        }
+        // Normalise to uppercase for DB comparison
+        $branch = strtoupper($branch);
+
+        // ── 4. Date sanity checks ──
+        $today = date('Y-m-d');
+        if (! empty($start) && (! preg_match('/^\d{4}-\d{2}-\d{2}$/', $start) || $start > $today)) {
+            $start = '';
+        }
+        if (! empty($end) && (! preg_match('/^\d{4}-\d{2}-\d{2}$/', $end) || $end > $today)) {
+            $end = '';
+        }
+        if (! empty($start) && ! empty($end) && $start > $end) {
+            $this->output->set_content_type('application/json');
+            echo json_encode([]);
+            return;
+        }
+
+        // ── 5. Employee ID format check ──
+        if (! empty($s_id) && ! preg_match('/^[a-zA-Z0-9 _\-]+$/', $s_id)) {
+            $this->output->set_content_type('application/json');
+            echo json_encode([]);
+            return;
+        }
+
+        // ── 6. Fetch records — branch filter works because we now pass a validated value ──
+        $list = $this->AttendanceModel->find_empid_with_daterange($s_id, $start, $end, $branch);
+
+        // ── 7. Format for display ──
+        foreach ($list as &$att) {
+            $att->formatted_date   = date('d-M-Y', strtotime($att->seemp_logdate));
+            $att->formatted_login  = date('h:i A', strtotime($att->seemp_logintime));
+            $att->formatted_logout = (
+                ! empty($att->seemp_logouttime) &&
+                $att->seemp_logouttime !== '0000-00-00 00:00:00'
+            )
+                ? date('h:i A', strtotime($att->seemp_logouttime))
+                : '<span class="text-muted">Not Logged Out</span>';
+        }
+        unset($att);
+
+        $this->output->set_content_type('application/json');
+        echo json_encode($list);
+    }
+
     function find_attendance_for_employee_id($empid = '')
     {
         if (trim($empid) == '')

@@ -657,36 +657,7 @@ class EmployeeModel extends CI_Model
     }
 
     // --- Bonus Management Functions ---
-    // In EmployeeModel.php
-    // public function get_yearly_bonus_report($year)
-    // {
-    //     $sql = "
-    //     SELECT 
-    //     e.seemp_id, 
-    //     d.seempd_name, 
-    //     d.seempd_salary,
-    //     d.seempd_permanent_date, -- ADD THIS LINE
-    //     b.bonus_amount, 
-    //     b.bonus_date, 
-    //     b.next_eligible_date, 
-    //     b.bonus_reason, 
-    //     b.bonus_status
-    // FROM seemployee e
-    // JOIN seempdetails d ON e.seemp_id = d.seempd_empid
-    // LEFT JOIN seemp_bonuses b ON e.seemp_id = b.bonus_empid 
-    //     AND b.bonus_id = (
-    //         SELECT MAX(bonus_id) 
-    //         FROM seemp_bonuses 
-    //         WHERE bonus_empid = e.seemp_id 
-    //         AND YEAR(bonus_date) = ?
-    //     )
-    // WHERE e.seemp_status = 'active' 
-    // AND e.seemp_acesslevel = 'EMPL'
-    // ORDER BY d.seempd_name ASC";
-
-    //     return $this->db->query($sql, array($year))->result();
-    // }
-   public function get_yearly_bonus_report($year, $status = 'all')
+    public function get_yearly_bonus_report($year, $status = 'all')
     {
         $sql = "
     SELECT 
@@ -853,15 +824,67 @@ class EmployeeModel extends CI_Model
         $this->db->where('bonus_status', 'completed');
         $query = $this->db->get('seemp_bonuses');
         $result = $query->row();
-        
+
         return $result->bonus_amount ? (float) $result->bonus_amount : 0.00;
     }
     public function get_lifecycle_history($empid)
     {
         return $this->db->where('empid', $empid)
-                        ->order_by('effective_date', 'ASC')
-                        ->order_by('history_id', 'ASC')
-                        ->get('seemp_status_history')
-                        ->result();
+            ->order_by('effective_date', 'ASC')
+            ->order_by('history_id', 'ASC')
+            ->get('seemp_status_history')
+            ->result();
+    }
+    // ---------------------------------------------------------------
+    // Fetch employees strictly by their branch
+    public function get_employees_by_branch($branch)
+    {
+        $this->db->select('seemployee.*, seempdetails.*');
+        $this->db->from('seemployee');
+        $this->db->join('seempdetails', 'seemployee.seemp_id = seempdetails.seempd_empid', 'left');
+
+        // Strict security filter
+        $this->db->where('seemployee.seemp_branch', $branch);
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+    /**
+     * Fetch a single employee by their ID (Joins Login info + Details)
+     */
+    public function get_employee_by_id($empid)
+    {
+        $this->db->select('*');
+        $this->db->from('seemployee');
+        $this->db->join('seempdetails', 'seemployee.seemp_id = seempdetails.seempd_empid', 'left');
+        $this->db->where('seemployee.seemp_id', $empid);
+        $query = $this->db->get();
+
+        if ($query->num_rows() > 0) {
+            return $query->row(); // Returns a single object instead of an array
+        }
+        return false;
+    }
+    /**
+     * Update an existing employee securely (MANAGER ONLY)
+     */
+    public function manager_update_employee($empid, $employee_data, $details_data)
+    {
+        // Start a database transaction so both tables update safely together
+        $this->db->trans_start(); 
+
+        // 1. Update the main seemployee table (email, password, etc)
+        $this->db->where('seemp_id', $empid);
+        $this->db->update('seemployee', $employee_data);
+
+        // 2. Update the seempdetails table (name, phone, salary, etc)
+        $this->db->where('seempd_empid', $empid);
+        $this->db->update('seempdetails', $details_data);
+
+        // Complete the transaction
+        $this->db->trans_complete(); 
+
+        // Returns TRUE if successful, FALSE if something failed
+        return $this->db->trans_status(); 
     }
 }

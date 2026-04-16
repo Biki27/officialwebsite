@@ -25,10 +25,12 @@
 
     <div class="sidebar" id="sidebar">
         <div class="logo text-center border-bottom mb-4 pb-3">
-            <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width: 60px; height: 60px;">
+            <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-2"
+                style="width: 60px; height: 60px;">
                 <!-- <i class="fas fa-user-tie"></i> -->
-                <img src="<?= base_url() ?>imgs/logo-without-bg.png" alt="Suropriyo Logo" class="img-fluid" style="max-width: 50px;">
-        </div>
+                <img src="<?= base_url() ?>imgs/logo-without-bg.png" alt="Suropriyo Logo" class="img-fluid"
+                    style="max-width: 50px;">
+            </div>
             <h5 class="fw-bold text-primary">HR Portal</h5>
         </div>
         <nav class="nav flex-column">
@@ -53,7 +55,7 @@
                 <i class="fas fa-user-plus me-2"></i> Add Employee
             </a>
             <!-- leave management -->
-             <a class="nav-link <?= ($this->uri->segment(2) == 'viewEmployeeLeaveRequests') ? 'active' : '' ?>"
+            <a class="nav-link <?= ($this->uri->segment(2) == 'viewEmployeeLeaveRequests') ? 'active' : '' ?>"
                 href="<?= base_url('Employee/viewEmployeeLeaveRequests') ?>">
                 <i class="fas fa-plane-departure me-2"></i> Leave Management
             </a>
