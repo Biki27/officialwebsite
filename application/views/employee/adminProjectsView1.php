@@ -395,7 +395,6 @@ defined('BASEPATH') or exit('No direct script access allowed');
     <script>
         /* ── Config ── */
         const BASE_URL = "<?= base_url() ?>";
-        const CTRL = "<?= isset($controller) ? $controller : 'Employee' ?>";
         const CSRF_NAME = "<?= $this->security->get_csrf_token_name() ?>";
         let CSRF_HASH = "<?= $this->security->get_csrf_hash() ?>";
 
@@ -547,7 +546,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
             if (mode === 'edit') {
                 /* ─ Edit: submit straight away ─ */
-                this.action = BASE_URL + CTRL + '/updateProject';
+                this.action = BASE_URL + 'Employee/updateProject';
                 this.submit();
             } else {
                 /* ─ Add: run duplicate check first ─ */
@@ -563,7 +562,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
             const name = document.getElementById('mProjectName').value.trim();
 
             $.ajax({
-                url: BASE_URL + CTRL + '/checkDuplicateProject',
+                url: BASE_URL + 'Employee/checkDuplicateProject',
                 type: 'POST',
                 dataType: 'json',
                 data: csrfPost({
@@ -623,7 +622,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
         /* ── Actually submit the add form ── */
         function submitAddForm() {
             const form = document.getElementById('projectModalForm');
-            form.action = BASE_URL + CTRL + '/addProject';
+            form.action = BASE_URL + 'Employee/addProject';
             form.submit();
         }
 
@@ -646,7 +645,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
                 if (!result.isConfirmed) return;
 
                 $.ajax({
-                    url: BASE_URL + CTRL + '/deleteProject',
+                    url: BASE_URL + 'Employee/deleteProject',
                     type: 'POST',
                     dataType: 'json',
                     data: csrfPost({

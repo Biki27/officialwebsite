@@ -35,7 +35,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 <!-- <i class="fas fa-building"></i> -->
                  <img src="<?= base_url() ?>imgs/logo-without-bg.png" alt="Suropriyo Logo" class="img-fluid" style="max-width: 50px;">
             </div>
-            <h5>Suropriyo Enterprise</h5>
+            <h5>Admin Portal</h5>
         </div>
         <nav class="nav flex-column">
             <a class="nav-link <?= ($this->uri->segment(2) == 'Dashboard') ? 'active' : '' ?>" href="<?= base_url() ?>Employee/Dashboard">

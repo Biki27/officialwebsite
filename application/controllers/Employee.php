@@ -60,7 +60,12 @@ class Employee extends CI_Controller
                         'lastlogin' => $user->seemp_lastlogin,
                     );
                     $this->session->set_userdata($sdata);
-                    redirect('Employee/Dashboard');
+                    // --- NEW ROUTING LOGIC ---
+                    if ($user->seemp_acesslevel == 'MANAGER') {
+                        redirect('Manager/Dashboard');
+                    } else {
+                        redirect('Employee/Dashboard');
+                    }
                 } else {
                     $this->load->view('employee/employeeLoginView', array(
                         'error' => 'Your account is inactive. Please contact HR.',

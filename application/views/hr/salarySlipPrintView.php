@@ -350,18 +350,18 @@ $net_before_round = $final_net - $round_off_val;          // gross - deductions 
         }
 
         .sig-box img {
-            height: 80px;
-            width: auto;
+            height: 132px;
+            width: 75%;
             display: block;
-            margin: 0 auto 10px auto;
+            margin: 0 auto -17px auto;
         }
     </style>
 </head>
 
 <body>
 
-    <!-- ══════════════════════════════════════════
-         ACTION BAR (hidden on print)
+    <!-- ══════════════════════════════════════════ 
+         ACTION BAR (hidden on print) 
     ══════════════════════════════════════════ -->
     <div id="actionBar">
         <div class="slip-label">
@@ -504,7 +504,8 @@ $net_before_round = $final_net - $round_off_val;          // gross - deductions 
                     <?php if (empty($bonus_amt) || $bonus_amt > 0): ?>
                         <td style="color:#d00;font-weight:bold;">Annual Bonus</td>
                         <td class="text-right" style="color:#d00;font-weight:bold; border-right:2px solid #000;">
-                            <?= fmtVal($bonus_amt) ?></td>
+                            <?= fmtVal($bonus_amt) ?>
+                        </td>
                     <?php else: ?>
                         <td>&nbsp;</td>
                         <td class="text-right">&nbsp;</td>
@@ -578,7 +579,7 @@ $net_before_round = $final_net - $round_off_val;          // gross - deductions 
         <!-- Signatures -->
         <div class="signatures">
             <div class="sig-box" style="margin-top:-30px;">
-                <img src="<?= base_url('imgs/sign.png') ?>" alt="Company Signature">
+                <img src="<?= base_url('imgs/sign_founder.png') ?>" alt="Company Signature">
                 <div style="border-top:1px solid #000;padding-top:5px;">Company's Signature</div>
             </div>
             <div class="sig-box" style="margin-top:50px;">
