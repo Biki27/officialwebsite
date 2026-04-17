@@ -173,6 +173,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
                             <option value="HR" <?= (isset($emp) && $emp->seemp_acesslevel == 'HR') ? 'selected' : '' ?>>HR
                             </option>
                             <option value="ADMIN" <?= (isset($emp) && $emp->seemp_acesslevel == 'ADMIN') ? 'selected' : '' ?>>Admin</option>
+                             <option value="MANAGER" <?= (isset($emp) && $emp->seemp_acesslevel == 'MANAGER') ? 'selected' : '' ?>>Manager</option>
                         </select>
                     </div>
 
