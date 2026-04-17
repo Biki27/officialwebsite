@@ -162,6 +162,7 @@ class Manager extends CI_Controller
             'seemp_email' => $formData['email'],
             'seemp_pass' => password_hash($formData['password'], PASSWORD_DEFAULT),
             'seemp_acesslevel' => 'EMPL',            // locked to standard employee
+            'seemp_status'     => 'active'
         ];
 
         $details = [
